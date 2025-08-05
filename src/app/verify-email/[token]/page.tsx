@@ -35,7 +35,7 @@ export default function VerifyEmailPage() {
         setStatus('loading');
 
         const response = await axiosInstance.post(
-          `/users/verify-email/?token=${token}${email ? `&email=${email}` : ''}`,
+          `/users/verify-email?token=${token}${email ? `&email=${email}` : ''}`,
           {},
           { headers: { Accept: 'application/json' } }
         );
