@@ -1,0 +1,47 @@
+// lib/mock-vendors.ts
+
+export const mockVendors = [
+  {
+    slug: "vendor-techgear",
+    name: "TechGear",
+    description: "Top-quality electronics and gadgets for every need.",
+    logo: "/images/placeholder.svg",
+    banner: "/images/placeholder.svg",
+    rating: 4.7,
+    reviewCount: 320,
+    yearsInBusiness: 5,
+    location: "New York",
+    totalProducts: 210,
+    isVerified: true,
+    categories: ["Electronics", "Gadgets", "Home Tech"],
+  },
+  {
+    slug: "vendor-stylehub",
+    name: "StyleHub",
+    description: "Trendy fashion collections for all seasons.",
+    logo: "/images/placeholder.svg",
+    banner: "/images/placeholder.svg",
+    rating: 4.3,
+    reviewCount: 148,
+    yearsInBusiness: 3,
+    location: "Los Angeles",
+    totalProducts: 96,
+    isVerified: false,
+    categories: ["Fashion", "Women", "Accessories"],
+  },
+  {
+    slug: "vendor-fitpro",
+    name: "FitPro",
+    description: "Gear up for your fitness journey.",
+    logo: "/images/placeholder.svg",
+    banner: "/images/placeholder.svg",
+    rating: 4.8,
+    reviewCount: 480,
+    yearsInBusiness: 6,
+    location: "Chicago",
+    totalProducts: 145,
+    isVerified: true,
+    categories: ["Sports", "Health", "Equipment"],
+  },
+  // Add more mock vendors if needed
+]
