@@ -259,7 +259,7 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await axiosInstance.post('/users/login/', {
+      const response = await axiosInstance.post('/users/login', {
         email: formData.email,
         password: formData.password,
       });
