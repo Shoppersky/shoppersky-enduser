@@ -390,9 +390,9 @@ export default function LoginPage() {
                     Remember me
                   </Label>
                 </div>
-                <Button variant="link" className="px-0 text-green-600" onClick={handleForgotPassword}>
+                {/* <Button variant="link" className="px-0 text-green-600" onClick={handleForgotPassword}>
                   Forgot password?
-                </Button>
+                </Button> */}
               </div>
 
               <Button 
