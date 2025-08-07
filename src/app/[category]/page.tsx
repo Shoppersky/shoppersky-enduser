@@ -457,7 +457,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-serif text-gray-800 capitalize">
           {formatDisplayName(unwrappedParams.category)}
@@ -466,7 +466,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
       </div>
 
       {products.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 lg:gap-6">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

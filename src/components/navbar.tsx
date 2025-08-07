@@ -1,454 +1,5 @@
-// // 'use client'
-
-// // import React, { useState, useEffect, useRef } from 'react'
-// // import { Button } from './ui/button'
-// // import { Heart, Search, ShoppingCart, User } from 'lucide-react'
-// // import Link from 'next/link'
-// // import { Badge } from './ui/badge'
-// // import { Input } from './ui/input'
-// // import Image from 'next/image'
-
-// // import { useCart } from './cart-provider'
-// // import { useWishlist } from './wishlist-provider'
-// // import { CartSidebar } from './cart-sidebar'
-// // import axiosInstance from '../lib/axiosInstance'
-
-// // interface SearchResult {
-// //   product_id: string
-// //   product_name: string
-// //   image_url: string
-// //   selling_price: string
-// //   slug: string
-// //   category_slug: string
-// // }
-
-// // const Navbar = () => {
-// //   const { cartCount, toggleCart } = useCart()
-// //   const { wishlistCount } = useWishlist()
-
-// //   const [searchQuery, setSearchQuery] = useState('')
-// //   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
-// //   const [isSearchLoading, setIsSearchLoading] = useState(false)
-// //   const [showSearchDropout, setShowSearchDropout] = useState(false)
-
-// //   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
-// //   const searchRef = useRef<HTMLDivElement>(null)
-
-// //   useEffect(() => {
-// //     const handleSearch = async () => {
-// //       if (searchQuery.length < 2) {
-// //         setSearchResults([])
-// //         setShowSearchDropout(false)
-// //         return
-// //       }
-
-// //       setIsSearchLoading(true)
-// //       try {
-// //         const response = await axiosInstance.get<SearchResult[]>(
-// //           `/products/search?query=${encodeURIComponent(searchQuery)}`
-// //         )
-// //         setSearchResults(response.data)
-// //         setShowSearchDropout(true)
-// //       } catch (error) {
-// //         console.error('Search error:', error)
-// //         setSearchResults([])
-// //       } finally {
-// //         setIsSearchLoading(false)
-// //       }
-// //     }
-
-// //     if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
-// //     debounceTimeout.current = setTimeout(handleSearch, 300)
-
-// //     return () => {
-// //       if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
-// //     }
-// //   }, [searchQuery])
-
-// //   useEffect(() => {
-// //     const handleClickOutside = (e: MouseEvent) => {
-// //       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-// //         setShowSearchDropout(false)
-// //       }
-// //     }
-
-// //     document.addEventListener('mousedown', handleClickOutside)
-// //     return () => document.removeEventListener('mousedown', handleClickOutside)
-// //   }, [])
-
-// //   return (
-// //     <div>
-// //       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-// //         <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
-// //           {/* Left Section */}
-// //           <div className="flex items-center gap-6">
-// //             <Link href="/" className="flex items-center gap-2">
-// //               <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-// //                 <ShoppingCart className="h-4 w-4 text-primary-foreground" />
-// //               </div>
-// //               <span className="font-bold text-xl">ShoppersSky</span>
-// //             </Link>
-
-// //             <nav className="hidden md:flex items-center gap-6">
-// //               <Link href="/categories" className="text-sm font-medium hover:text-primary">Categories</Link>
-// //               <Link href="/vendors" className="text-sm font-medium hover:text-primary">Vendors</Link>
-// //               <Link href="/deals" className="text-sm font-medium hover:text-primary">Deals</Link>
-// //             </nav>
-// //           </div>
-
-// //           {/* Center Search */}
-// //           <div className="flex-1 max-w-md mx-6 hidden sm:block relative" ref={searchRef}>
-// //             <div className="relative">
-// //               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-// //               <Input
-// //                 placeholder="Search products, vendors..."
-// //                 className="pl-10 pr-4"
-// //                 value={searchQuery}
-// //                 onChange={(e) => setSearchQuery(e.target.value)}
-// //                 onFocus={() => {
-// //                   if (searchQuery.length >= 2) setShowSearchDropout(true)
-// //                 }}
-// //               />
-// //             </div>
-
-// //             {showSearchDropout && (
-// //               <div className="absolute top-full left-0 right-0 bg-white border shadow-md rounded-md z-50 max-h-96 overflow-y-auto">
-// //                 {isSearchLoading ? (
-// //                   <div className="p-4 text-center text-muted-foreground">Loading...</div>
-// //                 ) : searchResults.length === 0 ? (
-// //                   <div className="p-4 text-center text-muted-foreground">No products found</div>
-// //                 ) : (
-// //                   searchResults.map((product) => (
-// //                     <Link
-// //                       key={product.product_id}
-// //                       href={`/${encodeURIComponent(product.category_slug)}/${encodeURIComponent(product.slug)}`}
-// //                       className="flex items-center p-2 hover:bg-muted"
-// //                       onClick={() => {
-// //                         setSearchQuery('')
-// //                         setShowSearchDropout(false)
-// //                       }}
-// //                     >
-// //                       <Image
-// //                         src={product.image_url}
-// //                         alt={product.product_name}
-// //                         width={40}
-// //                         height={40}
-// //                         className="object-cover rounded mr-2"
-// //                       />
-// //                       <div>
-// //                         <div className="font-medium">{product.product_name}</div>
-// //                         <div className="text-sm text-muted-foreground">AU${product.selling_price}</div>
-// //                       </div>
-// //                     </Link>
-// //                   ))
-// //                 )}
-// //               </div>
-// //             )}
-// //           </div>
-
-// //           {/* Right Section */}
-// //           <div className="flex items-center gap-3 sm:gap-4">
-// //             {/* Wishlist */}
-// //             <Button variant="ghost" size="icon" asChild className="relative">
-// //               <Link href="/wishlist">
-// //                 <Heart className="h-5 w-5" />
-// //                 {wishlistCount > 0 && (
-// //                   <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs flex items-center justify-center">
-// //                     {wishlistCount}
-// //                   </Badge>
-// //                 )}
-// //               </Link>
-// //             </Button>
-
-// //             {/* Cart */}
-// //             <Button variant="ghost" size="icon" className="relative" onClick={toggleCart}>
-// //               <ShoppingCart className="h-5 w-5" />
-// //               {cartCount > 0 && (
-// //                 <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs flex items-center justify-center">
-// //                   {cartCount}
-// //                 </Badge>
-// //               )}
-// //             </Button>
-
-// //             {/* User */}
-// //             <Button variant="ghost" size="icon">
-// //               <User className="h-5 w-5" />
-// //             </Button>
-
-// //             {/* Sell Link */}
-        
-// //           </div>
-// //         </div>
-// //       </header>
-
-// //       {/* Cart Sidebar */}
-// //       <CartSidebar />
-// //     </div>
-// //   )
-// // }
-
-// // export default Navbar
 
 
-// 'use client'
-
-// import React, { useState, useEffect, useRef } from 'react'
-// import { Button } from './ui/button'
-// import { Heart, Search, ShoppingCart, User } from 'lucide-react'
-// import Link from 'next/link'
-// import { Badge } from './ui/badge'
-// import { Input } from './ui/input'
-// import Image from 'next/image'
-// import { useRouter } from 'next/navigation'
-// import { useCart } from './cart-provider'
-// import { useWishlist } from './wishlist-provider'
-// import { CartSidebar } from './cart-sidebar'
-// import axiosInstance from '../lib/axiosInstance'
-// import useAuthStore from '@/lib/Zustand' // ✅ make sure this path is correct
-
-// interface SearchResult {
-//   product_id: string
-//   product_name: string
-//   image_url: string
-//   selling_price: string
-//   slug: string
-//   category_slug: string
-// }
-
-// const Navbar = () => {
-//   const { cartCount, toggleCart } = useCart()
-//   const { wishlistCount } = useWishlist()
-//   const { userId, token, isAuthenticated, logout } = useAuthStore()
-//   const router = useRouter()
-
-//   const [searchQuery, setSearchQuery] = useState('')
-//   const [searchResults, setSearchResults] = useState<SearchResult[]>([])
-//   const [isSearchLoading, setIsSearchLoading] = useState(false)
-//   const [showSearchDropout, setShowSearchDropout] = useState(false)
-//   const [username, setUsername] = useState<string | null>(null)
-//   const [showUserMenu, setShowUserMenu] = useState(false)
-
-//   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
-//   const searchRef = useRef<HTMLDivElement>(null)
-//   const userMenuRef = useRef<HTMLDivElement>(null)
-
-//   // Fetch username from backend
-//   useEffect(() => {
-//     const fetchUser = async () => {
-//       if (!userId || !token) return
-
-//       try {
-//         const res = await axiosInstance.get(`/users/user/${userId}`, {
-//           headers: {
-//             Authorization: `Bearer ${token}`,
-//           },
-//         })
-//         setUsername(res.data.data.username)
-//       } catch (err) {
-//         console.error('Failed to fetch user info:', err)
-//       }
-//     }
-
-//     fetchUser()
-//   }, [userId, token])
-
-//   // Debounced search
-//   useEffect(() => {
-//     const handleSearch = async () => {
-//       if (searchQuery.length < 2) {
-//         setSearchResults([])
-//         setShowSearchDropout(false)
-//         return
-//       }
-
-//       setIsSearchLoading(true)
-//       try {
-//         const response = await axiosInstance.get<SearchResult[]>(
-//           `/products/search?query=${encodeURIComponent(searchQuery)}`
-//         )
-//         setSearchResults(response.data)
-//         setShowSearchDropout(true)
-//       } catch (error) {
-//         console.error('Search error:', error)
-//         setSearchResults([])
-//       } finally {
-//         setIsSearchLoading(false)
-//       }
-//     }
-
-//     if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
-//     debounceTimeout.current = setTimeout(handleSearch, 300)
-
-//     return () => {
-//       if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
-//     }
-//   }, [searchQuery])
-
-//   // Hide dropdowns when clicked outside
-//   useEffect(() => {
-//     const handleClickOutside = (e: MouseEvent) => {
-//       if (
-//         searchRef.current &&
-//         !searchRef.current.contains(e.target as Node)
-//       ) {
-//         setShowSearchDropout(false)
-//       }
-
-//       if (
-//         userMenuRef.current &&
-//         !userMenuRef.current.contains(e.target as Node)
-//       ) {
-//         setShowUserMenu(false)
-//       }
-//     }
-
-//     document.addEventListener('mousedown', handleClickOutside)
-//     return () => document.removeEventListener('mousedown', handleClickOutside)
-//   }, [])
-
-//   const handleUserClick = () => {
-//     if (!isAuthenticated) {
-//       router.push('/login')
-//     } else {
-//       setShowUserMenu((prev) => !prev)
-//     }
-//   }
-
-//   const handleLogout = () => {
-//     logout()
-//     router.push('/login')
-//   }
-
-//   return (
-//     <div>
-//       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-//         <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
-//           {/* Left Section */}
-//           <div className="flex items-center gap-6">
-//             <Link href="/" className="flex items-center gap-2">
-//               <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-// <Image src='/logo.png' alt='Logo' width={50} height={50}/>
-//               </div>
-//               <span className="font-bold text-xl">ShoppersSky</span>
-//             </Link>
-
-//             <nav className="hidden md:flex items-center gap-6">
-//               <Link href="/products" className="text-sm font-medium hover:text-primary">Shop</Link>
-//               <Link href="/vendors" className="text-sm font-medium hover:text-primary">Vendors</Link>
-//               <Link href="/deals" className="text-sm font-medium hover:text-primary">Deals</Link>
-//             </nav>
-//           </div>
-
-//           {/* Center Search */}
-//           <div className="flex-1 max-w-md mx-6 hidden sm:block relative" ref={searchRef}>
-//             <div className="relative">
-//               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-//               <Input
-//                 placeholder="Search products, vendors..."
-//                 className="pl-10 pr-4"
-//                 value={searchQuery}
-//                 onChange={(e) => setSearchQuery(e.target.value)}
-//                 onFocus={() => {
-//                   if (searchQuery.length >= 2) setShowSearchDropout(true)
-//                 }}
-//               />
-//             </div>
-
-//             {showSearchDropout && (
-//               <div className="absolute top-full left-0 right-0 bg-white border shadow-md rounded-md z-50 max-h-96 overflow-y-auto">
-//                 {isSearchLoading ? (
-//                   <div className="p-4 text-center text-muted-foreground">Loading...</div>
-//                 ) : searchResults.length === 0 ? (
-//                   <div className="p-4 text-center text-muted-foreground">No products found</div>
-//                 ) : (
-//                   searchResults.map((product) => (
-//                     <Link
-//                       key={product.product_id}
-//                       href={`/${product.category_slug}/${product.slug}`}
-//                       className="flex items-center p-2 hover:bg-muted"
-//                       onClick={() => {
-//                         setSearchQuery('')
-//                         setShowSearchDropout(false)
-//                       }}
-//                     >
-//                       <Image
-//                         src={product.image_url}
-//                         alt={product.product_name}
-//                         width={40}
-//                         height={40}
-//                         className="object-cover rounded mr-2"
-//                       />
-//                       <div>
-//                         <div className="font-medium">{product.product_name}</div>
-//                         <div className="text-sm text-muted-foreground">AU${product.selling_price}</div>
-//                       </div>
-//                     </Link>
-//                   ))
-//                 )}
-//               </div>
-//             )}
-//           </div>
-
-//           {/* Right Section */}
-//           <div className="flex items-center gap-3 sm:gap-4">
-//             {/* Wishlist */}
-//             <Button variant="ghost" size="icon" asChild className="relative">
-//               <Link href="/wishlist">
-//                 <Heart className="h-5 w-5" />
-//                 {wishlistCount > 0 && (
-//                   <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs flex items-center justify-center">
-//                     {wishlistCount}
-//                   </Badge>
-//                 )}
-//               </Link>
-//             </Button>
-
-//             {/* Cart */}
-//             <Button variant="ghost" size="icon" className="relative" onClick={toggleCart}>
-//               <ShoppingCart className="h-5 w-5" />
-//               {cartCount > 0 && (
-//                 <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs flex items-center justify-center">
-//                   {cartCount}
-//                 </Badge>
-//               )}
-//             </Button>
-
-//             {/* User Profile */}
-//             <div className="relative" ref={userMenuRef}>
-//               <Button variant="ghost" size="icon" onClick={handleUserClick}>
-//                 <User className="h-5 w-5" />
-//                     {username}
-//               </Button>
-          
-
-//               {showUserMenu && isAuthenticated && (
-//                 <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow z-50 py-2 text-sm">
-//                   <button
-//                     className="w-full text-left px-4 py-2 hover:bg-muted"
-//                     onClick={() => router.push('/MyAccount')}
-//                   >
-//                     My Account
-//                   </button>
-//                   <button
-//                     className="w-full text-left px-4 py-2 hover:bg-muted"
-//                     onClick={handleLogout}
-//                   >
-//                     Logout
-//                   </button>
-//                 </div>
-//               )}
-//             </div>
-//           </div>
-//         </div>
-//       </header>
-
-//       {/* Cart Sidebar */}
-//       <CartSidebar />
-//     </div>
-//   )
-// }
-
-// export default Navbar
 
 
 
@@ -456,7 +7,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { Button } from './ui/button'
-import { Heart, Search, ShoppingCart, User } from 'lucide-react'
+import { Heart, Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from './ui/badge'
 import { Input } from './ui/input'
@@ -477,6 +28,30 @@ interface SearchResult {
   category_slug: string
 }
 
+interface ApiSubcategory {
+  subcategory_id: string;
+  subcategory_name: string;
+  subcategory_slug: string;
+}
+
+interface ApiCategory {
+  category_id: string;
+  category_name: string;
+  slug: string;
+  subcategories?: ApiSubcategory[];
+}
+
+interface Category {
+  category_id: string;
+  category_name: string;
+  slug: string;
+  subcategories: {
+    subcategory_id: string;
+    subcategory_name: string;
+    slug: string;
+  }[];
+}
+
 const Navbar = () => {
   const { cartCount, toggleCart } = useCart()
   const { wishlistCount } = useWishlist()
@@ -489,10 +64,16 @@ const Navbar = () => {
   const [showSearchDropout, setShowSearchDropout] = useState(false)
   const [username, setUsername] = useState<string | null>(null)
   const [showUserMenu, setShowUserMenu] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [showMobileSearch, setShowMobileSearch] = useState(false)
+  const [categories, setCategories] = useState<Category[]>([])
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
 
   const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const userMenuRef = useRef<HTMLDivElement>(null)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null)
 
   // Fetch username from backend
   useEffect(() => {
@@ -513,6 +94,34 @@ const Navbar = () => {
 
     fetchUser()
   }, [userId, token])
+
+  // Fetch categories
+  useEffect(() => {
+    const fetchCategoriesAndSubcategories = async () => {
+      try {
+        const response = await axiosInstance.get<{ data: ApiCategory[] }>(
+          '/categories/menu-categories'
+        );
+        const data = response.data.data.map((cat) => ({
+          category_id: cat.category_id,
+          category_name: cat.category_name,
+          slug: cat.slug,
+          subcategories:
+            cat.subcategories?.map((sub) => ({
+              subcategory_id: sub.subcategory_id,
+              subcategory_name: sub.subcategory_name,
+              slug: sub.subcategory_slug,
+            })) || [],
+        }));
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories and subcategories:', error);
+        setCategories([]);
+      }
+    };
+
+    fetchCategoriesAndSubcategories();
+  }, [])
 
   // Debounced search
   useEffect(() => {
@@ -574,6 +183,14 @@ const Navbar = () => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setShowUserMenu(false)
       }
+      if (
+        mobileMenuRef.current && 
+        !mobileMenuRef.current.contains(e.target as Node) &&
+        mobileMenuButtonRef.current &&
+        !mobileMenuButtonRef.current.contains(e.target as Node)
+      ) {
+        setIsMobileMenuOpen(false)
+      }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
@@ -593,126 +210,341 @@ const Navbar = () => {
     router.push('/login')
   }
 
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false)
+    setExpandedCategory(null)
+  }
+console.log(categories)
   return (
     <div>
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 flex h-16 items-center justify-between">
-          {/* Left Section */}
-          <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg flex items-center justify-center">
-                <Image src="/logo.png" alt="Logo" width={50} height={50} />
-              </div>
-              <span className="font-bold text-xl">Shoppersky</span>
-            </Link>
+        <div className="mx-auto w-full max-w-screen-2xl px-3 sm:px-4 lg:px-8">
+          {/* Main Navbar */}
+          <div className="flex h-14 sm:h-16 items-center justify-between">
+            {/* Left Section - Logo */}
+            <div className="flex items-center gap-2 sm:gap-4">
+              <Link href="/" className="flex items-center gap-1 sm:gap-2">
+                <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center">
+                  <Image src="/logo.png" alt="Logo" width={32} height={32} className="sm:w-[50px] sm:h-[50px]" />
+                </div>
+                <span className="font-bold text-lg sm:text-xl">Shoppersky</span>
+              </Link>
 
-            <nav className="hidden md:flex items-center gap-6">
-              <Link href="/products" className="text-sm font-medium hover:text-primary">Shop</Link>
-              <Link href="/vendors" className="text-sm font-medium hover:text-primary">Vendors</Link>
-              <Link href="/deals" className="text-sm font-medium hover:text-primary">Deals</Link>
-            </nav>
-          </div>
-
-          {/* Center Search */}
-          <div className="flex-1 max-w-md mx-6 hidden sm:block relative" ref={searchRef}>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search products, vendors..."
-                className="pl-10 pr-4"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onFocus={() => {
-                  if (searchQuery.length >= 2) setShowSearchDropout(true)
-                }}
-              />
+              {/* Desktop Navigation */}
+              <nav className="hidden lg:flex items-center gap-6 ml-6">
+                <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">Shop</Link>
+                <Link href="/vendors" className="text-sm font-medium hover:text-primary transition-colors">Vendors</Link>
+                <Link href="/deals" className="text-sm font-medium hover:text-primary transition-colors">Deals</Link>
+              </nav>
             </div>
 
-            {showSearchDropout && (
-              <div className="absolute top-full left-0 right-0 bg-white border shadow-md rounded-md z-50 max-h-96 overflow-y-auto">
-                {isSearchLoading ? (
-                  <div className="p-4 text-center text-muted-foreground">Loading...</div>
-                ) : searchResults.length === 0 ? (
-                  <div className="p-4 text-center text-muted-foreground">No products found</div>
-                ) : (
-                  searchResults.map((product) => (
-                    <Link
-                      key={product.product_id}
-                      href={`/${product.category_slug}/${product.slug}`}
-                      className="flex items-center p-2 hover:bg-muted"
-                      onClick={() => {
-                        setSearchQuery('')
-                        setShowSearchDropout(false)
-                      }}
-                    >
-                      <Image
-                        src={product.image_url}
-                        alt={product.product_name}
-                        width={40}
-                        height={40}
-                        className="object-cover rounded mr-2"
-                      />
-                      <div>
-                        <div className="font-medium">{product.product_name}</div>
-                        <div className="text-sm text-muted-foreground">AU${product.selling_price}</div>
-                      </div>
-                    </Link>
-                  ))
-                )}
+            {/* Center Search - Desktop */}
+            <div className="flex-1 max-w-md mx-4 sm:mx-6 hidden md:block relative" ref={searchRef}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search products, vendors..."
+                  className="pl-10 pr-4 h-9 sm:h-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => {
+                    if (searchQuery.length >= 2) setShowSearchDropout(true)
+                  }}
+                />
               </div>
-            )}
-          </div>
 
-          {/* Right Section */}
-          <div className="flex items-center gap-3 sm:gap-4">
-            {/* Wishlist */}
-            <Button variant="ghost" size="icon" asChild className="relative">
-              <Link href="/wishlist">
-                <Heart className="h-5 w-5" />
-                {wishlistCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs flex items-center justify-center">
-                    {wishlistCount}
-                  </Badge>
-                )}
-              </Link>
-            </Button>
-
-            {/* Cart */}
-            <Button variant="ghost" size="icon" className="relative" onClick={toggleCart}>
-              <ShoppingCart className="h-5 w-5" />
-              {cartCount > 0 && (
-                <Badge className="absolute -top-2 -right-2 h-5 w-5 p-0 text-xs flex items-center justify-center">
-                  {cartCount}
-                </Badge>
-              )}
-            </Button>
-
-            {/* User Profile */}
-            <div className="relative" ref={userMenuRef}>
-              <Button variant="ghost" size="icon" onClick={handleUserClick}>
-                <User className="h-5 w-5" />
-                {username && <span className="ml-2 text-sm">{username}</span>}
-              </Button>
-
-              {showUserMenu && isAuthenticated && (
-                <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow z-50 py-2 text-sm">
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-muted"
-                    onClick={() => router.push('/MyAccount')}
-                  >
-                    My Account
-                  </button>
-                  <button
-                    className="w-full text-left px-4 py-2 hover:bg-muted"
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </button>
+              {showSearchDropout && (
+                <div className="absolute top-full left-0 right-0 bg-white border shadow-md rounded-md z-50 max-h-96 overflow-y-auto">
+                  {isSearchLoading ? (
+                    <div className="p-4 text-center text-muted-foreground">Loading...</div>
+                  ) : searchResults.length === 0 ? (
+                    <div className="p-4 text-center text-muted-foreground">No products found</div>
+                  ) : (
+                    searchResults.map((product) => (
+                      <Link
+                        key={product.product_id}
+                        href={`/${product.category_slug}/${product.slug}`}
+                        className="flex items-center p-2 hover:bg-muted transition-colors"
+                        onClick={() => {
+                          setSearchQuery('')
+                          setShowSearchDropout(false)
+                        }}
+                      >
+                        <Image
+                          src={product.image_url}
+                          alt={product.product_name}
+                          width={40}
+                          height={40}
+                          className="object-cover rounded mr-2"
+                        />
+                        <div>
+                          <div className="font-medium text-sm">{product.product_name}</div>
+                          <div className="text-xs text-muted-foreground">AU${product.selling_price}</div>
+                        </div>
+                      </Link>
+                    ))
+                  )}
                 </div>
               )}
             </div>
+
+            {/* Right Section */}
+            <div className="flex items-center gap-1 sm:gap-2">
+              {/* Mobile Search Button */}
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="md:hidden h-8 w-8 sm:h-10 sm:w-10"
+                onClick={() => setShowMobileSearch(!showMobileSearch)}
+              >
+                <Search className="h-4 w-4 sm:h-5 sm:w-5" />
+              </Button>
+
+              {/* Wishlist */}
+              <Button variant="ghost" size="icon" asChild className="relative h-8 w-8 sm:h-10 sm:w-10">
+                <Link href="/wishlist">
+                  <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
+                  {wishlistCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 p-0 text-xs flex items-center justify-center">
+                      {wishlistCount}
+                    </Badge>
+                  )}
+                </Link>
+              </Button>
+
+              {/* Cart */}
+              <Button variant="ghost" size="icon" className="relative h-8 w-8 sm:h-10 sm:w-10" onClick={toggleCart}>
+                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+                {cartCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 p-0 text-xs flex items-center justify-center">
+                    {cartCount}
+                  </Badge>
+                )}
+              </Button>
+
+              {/* User Profile - Desktop and Mobile */}
+              <div className="relative hidden sm:block" ref={userMenuRef}>
+                <Button variant="ghost" size="icon" onClick={handleUserClick} className="h-8 w-8 sm:h-10 sm:w-10">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
+                  {username && <span className="ml-2 text-sm hidden lg:inline">{username}</span>}
+                </Button>
+
+                {showUserMenu && isAuthenticated && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white border rounded shadow z-50 py-2 text-sm">
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-muted transition-colors"
+                      onClick={() => {
+                        router.push('/MyAccount')
+                        setShowUserMenu(false)
+                      }}
+                    >
+                      My Account
+                    </button>
+                    <button
+                      className="w-full text-left px-4 py-2 hover:bg-muted transition-colors"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Mobile Menu Button */}
+              <Button 
+                ref={mobileMenuButtonRef}
+                variant="ghost" 
+                size="icon" 
+                className="lg:hidden h-8 w-8 sm:h-10 sm:w-10"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              >
+                {isMobileMenuOpen ? <X className="h-4 w-4 sm:h-5 sm:w-5" /> : <Menu className="h-4 w-4 sm:h-5 sm:w-5" />}
+              </Button>
+            </div>
           </div>
+
+          {/* Mobile Search Bar */}
+          {showMobileSearch && (
+            <div className="md:hidden py-3 border-t" ref={searchRef}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search products, vendors..."
+                  className="pl-10 pr-4 h-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => {
+                    if (searchQuery.length >= 2) setShowSearchDropout(true)
+                  }}
+                />
+              </div>
+
+              {showSearchDropout && (
+                <div className="absolute left-3 right-3 top-full bg-white border shadow-md rounded-md z-50 max-h-96 overflow-y-auto mt-1">
+                  {isSearchLoading ? (
+                    <div className="p-4 text-center text-muted-foreground">Loading...</div>
+                  ) : searchResults.length === 0 ? (
+                    <div className="p-4 text-center text-muted-foreground">No products found</div>
+                  ) : (
+                    searchResults.map((product) => (
+                      <Link
+                        key={product.product_id}
+                        href={`/${product.category_slug}/${product.slug}`}
+                        className="flex items-center p-3 hover:bg-muted transition-colors border-b last:border-b-0"
+                        onClick={() => {
+                          setSearchQuery('')
+                          setShowSearchDropout(false)
+                          setShowMobileSearch(false)
+                        }}
+                      >
+                        <Image
+                          src={product.image_url}
+                          alt={product.product_name}
+                          width={40}
+                          height={40}
+                          className="object-cover rounded mr-3"
+                        />
+                        <div>
+                          <div className="font-medium text-sm">{product.product_name}</div>
+                          <div className="text-xs text-muted-foreground">AU${product.selling_price}</div>
+                        </div>
+                      </Link>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className="lg:hidden border-t bg-background" ref={mobileMenuRef}>
+            <div className="px-3 py-4 space-y-3 max-h-[70vh] overflow-y-auto">
+              {/* Navigation Links */}
+              <div className="space-y-2">
+                <Link 
+                  href="/products" 
+                  className="block px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  Shop
+                </Link>
+                <Link 
+                  href="/vendors" 
+                  className="block px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  Vendors
+                </Link>
+                <Link 
+                  href="/deals" 
+                  className="block px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  Deals
+                </Link>
+              </div>
+
+              {/* Categories Section */}
+              {categories.length > 0 && (
+                <div className="border-t pt-3">
+                  <h3 className="px-3 py-2 text-sm font-semibold text-muted-foreground uppercase tracking-wide">
+                    Categories
+                  </h3>
+                  <div className="space-y-1">
+                    {categories.map((category) => (
+                      <div key={category.category_id}>
+                        {category.subcategories.length > 0 ? (
+                          <div>
+                            <button
+                              className="w-full flex items-center justify-between px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
+                              onClick={() => 
+                                setExpandedCategory(
+                                  expandedCategory === category.category_id ? null : category.category_id
+                                )
+                              }
+                            >
+                              <span>{category.category_name}</span>
+                              <ChevronDown
+                                className={`w-4 h-4 transition-transform ${
+                                  expandedCategory === category.category_id ? 'rotate-180' : ''
+                                }`}
+                              />
+                            </button>
+                            {expandedCategory === category.category_id && (
+                              <div className="ml-4 space-y-1">
+                                {category.subcategories.map((subcategory) => (
+                                  <Link
+                                    key={subcategory.subcategory_id}
+                                    href={`/${encodeURIComponent(subcategory.slug)}`}
+                                    className="block px-3 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-muted rounded-md transition-colors"
+                                    onClick={closeMobileMenu}
+                                  >
+                                    {subcategory.subcategory_name}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <Link
+                            href={`/${encodeURIComponent(category.slug)}`}
+                            className="block px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
+                            onClick={closeMobileMenu}
+                          >
+                            {category.category_name}
+                          </Link>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* User Section */}
+              <div className="border-t pt-3 space-y-2">
+                {isAuthenticated ? (
+                  <>
+                    {username && (
+                      <div className="px-3 py-2 text-sm text-muted-foreground">
+                        Welcome, {username}
+                      </div>
+                    )}
+                    <button
+                      className="block w-full text-left px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
+                      onClick={() => {
+                        router.push('/MyAccount')
+                        closeMobileMenu()
+                      }}
+                    >
+                      My Account
+                    </button>
+                    <button
+                      className="block w-full text-left px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
+                      onClick={() => {
+                        handleLogout()
+                        closeMobileMenu()
+                      }}
+                    >
+                      Logout
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    className="block w-full text-left px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
+                    onClick={() => {
+                      router.push('/login')
+                      closeMobileMenu()
+                    }}
+                  >
+                    Login
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Cart Sidebar */}

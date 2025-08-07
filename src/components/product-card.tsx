@@ -1,635 +1,19 @@
-// 'use client';
-
-// import { useState } from 'react';
-// import Image from 'next/image';
-// import Link from 'next/link';
-// import { ShoppingCart, Plus, Minus } from 'lucide-react';
-
-// import { Button } from '../components/ui/button';
-// import { useCart } from '../components/cart-provider';
-
-// interface Product {
-//   product_id: any;
-//   id: string;
-//   name: string;
-//   price: number;
-//   image: string;
-//   category: string;
-// }
-
-// interface ProductCardProps {
-//   product: Product;
-// }
-
-// export function ProductCard({ product }: ProductCardProps) {
-//   const { addToCart } = useCart();
-//   const [isAdding, setIsAdding] = useState(false);
-//   const [quantity, setQuantity] = useState(1);
-
-//   const handleAddToCart = () => {
-//     setIsAdding(true);
-//     addToCart({
-//       ...product,
-//       quantity,
-//     });
-
-//     // Visual feedback
-//     setTimeout(() => {
-//       setIsAdding(false);
-//       // Reset quantity after adding to cart
-//       setQuantity(1);
-//     }, 500);
-//   };
-
-//   const incrementQuantity = () => {
-//     setQuantity((prev) => prev + 1);
-//   };
-
-//   const decrementQuantity = () => {
-//     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-//   };
-
-//   return (
-//     <div className="group relative overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md">
-//       <Link href={`/products/${product.id}`} className="block overflow-hidden">
-//         <Image
-//           src={product.image || '/placeholder.svg'}
-//           alt={product.name}
-//           width={300}
-//           height={300}
-//           className="aspect-square w-full object-cover transition-transform group-hover:scale-105"
-//         />
-//       </Link>
-//       <div className="p-4">
-//         <div className="mb-2 text-sm text-muted-foreground">
-//           {product.category}
-//         </div>
-
-//         <Link href={`/${product.category}/${product.product_id}`}>
-
-//           <h3 className="mb-2 line-clamp-1 text-lg font-medium transition-colors group-hover:text-primary">
-//             {product.name}
-//           </h3>
-//         </Link>
-//         <div className="flex items-center justify-between">
-//           <span className="font-semibold">₹{product.price.toFixed(2)}</span>
-//         </div>
-//         <div className="mt-3 flex items-center gap-2">
-//           <div className="flex items-center border rounded-md">
-//             <Button
-//               variant="ghost"
-//               size="icon"
-//               className="h-8 w-8 rounded-none"
-//               onClick={decrementQuantity}
-//               disabled={quantity <= 1}
-//             >
-//               <Minus className="h-3 w-3" />
-//               <span className="sr-only">Decrease quantity</span>
-//             </Button>
-//             <span className="w-8 text-center text-sm">{quantity}</span>
-//             <Button
-//               variant="ghost"
-//               size="icon"
-//               className="h-8 w-8 rounded-none"
-//               onClick={incrementQuantity}
-//             >
-//               <Plus className="h-3 w-3" />
-//               <span className="sr-only">Increase quantity</span>
-//             </Button>
-//           </div>
-//           <Button
-//             size="sm"
-//             onClick={handleAddToCart}
-//             disabled={isAdding}
-//             className={`flex-1 ${isAdding ? 'bg-green-600' : ''}`}
-//           >
-//             <ShoppingCart className="mr-2 h-4 w-4" />
-//             {isAdding ? 'Added' : 'Add'}
-//           </Button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// 'use client';
-
-// import { useState } from 'react';
-// import Image from 'next/image';
-// import Link from 'next/link';
-// import { ShoppingCart, Plus, Minus } from 'lucide-react';
-// import { Button } from './ui/button';
-// import { useCart } from './cart-provider';
-
-// interface Product {
-//   id: string;
-//   name: string;
-//   price: number;
-//   image: string;
-//   category: string;
-//   slug: string;
-// }
-
-// interface ProductCardProps {
-//   product: Product;
-// }
-
-// export function ProductCard({ product }: ProductCardProps) {
-//   const { addToCart } = useCart();
-//   const [isAdding, setIsAdding] = useState(false);
-//   const [quantity, setQuantity] = useState(1);
-
-//   const handleAddToCart = () => {
-//     setIsAdding(true);
-//     addToCart({
-//       ...product,
-//       quantity,
-//     });
-
-//     setTimeout(() => {
-//       setIsAdding(false);
-//       setQuantity(1);
-//     }, 500);
-//   };
-
-//   const incrementQuantity = () => {
-//     setQuantity((prev) => prev + 1);
-//   };
-
-//   const decrementQuantity = () => {
-//     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-//   };
-
-//   return (
-//     <div className="group relative overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md">
-//       <Link href={`/${product.category}/${product.slug}`} className="block overflow-hidden">
-//         <Image
-//           src={product.image || '/placeholder.svg'}
-//           alt={product.name}
-//           width={300}
-//           height={300}
-//           className="aspect-square w-full object-cover transition-transform group-hover:scale-105"
-//         />
-//       </Link>
-//       <div className="p-4">
-//         <div className="mb-2 text-sm text-muted-foreground">
-//           {product.category}
-//         </div>
-//         <Link href={`/${product.category}/${product.slug}`}>
-//           <h3 className="mb-2 line-clamp-1 text-lg font-medium transition-colors group-hover:text-primary">
-//             {product.name}
-//           </h3>
-//         </Link>
-//         <div className="flex items-center justify-between">
-//           <span className="font-semibold">AU${product.price.toFixed(2)}</span>
-//         </div>
-//         <div className="mt-3 flex items-center gap-2">
-//           <div className="flex items-center border rounded-md">
-//             <Button
-//               variant="ghost"
-//               size="icon"
-//               className="h-8 w-8 rounded-none"
-//               onClick={decrementQuantity}
-//               disabled={quantity <= 1}
-//             >
-//               <Minus className="h-3 w-3" />
-//               <span className="sr-only">Decrease quantity</span>
-//             </Button>
-//             <span className="w-8 text-center text-sm">{quantity}</span>
-//             <Button
-//               variant="ghost"
-//               size="icon"
-//               className="h-8 w-8 rounded-none"
-//               onClick={incrementQuantity}
-//             >
-//               <Plus className="h-3 w-3" />
-//               <span className="sr-only">Increase quantity</span>
-//             </Button>
-//           </div>
-//           <Button
-//             size="sm"
-//             onClick={handleAddToCart}
-//             disabled={isAdding}
-//             className={`flex-1 ${isAdding ? 'bg-green-600' : ''}`}
-//           >
-//             <ShoppingCart className="mr-2 h-4 w-4" />
-//             {isAdding ? 'Added' : 'Add'}
-//           </Button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-//without add to wishlist
-
-// 'use client';
-
-// import { useState } from 'react';
-// import Image from 'next/image';
-// import Link from 'next/link';
-// import { ShoppingCart, Plus, Minus } from 'lucide-react';
-// import { Button } from './ui/button';
-// import { useCart } from './cart-provider';
-
-// interface Product {
-//   id: string;
-//   name: string;
-//   price: number;
-//   image: string;
-//   category: string;
-//   productSlug: string; // Change from slug to productSlug
-// }
-
-// interface ProductCardProps {
-//   product: Product;
-// }
-
-// export function ProductCard({ product }: ProductCardProps) {
-//   const { addToCart } = useCart();
-//   const [isAdding, setIsAdding] = useState(false);
-//   const [quantity, setQuantity] = useState(1);
-
-//   console.log('ProductCard product:', product);
-//   console.log(
-//     'ProductCard link:',
-//     `/${product.category}/${product.productSlug}`
-//   );
-
-//   const handleAddToCart = () => {
-//     setIsAdding(true);
-//     addToCart({
-//       ...product,
-//       quantity,
-//     });
-//     setTimeout(() => {
-//       setIsAdding(false);
-//       setQuantity(1);
-//     }, 500);
-//   };
-
-//   const incrementQuantity = () => {
-//     setQuantity((prev) => prev + 1);
-//   };
-
-//   const decrementQuantity = () => {
-//     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-//   };
-
-//   return (
-//     <div className="group relative overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md">
-//       <Link
-//         href={`/${product.category}/${product.productSlug}`}
-//         className="block overflow-hidden"
-//       >
-//         <Image
-//           src={product.image || '/placeholder.svg'}
-//           alt={product.name}
-//           width={300}
-//           height={300}
-//           className="aspect-square w-full object-cover transition-transform group-hover:scale-105"
-//         />
-//       </Link>
-//       <div className="p-4">
-//         <div className="mb-2 text-sm text-muted-foreground">
-//           {product.category}
-//         </div>
-//         <Link href={`/${product.category}/${product.productSlug}`}>
-//           <h3 className="mb-2 line-clamp-1 text-lg font-medium transition-colors group-hover:text-primary">
-//             {product.name}
-//           </h3>
-//         </Link>
-//         <div className="flex items-center justify-between">
-//           <span className="font-semibold">AU${product.price.toFixed(2)}</span>
-//         </div>
-//         <div className="mt-3 flex items-center gap-2">
-//           <div className="flex items-center border rounded-md">
-//             <Button
-//               variant="ghost"
-//               size="icon"
-//               className="h-8 w-8 rounded-none"
-//               onClick={decrementQuantity}
-//               disabled={quantity <= 1}
-//             >
-//               <Minus className="h-3 w-3" />
-//               <span className="sr-only">Decrease quantity</span>
-//             </Button>
-//             <span className="w-8 text-center text-sm">{quantity}</span>
-//             <Button
-//               variant="ghost"
-//               size="icon"
-//               className="h-8 w-8 rounded-none"
-//               onClick={incrementQuantity}
-//             >
-//               <Plus className="h-3 w-3" />
-//               <span className="sr-only">Increase quantity</span>
-//             </Button>
-//           </div>
-//           <Button
-//             size="sm"
-//             onClick={handleAddToCart}
-//             disabled={isAdding}
-//             className={`flex-1 ${isAdding ? 'bg-green-600' : ''}`}
-//           >
-//             <ShoppingCart className="mr-2 h-4 w-4" />
-//             {isAdding ? 'Added' : 'Add'}
-//           </Button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// add to wishlist
-// "use client"
-
-// import type React from "react"
-
-// import { useState } from "react"
-// import Image from "next/image"
-// import Link from "next/link"
-// import { ShoppingCart, Plus, Minus, Heart } from "lucide-react"
-// import { Button } from "./ui/button"
-// import { useCart } from "./cart-provider"
-
-// interface Product {
-//   id: string
-//   name: string
-//   price: number
-//   image: string
-//   category: string
-//   productSlug: string
-// }
-
-// interface ProductCardProps {
-//   product: Product
-// }
-
-// export function ProductCard({ product }: ProductCardProps) {
-//   const { addToCart } = useCart()
-//   const [isAdding, setIsAdding] = useState(false)
-//   const [quantity, setQuantity] = useState(1)
-//   const [isInWishlist, setIsInWishlist] = useState(false)
-
-//   console.log("ProductCard product:", product)
-//   console.log("ProductCard link:", `/${product.category}/${product.productSlug}`)
-
-//   const handleAddToCart = () => {
-//     setIsAdding(true)
-//     addToCart({
-//       ...product,
-//       quantity,
-//     })
-//     setTimeout(() => {
-//       setIsAdding(false)
-//       setQuantity(1)
-//     }, 500)
-//   }
-
-//   const incrementQuantity = () => {
-//     setQuantity((prev) => prev + 1)
-//   }
-
-//   const decrementQuantity = () => {
-//     setQuantity((prev) => (prev > 1 ? prev - 1 : 1))
-//   }
-
-//   const toggleWishlist = (e: React.MouseEvent) => {
-//     e.preventDefault() // Prevent navigation when clicking the heart
-//     setIsInWishlist(!isInWishlist)
-//   }
-
-//   return (
-//     <div className="group relative overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md">
-//       {/* Wishlist heart icon */}
-//       <button
-//         onClick={toggleWishlist}
-//         className="absolute right-2 top-2 z-10 rounded-full bg-white/80 p-1.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-white"
-//         aria-label={isInWishlist ? "Remove from wishlist" : "Add to wishlist"}
-//       >
-//         <Heart className={`h-4 w-4 ${isInWishlist ? "fill-red-500 text-red-500" : "text-gray-600"}`} />
-//       </button>
-
-//       <Link href={`/${product.category}/${product.productSlug}`} className="block overflow-hidden">
-//         <Image
-//           src={product.image || "/placeholder.svg"}
-//           alt={product.name}
-//           width={300}
-//           height={300}
-//           className="aspect-square w-full object-cover transition-transform group-hover:scale-105"
-//         />
-//       </Link>
-//       <div className="p-4">
-//         <div className="mb-2 text-sm text-muted-foreground">{product.category}</div>
-//         <Link href={`/${product.category}/${product.productSlug}`}>
-//           <h3 className="mb-2 line-clamp-1 text-lg font-medium transition-colors group-hover:text-primary">
-//             {product.name}
-//           </h3>
-//         </Link>
-//         <div className="flex items-center justify-between">
-//           <span className="font-semibold">AU${product.price.toFixed(2)}</span>
-//         </div>
-//         <div className="mt-3 flex items-center gap-2">
-//           <div className="flex items-center border rounded-md">
-//             <Button
-//               variant="ghost"
-//               size="icon"
-//               className="h-8 w-8 rounded-none"
-//               onClick={decrementQuantity}
-//               disabled={quantity <= 1}
-//             >
-//               <Minus className="h-3 w-3" />
-//               <span className="sr-only">Decrease quantity</span>
-//             </Button>
-//             <span className="w-8 text-center text-sm">{quantity}</span>
-//             <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none" onClick={incrementQuantity}>
-//               <Plus className="h-3 w-3" />
-//               <span className="sr-only">Increase quantity</span>
-//             </Button>
-//           </div>
-//           <Button
-//             size="sm"
-//             onClick={handleAddToCart}
-//             disabled={isAdding}
-//             className={`flex-1 ${isAdding ? "bg-green-600" : ""}`}
-//           >
-//             <ShoppingCart className="mr-2 h-4 w-4" />
-//             {isAdding ? "Added" : "Add"}
-//           </Button>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
-// components/ProductCard.tsx
-// 'use client';
-
-// import type React from 'react';
-// import { useState } from 'react';
-// import Image from 'next/image';
-// import Link from 'next/link';
-// import { ShoppingCart, Plus, Minus, Heart } from 'lucide-react';
-// import { Button } from './ui/button';
-// import { useCart } from './cart-provider';
-// import { useWishlist } from './wishlist-provider';
-
-// interface Product {
-//   id: string;
-//   name: string;
-//   price: number;
-//   image: string;
-//   category: string;
-//   productSlug: string;
-// }
-
-// interface ProductCardProps {
-//   product: Product;
-// }
-
-// export function ProductCard({ product }: ProductCardProps) {
-//   const { addToCart } = useCart();
-//   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-//   const [isAdding, setIsAdding] = useState(false);
-//   const [quantity, setQuantity] = useState(1);
-
-//   console.log('ProductCard product:', product);
-//   console.log(
-//     'ProductCard link:',
-//     `/${product.category.toLowerCase()}/${product.productSlug}`
-//   );
-
-//   const handleAddToCart = () => {
-//     setIsAdding(true);
-//     addToCart({
-//       ...product,
-//       quantity,
-//     });
-//     setTimeout(() => {
-//       setIsAdding(false);
-//       setQuantity(1);
-//     }, 500);
-//   };
-
-//   const incrementQuantity = () => {
-//     setQuantity((prev) => prev + 1);
-//   };
-
-//   const decrementQuantity = () => {
-//     setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-//   };
-
-//   const toggleWishlist = (e: React.MouseEvent) => {
-//     e.preventDefault();
-//     if (isInWishlist(product.id)) {
-//       removeFromWishlist(product.id);
-//     } else {
-//       addToWishlist(product);
-//     }
-//   };
-
-//   return (
-//     <div className="group relative overflow-hidden rounded-lg border bg-background shadow-sm transition-all hover:shadow-md">
-//       <button
-//         onClick={toggleWishlist}
-//         className="absolute right-2 top-2 z-10 rounded-full bg-white/80 p-1.5 opacity-0 shadow-sm transition-opacity group-hover:opacity-100 hover:bg-white"
-//         aria-label={
-//           isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'
-//         }
-//       >
-//         <Heart
-//           className={`h-4 w-4 ${isInWishlist(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}`}
-//         />
-//       </button>
-
-//       <Link
-//         href={`/${product.category.toLowerCase()}/${product.productSlug}`}
-//         className="block overflow-hidden"
-//       >
-//         <Image
-//           src={product.image || '/placeholder.svg'}
-//           alt={product.name}
-//           width={300}
-//           height={300}
-//           className="aspect-square w-full object-cover transition-transform group-hover:scale-105"
-//         />
-//       </Link>
-//       <div className="p-4">
-//         <div className="mb-2 text-sm text-muted-foreground">
-//           {product.category}
-//         </div>
-//         <Link
-//           href={`/${product.category.toLowerCase()}/${product.productSlug}`}
-//         >
-//           <h3 className="mb-2 line-clamp-1 text-lg font-medium transition-colors group-hover:text-primary">
-//             {product.name}
-//           </h3>
-//         </Link>
-//         <div className="flex items-center justify-between">
-//           <span className="font-semibold">AU${product.price.toFixed(2)}</span>
-//         </div>
-//         <div className="mt-3 flex items-center gap-2">
-//           <div className="flex items-center border rounded-md">
-//             <Button
-//               variant="ghost"
-//               size="icon"
-//               className="h-8 w-8 rounded-none"
-//               onClick={decrementQuantity}
-//               disabled={quantity <= 1}
-//             >
-//               <Minus className="h-3 w-3" />
-//               <span className="sr-only">Decrease quantity</span>
-//             </Button>
-//             <span className="w-8 text-center text-sm">{quantity}</span>
-//             <Button
-//               variant="ghost"
-//               size="icon"
-//               className="h-8 w-8 rounded-none"
-//               onClick={incrementQuantity}
-//             >
-//               <Plus className="h-3 w-3" />
-//               <span className="sr-only">Increase quantity</span>
-//             </Button>
-//           </div>
-//           <Button
-//             size="sm"
-//             onClick={handleAddToCart}
-//             disabled={isAdding}
-//             className={`flex-1 ${isAdding ? 'bg-green-600' : ''}`}
-//           >
-//             <ShoppingCart className="mr-2 h-4 w-4" />
-//             {isAdding ? 'Added' : 'Add'}
-//           </Button>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
 
 
 
-"use client";
 
-import type React from "react";
-import { useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { ShoppingCart, Plus, Minus, Heart } from "lucide-react";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { useCart } from "./cart-provider";
-import { useWishlist } from "./wishlist-provider";
+'use client';
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: string;
-  productSlug: string;
-  discount?: string;
-  originalPrice?: number;
-}
+import type React from 'react';
+import { useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { ShoppingCart, Plus, Minus, Heart, Star } from 'lucide-react';
+import { Button } from './ui/button';
+import { Badge } from './ui/badge';
+import { useCart } from './cart-provider';
+import { useWishlist } from './wishlist-provider';
+import { Product } from '../types/product';
 
 interface ProductCardProps {
   product: Product;
@@ -664,6 +48,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (isInWishlist(product.id)) {
       removeFromWishlist(product.id);
     } else {
@@ -677,26 +62,34 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
-      className="group relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl w-[280px] h-[450px] mx-auto"
+      className="group relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl w-full max-w-[280px] sm:max-w-[320px] mx-auto flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
       {/* Product Image Container */}
-      <div className="relative w-full h-[280px] bg-gray-50">
+      <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
         <Link href={`/${product.category.toLowerCase()}/${product.productSlug}`}>
           <Image
-            src={product.image || "/placeholder.svg"}
+            src={product.image || '/placeholder.svg'}
             alt={product.name}
             fill
-            className="object-contain transition-transform duration-300 group-hover:scale-105"
-            sizes="280px"
+            className="object-contain transition-transform duration-300 group-hover:scale-105 p-2"
+            sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
           />
         </Link>
 
-        {/* Discount Badge */}
-        {product.discount && (
-          <Badge className="absolute top-3 left-3 bg-blue-100 hover:bg-blue-100 text-blue-700 text-sm px-3 py-1">
-            {product.discount || `${discountPercentage}% OFF`}
+        {/* Badge */}
+        {product.badge && (
+          <Badge
+            className={`absolute top-1 left-1 sm:top-2 sm:left-2 text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 ${
+              product.badgeColor === 'red'
+                ? 'bg-red-100 hover:bg-red-100 text-red-700'
+                : product.badgeColor === 'green'
+                  ? 'bg-green-100 hover:bg-green-100 text-green-700'
+                  : 'bg-blue-100 hover:bg-blue-100 text-blue-700'
+            }`}
+          >
+            {product.badge}
           </Badge>
         )}
 
@@ -704,21 +97,23 @@ export function ProductCard({ product }: ProductCardProps) {
         <Button
           size="sm"
           variant="secondary"
-          className="absolute top-3 right-3 w-8 h-8 p-0 rounded-full bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 p-0 rounded-full bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 sm:opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300"
           onClick={toggleWishlist}
-          aria-label={isInWishlist(product.id) ? "Remove from wishlist" : "Add to wishlist"}
+          aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <Heart
-            className={`h-4 w-4 ${isInWishlist(product.id) ? "fill-red-500 text-red-500" : "text-gray-600"}`}
+            className={`h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4 ${
+              isInWishlist(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'
+            }`}
           />
         </Button>
 
-        {/* Hover Overlay */}
+        {/* Desktop Hover Overlay */}
         <div
-          className={`absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm transition-all duration-300 ease-in-out ${
-            isHovered ? "translate-y-0 opacity-100" : "translate-y-full opacity-0"
+          className={`hidden md:block absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm transition-all duration-300 ease-in-out ${
+            isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
           }`}
-          style={{ height: "40%" }}
+          style={{ height: '40%' }}
         >
           <div className="p-3 h-full flex flex-col justify-center">
             {/* Quantity Selector */}
@@ -751,33 +146,154 @@ export function ProductCard({ product }: ProductCardProps) {
             {/* Add to Cart Button */}
             <Button
               onClick={handleAddToCart}
-              disabled={isAdding}
+              disabled={isAdding || !product.inStock}
               className={`w-full rounded-full font-medium py-2 text-sm text-white ${
-                isAdding ? "bg-green-100 hover:bg-green-100" : "bg-green-600 hover:bg-green-800"
+                isAdding
+                  ? 'bg-green-500 text-white'
+                  : !product.inStock
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700'
               }`}
             >
               <ShoppingCart className="w-4 h-4 mr-1" />
-              {isAdding ? "Added" : "Add to Bag"}
+              {!product.inStock ? 'Out of Stock' : isAdding ? 'Added' : 'Add to Bag'}
             </Button>
+          </div>
+        </div>
+
+        {/* Tablet Fallback - Always visible on medium screens */}
+        <div className="hidden sm:block md:hidden absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm">
+          <div className="p-2">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center border rounded-lg">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="w-6 h-6 p-0 hover:bg-gray-100"
+                  onClick={decrementQuantity}
+                  disabled={quantity <= 1}
+                >
+                  <Minus className="h-2 w-2" />
+                  <span className="sr-only">Decrease quantity</span>
+                </Button>
+                <span className="w-6 text-center text-xs font-medium">{quantity}</span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="w-6 h-6 p-0 hover:bg-gray-100"
+                  onClick={incrementQuantity}
+                >
+                  <Plus className="h-2 w-2" />
+                  <span className="sr-only">Increase quantity</span>
+                </Button>
+              </div>
+              <Button
+                onClick={handleAddToCart}
+                disabled={isAdding || !product.inStock}
+                className={`flex-1 rounded-lg font-medium py-1 text-xs text-white ${
+                  isAdding
+                    ? 'bg-green-500 text-white'
+                    : !product.inStock
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-green-600 hover:bg-green-700'
+                }`}
+              >
+                <ShoppingCart className="w-3 h-3 mr-1" />
+                {!product.inStock ? 'Out of Stock' : isAdding ? 'Added' : 'Add'}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Product Info */}
-      <div className="p-4">
-        <div className="mb-2 text-sm text-gray-600">{product.category}</div>
+      <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col">
+        <div className="mb-1 sm:mb-2 text-xs text-gray-600 uppercase tracking-wide">
+          {product.category}
+        </div>
         <Link href={`/${product.category.toLowerCase()}/${product.productSlug}`}>
-          <h3 className="mb-2 line-clamp-1 text-base font-medium transition-colors group-hover:text-[#1B4B33]">
+          <h3 className="mb-2 line-clamp-2 text-xs sm:text-sm md:text-base font-medium transition-colors group-hover:text-[#1B4B33] leading-tight">
             {product.name}
           </h3>
         </Link>
-        <div className="flex items-center justify-between">
-          <span className="font-semibold text-lg text-gray-900">AU${product.price.toFixed(2)}</span>
-          {product.originalPrice && (
-            <span className="text-sm text-gray-500 line-through">
-              AU${product.originalPrice.toFixed(2)}
+
+        {/* Rating */}
+        {product.rating > 0 && (
+          <div className="flex items-center gap-1 mb-2">
+            {Array(5)
+              .fill(0)
+              .map((_, i) => (
+                <Star
+                  key={i}
+                  className={`w-3 h-3 ${
+                    i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+                  }`}
+                />
+              ))}
+            <span className="text-xs text-gray-600 ml-1">({product.reviews || 0})</span>
+          </div>
+        )}
+
+        {/* Price Section */}
+        <div className="flex items-center justify-between mb-2 sm:mb-3 flex-wrap gap-1">
+          <div className="flex items-center gap-2">
+            <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-900">
+              AU${product.price.toFixed(2)}
             </span>
-          )}
+            {product.originalPrice && (
+              <span className="text-xs text-gray-500 line-through">
+                AU${product.originalPrice.toFixed(2)}
+              </span>
+            )}
+          </div>
+          {product.unit && <span className="text-xs text-gray-500">{product.unit}</span>}
+        </div>
+
+        {/* Discount Percentage */}
+        {discountPercentage > 0 && (
+          <div className="text-xs text-green-600 font-medium mb-2">Save {discountPercentage}%</div>
+        )}
+
+        {/* Mobile Add to Cart Section - Always Visible */}
+        <div className="md:hidden mt-auto">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className="flex items-center border rounded-lg">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-6 h-6 sm:w-7 sm:h-7 p-0 hover:bg-gray-100"
+                onClick={decrementQuantity}
+                disabled={quantity <= 1}
+              >
+                <Minus className="h-2 w-2 sm:h-3 sm:w-3" />
+                <span className="sr-only">Decrease quantity</span>
+              </Button>
+              <span className="w-6 sm:w-8 text-center text-xs sm:text-sm font-medium">{quantity}</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-6 h-6 sm:w-7 sm:h-7 p-0 hover:bg-gray-100"
+                onClick={incrementQuantity}
+              >
+                <Plus className="h-2 w-2 sm:h-3 sm:w-3" />
+                <span className="sr-only">Increase quantity</span>
+              </Button>
+            </div>
+            <Button
+              onClick={handleAddToCart}
+              disabled={isAdding || !product.inStock}
+              className={`flex-1 rounded-lg font-medium py-1.5 sm:py-2 text-xs text-white ${
+                isAdding
+                  ? 'bg-green-500 text-white'
+                  : !product.inStock
+                    ? 'bg-gray-400 cursor-not-allowed'
+                    : 'bg-green-600 hover:bg-green-700'
+              }`}
+            >
+              <ShoppingCart className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
+              {!product.inStock ? 'Out of Stock' : isAdding ? 'Added' : 'Add'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

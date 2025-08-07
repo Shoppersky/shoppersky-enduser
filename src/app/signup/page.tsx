@@ -85,15 +85,76 @@ export default function SignupPage() {
     if (!phone) {
       return { isValid: false, error: 'Phone number is required' };
     }
+    
     // Remove all non-digit characters for validation
     const cleanPhone = phone.replace(/\D/g, '');
-    if (cleanPhone.length < 10 || cleanPhone.length > 15) {
+    
+    // Australian phone number validation
+    // Mobile: 04XX XXX XXX (10 digits starting with 04)
+    // Landline: 0X XXXX XXXX (10 digits starting with 02, 03, 07, 08)
+    // International format: +61 4XX XXX XXX or +61 X XXXX XXXX
+    
+    // Check for international format (+61)
+    if (phone.startsWith('+61')) {
+      const phoneWithoutCountryCode = cleanPhone.substring(2); // Remove '61'
+      
+      // Mobile: +61 4XX XXX XXX (9 digits starting with 4)
+      if (phoneWithoutCountryCode.startsWith('4')) {
+        if (phoneWithoutCountryCode.length !== 9) {
+          return {
+            isValid: false,
+            error: 'Australian mobile number should be +61 4XX XXX XXX format',
+          };
+        }
+        return { isValid: true };
+      }
+      
+      // Landline: +61 X XXXX XXXX (9 digits starting with 2, 3, 7, or 8)
+      if (['2', '3', '7', '8'].includes(phoneWithoutCountryCode[0])) {
+        if (phoneWithoutCountryCode.length !== 9) {
+          return {
+            isValid: false,
+            error: 'Australian landline number should be +61 X XXXX XXXX format',
+          };
+        }
+        return { isValid: true };
+      }
+      
       return {
         isValid: false,
-        error: 'Phone number must be between 10 and 15 digits',
+        error: 'Invalid Australian phone number format',
       };
     }
-    return { isValid: true };
+    
+    // Check for domestic format (starting with 0)
+    if (cleanPhone.startsWith('0')) {
+      if (cleanPhone.length !== 10) {
+        return {
+          isValid: false,
+          error: 'Australian phone number should be 10 digits',
+        };
+      }
+      
+      // Mobile: 04XX XXX XXX
+      if (cleanPhone.startsWith('04')) {
+        return { isValid: true };
+      }
+      
+      // Landline: 02, 03, 07, 08
+      if (['02', '03', '07', '08'].some(prefix => cleanPhone.startsWith(prefix))) {
+        return { isValid: true };
+      }
+      
+      return {
+        isValid: false,
+        error: 'Australian phone numbers should start with 02, 03, 04, 07, or 08',
+      };
+    }
+    
+    return {
+      isValid: false,
+      error: 'Please enter a valid Australian phone number (e.g., 04XX XXX XXX or +61 4XX XXX XXX)',
+    };
   };
 
   const validatePassword = (password: string) => {
@@ -120,8 +181,52 @@ export default function SignupPage() {
     return { isValid: true };
   };
 
+  // Format Australian phone number as user types
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digit characters except +
+    const cleaned = value.replace(/[^\d+]/g, '');
+    
+    // Handle international format (+61)
+    if (cleaned.startsWith('+61')) {
+      const digits = cleaned.substring(3); // Remove +61
+      if (digits.length <= 9) {
+        // Format as +61 4XX XXX XXX or +61 X XXXX XXXX
+        if (digits.startsWith('4')) {
+          // Mobile format
+          return `+61 ${digits.substring(0, 3)} ${digits.substring(3, 6)} ${digits.substring(6, 9)}`.trim();
+        } else {
+          // Landline format
+          return `+61 ${digits.substring(0, 1)} ${digits.substring(1, 5)} ${digits.substring(5, 9)}`.trim();
+        }
+      }
+      return cleaned;
+    }
+    
+    // Handle domestic format
+    if (cleaned.startsWith('0')) {
+      if (cleaned.length <= 10) {
+        if (cleaned.startsWith('04')) {
+          // Mobile: 04XX XXX XXX
+          return cleaned.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
+        } else {
+          // Landline: 0X XXXX XXXX
+          return cleaned.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3');
+        }
+      }
+    }
+    
+    return cleaned;
+  };
+
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    let processedValue = value;
+    
+    // Format phone number as user types
+    if (field === 'phone') {
+      processedValue = formatPhoneNumber(value);
+    }
+    
+    setFormData((prev) => ({ ...prev, [field]: processedValue }));
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
@@ -170,6 +275,19 @@ export default function SignupPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Clean phone number for API submission
+  const cleanPhoneForAPI = (phone: string) => {
+    // Remove all formatting and keep only digits and +
+    const cleaned = phone.replace(/[^\d+]/g, '');
+    
+    // Convert domestic format to international format for consistency
+    if (cleaned.startsWith('0')) {
+      return `+61${cleaned.substring(1)}`;
+    }
+    
+    return cleaned;
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
@@ -182,12 +300,15 @@ export default function SignupPage() {
     setIsLoading(true);
 
     try {
+      // Clean phone number before sending to API
+      const cleanedPhone = cleanPhoneForAPI(formData.phone);
+      
       await axiosInstance.post('/users/register', {
         first_name: formData.firstname,
         last_name: formData.lastname,
         username: formData.username,
         email: formData.email,
-        phone_number: formData.phone,
+        phone_number: cleanedPhone,
         password: formData.password,
       });
       
@@ -308,13 +429,16 @@ export default function SignupPage() {
                   <Input
                     id="phone"
                     type="tel"
-                    placeholder="+1 (555) 123-4567"
+                    placeholder="04XX XXX XXX or +61 4XX XXX XXX"
                     value={formData.phone}
                     onChange={(e) => handleInputChange('phone', e.target.value)}
                     className="pl-10"
                     required
                   />
                 </div>
+                <p className="text-xs text-gray-500">
+                  Enter Australian mobile (04XX XXX XXX) or landline (02/03/07/08 XXXX XXXX) number
+                </p>
                 {errors.phone && (
                   <p className="text-red-500 text-xs">{errors.phone}</p>
                 )}

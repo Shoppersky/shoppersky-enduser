@@ -31,7 +31,7 @@ export default function VendorPage({ params, searchParams }: VendorPageProps) {
     const [products, setProducts] = useState<Product[]>([]);
     const[vendorId,setVendorid]=useState('')
     const [vendor,setvendor]=useState({})
-console.log(vendorId)
+
 
   const [searchQuery, setSearchQuery] = useState("")
 
@@ -39,13 +39,11 @@ console.log(vendorId)
     setSelectedCategory(categoryName);
   }
 
-  const handleAddToCart = (productId: number) => {
-    console.log(`Adding product ${productId} to cart for vendor: ${slug}`)
-  }
 
 const fetchCategories=async()=>{
   try{
     const response=await axiosInstance.get(`/vendor/vendor-products-categories?store_slug=${slug}`)
+    console.log(response.data.category_management)
     setCategories(response.data.category_management)
 
     setVendorid(response.data.vendor_id)
@@ -111,98 +109,12 @@ const fetchvendor=async()=>{
   });
 
 
-    console.log(products)
   return (
     <div className="min-h-screen bg-background">
-      <VendorHeader
-  vendor={vendor}
-/>
+      {/* Vendor Header - Responsive */}
+      <VendorHeader vendor={vendor} />
 
-
-{/* <section className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
-  <div className="mb-8">
-    <h2 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h2>
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-      {categories.filter(cat => cat.category_id !== 'all').map((category) => (
-        <div 
-          key={category.category_id}
-          onClick={() => setSelectedCategory(category.category_name)}
-          className={`cursor-pointer rounded-lg p-6 text-center transition-all hover:shadow-md ${
-            selectedCategory === category.category_name 
-              ? 'bg-indigo-100 border-2 border-indigo-500' 
-              : 'bg-white border border-gray-200'
-          }`}
-        >
-          <div className="flex flex-col items-center">
-     
-            
-            <h3 className="font-medium text-lg">{category.category_name}</h3>
-            <p className="text-sm text-gray-500 mt-1">
-{
-  products.filter(
-    p => p.category?.toLowerCase() === category.category_name?.toLowerCase()
-  ).length
-} Products
-            </p>
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-</section> */}
-
-
-      {/* Category Filter */}
-      {/* <section className="w-full mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Product Catalog</h2>
-            <p className="text-gray-600">Preview how customers see your products</p>
-          </div>
-          <div className="flex items-center space-x-4 mt-4 sm:mt-0">
-            <div className="flex items-center space-x-2">
-              <Filter className="h-4 w-4 text-gray-500" />
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="border border-gray-300 rounded-md px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              >
-                {categories.map((category) => (
-                  <option key={category.category_id} value={category.category_id}>
-                    {category.category_name}
-                  </option>
-                ))}
-                  <option  value='all'>
-             All
-                  </option>
-              </select>
-            </div>
-               <div className="flex items-center gap-2">
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-            >
-              <Grid className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-            >
-              <List className="w-4 h-4" />
-            </Button>
-          </div>
-            <div className="text-sm text-gray-500">
-              Showing {filteredProducts.length} of {products.length} products
-            </div>
-          </div>
-        </div>
-
-
-      
-      </section> */}
-
+      {/* Vendor Menu - Responsive Navigation */}
       <VendorMenu
         vendorSlug={slug}
         categories={categories}
@@ -212,7 +124,81 @@ const fetchvendor=async()=>{
         onFollow={handleFollow}
       />
 
-     <ProductGrid products={filteredProducts} viewMode={viewMode} />
+      {/* Main Content Area - Responsive Container */}
+      <main className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
+        {/* Category Overview Section - Optional for larger screens */}
+       
+
+        {/* Products Section Header - Responsive */}
+        <section className="mb-4 sm:mb-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            {/* Title and Description */}
+            <div className="flex-1">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
+                {selectedCategory === 'all' ? 'All Products' : selectedCategory}
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600">
+                {selectedCategory === 'all' 
+                  ? `Browse all ${products.length} products from this store`
+                  : `${filteredProducts.length} products in ${selectedCategory}`
+                }
+              </p>
+            </div>
+
+            {/* View Mode Toggle - Desktop/Tablet Only */}
+            <div className="hidden sm:flex items-center gap-2">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="text-xs sm:text-sm"
+              >
+                <Grid className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden md:inline ml-1">Grid</span>
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="text-xs sm:text-sm"
+              >
+                <List className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span className="hidden md:inline ml-1">List</span>
+              </Button>
+            </div>
+
+            {/* Product Count - Mobile */}
+            <div className="sm:hidden text-xs text-gray-500">
+              Showing {filteredProducts.length} of {products.length} products
+            </div>
+          </div>
+
+          {/* Product Count - Desktop */}
+          <div className="hidden sm:block text-sm text-gray-500 mt-2">
+            Showing {filteredProducts.length} of {products.length} products
+          </div>
+        </section>
+
+        {/* Products Grid - Responsive */}
+        <ProductGrid 
+          products={filteredProducts} 
+          viewMode={viewMode}
+          clearFilters={() => setSelectedCategory('all')}
+        />
+
+        {/* Load More Button - For future pagination */}
+        {filteredProducts.length > 0 && filteredProducts.length >= 20 && (
+          <div className="flex justify-center mt-8 sm:mt-12">
+            <Button 
+              variant="outline" 
+              onClick={handleLoadMore}
+              className="px-6 sm:px-8 py-2 sm:py-3"
+            >
+              Load More Products
+            </Button>
+          </div>
+        )}
+      </main>
     </div>
   )
 }
