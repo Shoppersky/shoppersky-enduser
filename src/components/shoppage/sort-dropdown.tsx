@@ -33,7 +33,6 @@
 //   );
 // }
 
-
 'use client';
 
 import {
@@ -51,10 +50,11 @@ interface SortDropdownProps {
 
 export function SortDropdown({ value, onChange }: SortDropdownProps) {
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-sm">Sort by:</span>
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+      
+
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-48">
+        <SelectTrigger className="w-full sm:w-48">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>

@@ -1,7 +1,3 @@
-
-
-
-
 'use client';
 
 import type React from 'react';
@@ -28,32 +24,21 @@ export function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = () => {
     setIsAdding(true);
-    addToCart({
-      ...product,
-      quantity,
-    });
+    addToCart({ ...product, quantity });
     setTimeout(() => {
       setIsAdding(false);
       setQuantity(1);
     }, 500);
   };
 
-  const incrementQuantity = () => {
-    setQuantity((prev) => prev + 1);
-  };
-
-  const decrementQuantity = () => {
-    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
-  };
+  const incrementQuantity = () => setQuantity((prev) => prev + 1);
+  const decrementQuantity = () => setQuantity((prev) => Math.max(prev - 1, 1));
 
   const toggleWishlist = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
-    } else {
-      addToWishlist(product);
-    }
+    if (isInWishlist(product.id)) removeFromWishlist(product.id);
+    else addToWishlist(product);
   };
 
   const discountPercentage = product.originalPrice
@@ -62,11 +47,11 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div
-      className="group relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl w-full max-w-[280px] sm:max-w-[320px] mx-auto flex flex-col"
+      className="group relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] mx-auto flex flex-col"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Product Image Container */}
+      {/* Product Image */}
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
         <Link href={`/${product.category.toLowerCase()}/${product.productSlug}`}>
           <Image
@@ -83,21 +68,21 @@ export function ProductCard({ product }: ProductCardProps) {
           <Badge
             className={`absolute top-1 left-1 sm:top-2 sm:left-2 text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 ${
               product.badgeColor === 'red'
-                ? 'bg-red-100 hover:bg-red-100 text-red-700'
+                ? 'bg-red-100 text-red-700'
                 : product.badgeColor === 'green'
-                  ? 'bg-green-100 hover:bg-green-100 text-green-700'
-                  : 'bg-blue-100 hover:bg-blue-100 text-blue-700'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-blue-100 text-blue-700'
             }`}
           >
             {product.badge}
           </Badge>
         )}
 
-        {/* Wishlist Button */}
+        {/* Wishlist */}
         <Button
           size="sm"
           variant="secondary"
-          className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 p-0 rounded-full bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 sm:opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 p-0 rounded-full bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 sm:opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300"
           onClick={toggleWishlist}
           aria-label={isInWishlist(product.id) ? 'Remove from wishlist' : 'Add to wishlist'}
         >
@@ -108,109 +93,40 @@ export function ProductCard({ product }: ProductCardProps) {
           />
         </Button>
 
-        {/* Desktop Hover Overlay */}
+        {/* Desktop Overlay */}
         <div
-          className={`hidden md:block absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm transition-all duration-300 ease-in-out ${
+          className={`hidden md:flex absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm transition-all duration-300 ease-in-out flex-col items-center justify-center p-3 gap-2 ${
             isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
           }`}
-          style={{ height: '40%' }}
         >
-          <div className="p-3 h-full flex flex-col justify-center">
-            {/* Quantity Selector */}
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-medium">Quantity:</span>
-              <div className="flex items-center border rounded-lg">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="w-7 h-7 p-0 hover:bg-gray-100"
-                  onClick={decrementQuantity}
-                  disabled={quantity <= 1}
-                >
-                  <Minus className="h-3 w-3" />
-                  <span className="sr-only">Decrease quantity</span>
-                </Button>
-                <span className="w-7 text-center text-sm font-medium">{quantity}</span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="w-7 h-7 p-0 hover:bg-gray-100"
-                  onClick={incrementQuantity}
-                >
-                  <Plus className="h-3 w-3" />
-                  <span className="sr-only">Increase quantity</span>
-                </Button>
-              </div>
-            </div>
-
-            {/* Add to Cart Button */}
-            <Button
-              onClick={handleAddToCart}
-              disabled={isAdding || !product.inStock}
-              className={`w-full rounded-full font-medium py-2 text-sm text-white ${
-                isAdding
-                  ? 'bg-green-500 text-white'
-                  : !product.inStock
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700'
-              }`}
-            >
-              <ShoppingCart className="w-4 h-4 mr-1" />
-              {!product.inStock ? 'Out of Stock' : isAdding ? 'Added' : 'Add to Bag'}
+          {/* Quantity */}
+          <div className="flex items-center border rounded-lg">
+            <Button size="sm" variant="ghost" className="w-7 h-7 p-0" onClick={decrementQuantity} disabled={quantity <= 1}>
+              <Minus className="h-3 w-3" />
+            </Button>
+            <span className="w-7 text-center text-sm font-medium">{quantity}</span>
+            <Button size="sm" variant="ghost" className="w-7 h-7 p-0" onClick={incrementQuantity}>
+              <Plus className="h-3 w-3" />
             </Button>
           </div>
-        </div>
 
-        {/* Tablet Fallback - Always visible on medium screens */}
-        <div className="hidden sm:block md:hidden absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm">
-          <div className="p-2">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center border rounded-lg">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="w-6 h-6 p-0 hover:bg-gray-100"
-                  onClick={decrementQuantity}
-                  disabled={quantity <= 1}
-                >
-                  <Minus className="h-2 w-2" />
-                  <span className="sr-only">Decrease quantity</span>
-                </Button>
-                <span className="w-6 text-center text-xs font-medium">{quantity}</span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="w-6 h-6 p-0 hover:bg-gray-100"
-                  onClick={incrementQuantity}
-                >
-                  <Plus className="h-2 w-2" />
-                  <span className="sr-only">Increase quantity</span>
-                </Button>
-              </div>
-              <Button
-                onClick={handleAddToCart}
-                disabled={isAdding || !product.inStock}
-                className={`flex-1 rounded-lg font-medium py-1 text-xs text-white ${
-                  isAdding
-                    ? 'bg-green-500 text-white'
-                    : !product.inStock
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-green-600 hover:bg-green-700'
-                }`}
-              >
-                <ShoppingCart className="w-3 h-3 mr-1" />
-                {!product.inStock ? 'Out of Stock' : isAdding ? 'Added' : 'Add'}
-              </Button>
-            </div>
-          </div>
+          {/* Add to Cart */}
+          <Button
+            onClick={handleAddToCart}
+            disabled={isAdding || !product.inStock}
+            className={`w-full rounded-full font-medium py-2 text-sm text-white ${
+              isAdding ? 'bg-green-500' : !product.inStock ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+            }`}
+          >
+            <ShoppingCart className="w-4 h-4 mr-1" />
+            {!product.inStock ? 'Out of Stock' : isAdding ? 'Added' : 'Add to Bag'}
+          </Button>
         </div>
       </div>
 
       {/* Product Info */}
       <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col">
-        <div className="mb-1 sm:mb-2 text-xs text-gray-600 uppercase tracking-wide">
-          {product.category}
-        </div>
+        <div className="mb-1 sm:mb-2 text-xs text-gray-600 uppercase tracking-wide">{product.category}</div>
         <Link href={`/${product.category.toLowerCase()}/${product.productSlug}`}>
           <h3 className="mb-2 line-clamp-2 text-xs sm:text-sm md:text-base font-medium transition-colors group-hover:text-[#1B4B33] leading-tight">
             {product.name}
@@ -225,75 +141,64 @@ export function ProductCard({ product }: ProductCardProps) {
               .map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-3 h-3 ${
-                    i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
-                  }`}
+                  className={`w-3 h-3 ${i < Math.floor(product.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
                 />
               ))}
             <span className="text-xs text-gray-600 ml-1">({product.reviews || 0})</span>
           </div>
         )}
 
-        {/* Price Section */}
+        {/* Price */}
         <div className="flex items-center justify-between mb-2 sm:mb-3 flex-wrap gap-1">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-900">
-              AU${product.price.toFixed(2)}
-            </span>
-            {product.originalPrice && (
-              <span className="text-xs text-gray-500 line-through">
-                AU${product.originalPrice.toFixed(2)}
-              </span>
-            )}
+            <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-900">AU${product.price.toFixed(2)}</span>
+            {product.originalPrice && <span className="text-xs text-gray-500 line-through">AU${product.originalPrice.toFixed(2)}</span>}
           </div>
           {product.unit && <span className="text-xs text-gray-500">{product.unit}</span>}
         </div>
 
-        {/* Discount Percentage */}
-        {discountPercentage > 0 && (
-          <div className="text-xs text-green-600 font-medium mb-2">Save {discountPercentage}%</div>
-        )}
+        {/* Discount */}
+        {discountPercentage > 0 && <div className="text-xs text-green-600 font-medium mb-2">Save {discountPercentage}%</div>}
 
-        {/* Mobile Add to Cart Section - Always Visible */}
-        <div className="md:hidden mt-auto">
-          <div className="flex items-center gap-1 sm:gap-2">
-            <div className="flex items-center border rounded-lg">
-              <Button
-                size="sm"
-                variant="ghost"
-                className="w-6 h-6 sm:w-7 sm:h-7 p-0 hover:bg-gray-100"
-                onClick={decrementQuantity}
-                disabled={quantity <= 1}
-              >
-                <Minus className="h-2 w-2 sm:h-3 sm:w-3" />
-                <span className="sr-only">Decrease quantity</span>
-              </Button>
-              <span className="w-6 sm:w-8 text-center text-xs sm:text-sm font-medium">{quantity}</span>
-              <Button
-                size="sm"
-                variant="ghost"
-                className="w-6 h-6 sm:w-7 sm:h-7 p-0 hover:bg-gray-100"
-                onClick={incrementQuantity}
-              >
-                <Plus className="h-2 w-2 sm:h-3 sm:w-3" />
-                <span className="sr-only">Increase quantity</span>
-              </Button>
-            </div>
+        {/* Mobile Add to Cart */}
+        <div className="md:hidden mt-auto flex flex-col gap-2">
+          {/* Quantity in column */}
+          <div className="flex flex-col-2 ml- justify-center items-center border rounded-lg p-1 gap-1">
             <Button
-              onClick={handleAddToCart}
-              disabled={isAdding || !product.inStock}
-              className={`flex-1 rounded-lg font-medium py-1.5 sm:py-2 text-xs text-white ${
-                isAdding
-                  ? 'bg-green-500 text-white'
-                  : !product.inStock
-                    ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-green-600 hover:bg-green-700'
-              }`}
+              size="sm"
+              variant="ghost"
+              className="w-8 h-8 p-0"
+              onClick={incrementQuantity}
             >
-              <ShoppingCart className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
-              {!product.inStock ? 'Out of Stock' : isAdding ? 'Added' : 'Add'}
+              <Plus className="h-3 w-3" />
+            </Button>
+            <span className="text-sm font-medium">{quantity}</span>
+            <Button
+              size="sm"
+              variant="ghost"
+              className="w-8 h-8 p-0"
+              onClick={decrementQuantity}
+              disabled={quantity <= 1}
+            >
+              <Minus className="h-3 w-3" />
             </Button>
           </div>
+
+          {/* Add to Cart button */}
+          <Button
+            onClick={handleAddToCart}
+            disabled={isAdding || !product.inStock}
+            className={`w-full rounded-lg font-medium py-2 text-xs text-white ${
+              isAdding
+                ? 'bg-green-500'
+                : !product.inStock
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-green-600 hover:bg-green-700'
+            }`}
+          >
+            <ShoppingCart className="w-4 h-4 mr-1" />
+            {!product.inStock ? 'Out of Stock' : isAdding ? 'Added' : 'Add'}
+          </Button>
         </div>
       </div>
     </div>

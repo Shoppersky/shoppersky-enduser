@@ -698,11 +698,11 @@ import {
 } from '../../../components/cart-provider';
 import { useWishlist } from '../../../components/wishlist-provider';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '../../../components/ui/tabs';
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from '../../../components/ui/accordion';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -948,7 +948,7 @@ function ProductDetails() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-12">
             {/* Product Images */}
             <div className="space-y-4">
               <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-gray-200">
@@ -988,7 +988,7 @@ function ProductDetails() {
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                   {identification.product_name}
                 </h1>
-                <div className="flex items-center gap-4 mb-4">
+                <div className="grid grid:cols-2 lg:cols-1 items-center gap-4 mb-4">
                   <div className="flex items-center gap-1">
                     {Array(5)
                       .fill(0)
@@ -1113,131 +1113,134 @@ function ProductDetails() {
                 </div>
               </div>
             </div>
-          </div>
+        
 
           {/* Product Information Tabs */}
           <div className="bg-white rounded-2xl border border-gray-200 p-8 mb-12">
-            <Tabs defaultValue="details" className="w-full">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="details">Description</TabsTrigger>
-                <TabsTrigger value="specs">Specifications</TabsTrigger>
-                <TabsTrigger value="reviews">Reviews</TabsTrigger>
-                <TabsTrigger value="shipping">Shipping</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="details" className="mt-6">
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Product Description</h3>
-                    <p className="text-gray-600 leading-relaxed">
-                      {descriptions?.full_description || 'No description available.'}
-                    </p>
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-description">
+                <AccordionTrigger>Description</AccordionTrigger>
+                <AccordionContent>
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Product Description</h3>
+                      <p className="text-gray-600 leading-relaxed">
+                        {descriptions?.full_description || 'No description available.'}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
+                </AccordionContent>
+              </AccordionItem>
 
-              <TabsContent value="specs" className="mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Specifications</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between py-2 border-b border-gray-200">
-                        <span className="font-medium">Weight</span>
-                        <span>{physical_attributes?.weight || 'N/A'}</span>
-                      </div>
-                      <div className="flex justify-between py-2 border-b border-gray-200">
-                        <span className="font-medium">Dimensions</span>
-                        <span>
-                          {physical_attributes?.dimensions?.length
-                            ? `${physical_attributes?.dimensions?.length} x ${physical_attributes?.dimensions?.width} x ${physical_attributes.dimensions.height} cm`
-                            : 'N/A'}
-                        </span>
-                      </div>
-                      <div className="flex justify-between py-2">
-                        <span className="font-medium">Shipping Class</span>
-                        <span>{physical_attributes?.shipping_class || 'N/A'}</span>
+              <AccordionItem value="item-specs">
+                <AccordionTrigger>Specifications</AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Specifications</h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between py-2 border-b border-gray-200">
+                          <span className="font-medium">Weight</span>
+                          <span>{physical_attributes?.weight || 'N/A'}</span>
+                        </div>
+                        <div className="flex justify-between py-2 border-b border-gray-200">
+                          <span className="font-medium">Dimensions</span>
+                          <span>
+                            {physical_attributes?.dimensions?.length
+                              ? `${physical_attributes?.dimensions?.length} x ${physical_attributes?.dimensions?.width} x ${physical_attributes?.dimensions?.height} cm`
+                              : 'N/A'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between py-2">
+                          <span className="font-medium">Shipping Class</span>
+                          <span>{physical_attributes?.shipping_class || 'N/A'}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              </TabsContent>
+                </AccordionContent>
+              </AccordionItem>
 
-              <TabsContent value="reviews" className="mt-6">
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-semibold text-gray-900">Customer Reviews</h3>
-                    <Button variant="outline">Write a Review</Button>
-                  </div>
+              <AccordionItem value="item-reviews">
+                <AccordionTrigger>Reviews</AccordionTrigger>
+                <AccordionContent>
                   <div className="space-y-6">
-                    {mockReviews.map((review) => (
-                      <div key={review.id} className="border-b border-gray-200 pb-6">
-                        <div className="flex items-start justify-between mb-3">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-medium text-gray-900">{review.name}</span>
-                              {review.verified && (
-                                <Badge className="bg-green-100 text-green-700 text-xs">Verified Purchase</Badge>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="flex">
-                                {Array(5)
-                                  .fill(0)
-                                  .map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-4 h-4 ${
-                                        i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                                      }`}
-                                    />
-                                  ))}
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-gray-900">Customer Reviews</h3>
+                      <Button variant="outline">Write a Review</Button>
+                    </div>
+                    <div className="space-y-6">
+                      {mockReviews.map((review) => (
+                        <div key={review.id} className="border-b border-gray-200 pb-6">
+                          <div className="flex items-start justify-between mb-3">
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="font-medium text-gray-900">{review.name}</span>
+                                {review.verified && (
+                                  <Badge className="bg-green-100 text-green-700 text-xs">Verified Purchase</Badge>
+                                )}
                               </div>
-                              <span className="text-sm text-gray-600">{review.date}</span>
+                              <div className="flex items-center gap-2">
+                                <div className="flex">
+                                  {Array(5)
+                                    .fill(0)
+                                    .map((_, i) => (
+                                      <Star
+                                        key={i}
+                                        className={`w-4 h-4 ${i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
+                                      />
+                                    ))}
+                                </div>
+                                <span className="text-sm text-gray-600">{review.date}</span>
+                              </div>
                             </div>
                           </div>
+                          <p className="text-gray-600">{review.comment}</p>
                         </div>
-                        <p className="text-gray-600">{review.comment}</p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
+                </AccordionContent>
+              </AccordionItem>
 
-              <TabsContent value="shipping" className="mt-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Options</h3>
-                    <div className="space-y-4">
-                      <div className="flex items-start gap-3">
-                        <Truck className="w-5 h-5 text-green-600 mt-1" />
-                        <div>
-                          <h4 className="font-medium text-gray-900">Standard Delivery</h4>
-                          <p className="text-sm text-gray-600">2-4 hours • Free on orders over AU$50</p>
+              <AccordionItem value="item-shipping">
+                <AccordionTrigger>Shipping</AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Options</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-start gap-3">
+                          <Truck className="w-5 h-5 text-green-600 mt-1" />
+                          <div>
+                            <h4 className="font-medium text-gray-900">Standard Delivery</h4>
+                            <p className="text-sm text-gray-600">2-4 hours • Free on orders over AU$50</p>
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-start gap-3">
-                        <Truck className="w-5 h-5 text-green-600 mt-1" />
-                        <div>
-                          <h4 className="font-medium text-gray-900">Express Delivery</h4>
-                          <p className="text-sm text-gray-600">30-60 minutes • AU$9.99</p>
+                        <div className="flex items-start gap-3">
+                          <Truck className="w-5 h-5 text-green-600 mt-1" />
+                          <div>
+                            <h4 className="font-medium text-gray-900">Express Delivery</h4>
+                            <p className="text-sm text-gray-600">30-60 minutes • AU$9.99</p>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Return Policy</h3>
-                    <div className="space-y-2">
-                      <p className="text-sm text-gray-600">• 100% satisfaction guarantee</p>
-                      <p className="text-sm text-gray-600">• Return within 24 hours of delivery</p>
-                      <p className="text-sm text-gray-600">• Full refund for damaged or unsatisfactory items</p>
-                      <p className="text-sm text-gray-600">• Contact customer service for easy returns</p>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Return Policy</h3>
+                      <div className="space-y-2">
+                        <p className="text-sm text-gray-600">• 100% satisfaction guarantee</p>
+                        <p className="text-sm text-gray-600">• Return within 24 hours of delivery</p>
+                        <p className="text-sm text-gray-600">• Full refund for damaged or unsatisfactory items</p>
+                        <p className="text-sm text-gray-600">• Contact customer service for easy returns</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </TabsContent>
-            </Tabs>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           </div>
-
+  </div>
           {/* Related Products Placeholder */}
           {/* <div className="bg-white rounded-2xl border border-gray-200 p-8">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">You might also like</h2>
