@@ -79,7 +79,7 @@ const [categories, setCategories] = useState<Category[]>([]);
   }
   const fetchCategories = async () => {
       try {
-        const response = await axiosInstance.get("/categories", {
+        const response = await axiosInstance.get("/categories/", {
           params: { status_filter: null },
         });
         if (response.data.statusCode === 200) {

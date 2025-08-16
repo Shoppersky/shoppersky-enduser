@@ -11,7 +11,7 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
           {/* Company Info */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h3 className="text-2xl font-bold text-green-400">Shoppersky</h3>
             <p className="text-gray-300">
               Your trusted partner for fresh, organic groceries delivered right to your doorstep. Quality guaranteed,
@@ -28,7 +28,7 @@ export default function Footer() {
                 <Instagram className="w-5 h-5" />
               </Button>
             </div>
-          </div>
+          </div> */}
 
           {/* Quick Links */}
           <div className="space-y-4">
@@ -68,22 +68,22 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <a href="#" className="text-gray-300 hover:text-green-400 transition-colors">
-                  Fresh Fruits
+                  Men's wear
                 </a>
               </li>
               <li>
                 <a href="#" className="text-gray-300 hover:text-green-400 transition-colors">
-                  Vegetables
+                  Electronics
                 </a>
               </li>
               <li>
                 <a href="#" className="text-gray-300 hover:text-green-400 transition-colors">
-                  Dairy & Eggs
+                Home Decor
                 </a>
               </li>
               <li>
                 <a href="#" className="text-gray-300 hover:text-green-400 transition-colors">
-                  Meat & Seafood
+                  Daily essentials
                 </a>
               </li>
               <li>

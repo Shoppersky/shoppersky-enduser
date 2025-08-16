@@ -6,7 +6,7 @@ import { VendorHeader } from "@/components/vendor/vendor-header"
 import { VendorMenu } from "@/components/vendor/vendor-menu"
 import { ProductGrid } from "@/components/shoppage/product-grid"
 import axiosInstance from "@/lib/axiosInstance"
-import {Grid, List, Filter, Edit3, Save, Camera, Settings, Eye, EyeOff, ArrowLeft, BoxIcon, Home } from 'lucide-react';
+import {Grid, List } from 'lucide-react';
 // import { ProductsGrid } from "@/components/products-grid"
 import { Button } from "@/components/ui/button"
 import { toast } from "sonner"
@@ -55,7 +55,7 @@ const fetchCategories=async()=>{
               originalPrice: item.pricing?.original_price
                 ? parseFloat(item.pricing.original_price)
                 : undefined,
-              image: item.images?.urls[0] || '/images/placeholder.svg',
+              image: item.images?.urls?.[0] || '/images/placeholder.svg', 
               category:item.category_name || 'Uncategorized',
               productSlug: item.slug,
               timestamp: item.timestamp,
@@ -65,6 +65,7 @@ const fetchCategories=async()=>{
               inStock: item.in_stock !== undefined ? item.in_stock : true,
               badge: item.badge,
               badgeColor: item.badge_color,
+              
             }));
                 setProducts(mappedProducts)
   }
@@ -154,7 +155,7 @@ const fetchvendor=async()=>{
                 className="text-xs sm:text-sm"
               >
                 <Grid className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden md:inline ml-1">Grid</span>
+                {/* <span className="hidden md:inline ml-1">Grid</span> */}
               </Button>
               <Button
                 variant={viewMode === 'list' ? 'default' : 'outline'}
@@ -163,7 +164,7 @@ const fetchvendor=async()=>{
                 className="text-xs sm:text-sm"
               >
                 <List className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden md:inline ml-1">List</span>
+                {/* <span className="hidden md:inline ml-1">List</span> */}
               </Button>
             </div>
 
