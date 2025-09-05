@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: isProd, // Skip TypeScript errors in production builds
   },
   images: {
-    domains: ['syd1.digitaloceanspaces.com'],
+    domains: ['syd1.digitaloceanspaces.com', 'localhost:3000'],
   },
  
 };
