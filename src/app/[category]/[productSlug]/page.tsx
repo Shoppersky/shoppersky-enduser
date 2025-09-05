@@ -1088,8 +1088,8 @@ function ProductDetails() {
                   {isAdding 
                     ? 'Added to Cart' 
                     : isInStock 
-                    ? 'Out of Stock' 
-                    :  `Add to Cart - AU$${(parseFloat(pricing?.selling_price) * quantity).toFixed(2)}` 
+                    ?`Add to Cart - AU$${(parseFloat(pricing?.selling_price) * quantity).toFixed(2)}` 
+                    :   'Out of Stock' 
                   }
                 </Button>
               </div>

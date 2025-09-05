@@ -363,6 +363,8 @@ import { ProductCard } from '../../components/product-card';
 
 // Interface for product data from API
 interface ApiProduct {
+  thumbnail_image: string;
+  stock: any;
   product_id: string;
   product_name: string;
   selling_price: string;
@@ -416,6 +418,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
           price: parseFloat(item.selling_price) || 0,
           image: item.thumbnail_image || FALLBACK_IMAGE,
           category: unwrappedParams.category,
+          inStock: item.stock,
           productSlug: slugify(item.product_name, {
             lower: true,
             strict: true,
