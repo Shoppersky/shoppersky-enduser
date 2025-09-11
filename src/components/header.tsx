@@ -737,9 +737,9 @@ export function Header() {
           {industries
             .filter((ind) => ind.industry_id === (selectedIndustryId || hoverIndustryId))
             .map((ind) => (
-              <div key={ind.industry_id} className="flex mx-auto max-w-screen-2xl px-4 lg:px-8">
-                <div className="w-1/2 max-h-[420px] overflow-y-auto border-r">
-                  <div className="flex justify-between items-center px-4 py-2">
+              <div key={ind.industry_id} className="flex mx-auto w-fit px-4 lg:px-8">
+                <div className="w-fit max-h-[420px] overflow-y-auto border-r">
+                  <div className="flex justify-between items-center px-4 py-2 mb-1">
                     <span className="text-sm font-semibold">{ind.industry_name}</span>
                     {(selectedIndustryId || selectedCategoryId || selectedSubcategoryId) && (
                       <Button
@@ -769,8 +769,9 @@ export function Header() {
                           onClick={(e) => {
                         // Prevent navigation until confirmed
                         
-                            handleSelectCategory(cat.category_id);
+                          
                             handleDeselectAll(); 
+                              handleSelectCategory(cat.category_id);
                           }}
                         >
                           {cat.category_name}
