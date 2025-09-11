@@ -57,7 +57,7 @@ export default function Partners() {
 
   if (loading) {
     return (
-      <section className="w-full max-w-7xl mx-auto py-4 sm:py-6 md:py-8 px-2 sm:px-4">
+      <section className="w-full container  mx-auto py-4 sm:py-6 md:py-8 px-2 sm:px-4">
         <div className="flex items-center justify-between mb-4 sm:mb-6">
           <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 truncate">
             Our Partners
@@ -97,7 +97,7 @@ export default function Partners() {
   }
 
   return (
-    <section className="w-full max-w-7xl mx-auto py-4 sm:py-6 md:py-8 px-2 sm:px-4">
+    <section className="w-full container mx-auto py-4 sm:py-6 md:py-8 px-2 sm:px-4">
       {/* Header Row */}
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <h1 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 truncate">

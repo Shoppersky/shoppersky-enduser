@@ -1,4 +1,7 @@
 export interface Product {
+  selling_price: ReactNode;
+  product_name: ReactNode;
+  product_images: string | Blob | undefined;
   id: string;
   name: string;
   description?: string;
