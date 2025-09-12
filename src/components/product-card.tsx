@@ -53,7 +53,10 @@ export function ProductCard({ product }: ProductCardProps) {
     >
       {/* Product Image */}
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
-        <Link href={`/${product.category.toLowerCase()}/${product.productSlug}`}>
+        <Link 
+  href={`/${product.category?.toLowerCase() || 'unknown'}/${product.productSlug}`}
+>
+
           <Image
             src={product.image || '/placeholder.svg'}
             alt={product.name}
@@ -127,7 +130,7 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product Info */}
       <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col">
         <div className="mb-1 sm:mb-2 text-xs text-gray-600 uppercase tracking-wide">{product.category}</div>
-        <Link href={`/${product.category.toLowerCase()}/${product.productSlug}`}>
+        <Link href={`/${product.category?.toLowerCase()}/${product.productSlug}`}>
           <h3 className="mb-2 line-clamp-2 text-xs sm:text-sm md:text-base font-medium transition-colors group-hover:text-[#1B4B33] leading-tight">
             {product.name}
           </h3>
@@ -151,7 +154,7 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Price */}
         <div className="flex items-center justify-between mb-2 sm:mb-3 flex-wrap gap-1">
           <div className="flex items-center gap-2">
-            <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-900">AU${product.price.toFixed(2)}</span>
+            <span className="font-semibold text-sm sm:text-base md:text-lg text-gray-900">AU${product.price?.toFixed(2)}</span>
             {product.originalPrice && <span className="text-xs text-gray-500 line-through">AU${product.originalPrice.toFixed(2)}</span>}
           </div>
           {product.unit && <span className="text-xs text-gray-500">{product.unit}</span>}

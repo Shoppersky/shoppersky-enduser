@@ -33,7 +33,16 @@ import Image from 'next/image';
 import useStore from '@/lib/Zustand';
 import axiosInstance from '@/lib/axiosInstance';
 import { AxiosError } from 'axios';
-import { cn } from '@/lib/utils'; // Assuming a utility like `cn` for classNames
+import { cn } from '@/lib/utils';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 // Sample order, payment, and wishlist data (replace with API data in production)
 const orders = [
@@ -86,7 +95,7 @@ interface Address {
   id: string;
   type: string;
   default: boolean;
-  name: string;
+
   address: string;
   apartment?: string;
   city: string;
@@ -105,127 +114,301 @@ interface UserProfile {
   delivery_address?: Address;
 }
 
+interface Order {
+  order_id: string;
+  amount: number;
+  payment_status: string;
+  order_status: string;
+  item_details: { [key: string]: { name: string; quantity: number } };
+  address: { street: string; city: string; state: string; postcode: string; country: string };
+  created_at: string;
+}
+
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState('overview');
-//   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-//   const [isLoading, setIsLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
   const { userId, token, isAuthenticated, logout, checkAuth } = useStore();
   const router = useRouter();
-  const [user,SetUser]=useState( )
-  // Fetch user profile from FastAPI
-// useEffect(() => {
-//   async function fetchUserProfile() {
-//     // if (!isAuthenticated || !userId || !token) {
-//     //   console.log(
-//     //     'Not authenticated or missing userId/token, redirecting to login'
-//     //   );
-//     //   router.push('/login');
-//     //   return;
-//     // }
+  const [user, setUser] = useState<any>({});
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-//     // Instead of API call, use static data
-//     setIsLoading(true);
-//     setError(null);
 
-   
 
-//     setUserProfile({
-//       name: staticProfileData.user_fullname,
-//       email: staticProfileData.user_email,
-//       avatar:
-//         staticProfileData.user_profile_img ||
-//         '/images/placeholder.svg?height=40&width=40',
-//       joinDate: 'Jan 1, 2024',
-//       user_address: {
-//         id: '1',
-//         type: 'Home',
-//         default: true,
-//         name: staticProfileData.user_fullname,
-//         address: staticProfileData.user_address.street,
-//         apartment: staticProfileData.user_address.apartment,
-//         city: staticProfileData.user_address.city,
-//         state: staticProfileData.user_address.state,
-//         zipCode: staticProfileData.user_address.postal_code,
-//         country: staticProfileData.user_address.country,
-//         phone: staticProfileData.user_address.phone,
-//       },
-//       delivery_address: {
-//         id: '2',
-//         type: 'Delivery',
-//         default: false,
-//         name: staticProfileData.user_fullname,
-//         address: staticProfileData.delivery_address.street,
-//         apartment: staticProfileData.delivery_address.apartment,
-//         city: staticProfileData.delivery_address.city,
-//         state: staticProfileData.delivery_address.state,
-//         zipCode: staticProfileData.delivery_address.postal_code,
-//         country: staticProfileData.delivery_address.country,
-//         phone: staticProfileData.delivery_address.phone,
-//       },
-//     });
+  const [addressForm, setAddressForm] = useState({
+    label: '',
+    address: '',
+    apartment: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    country: '',
+    phone: '',
+  });
 
-//     setIsLoading(false);
-//   }
+  const userProfile = {
+    name: 'Vineetha Sharma',
+    user_email: 'vineetha@example.com',
+    user_profile_img: '/images/vineetha.jpg',
+    user_address: {
+      street: '123 Rainbow Road',
+      apartment: 'Apt 4B',
+      city: 'Hyderabad',
+      state: 'Telangana',
+      postal_code: '500081',
+      country: 'India',
+      phone: '+91 9876543210',
+    },
+    delivery_address: {
+      street: '456 Delivery Lane',
+      apartment: 'Suite 10',
+      city: 'Hyderabad',
+      state: 'Telangana',
+      postal_code: '500081',
+      country: 'India',
+      phone: '+91 9123456780',
+    },
+  };
 
-// //   checkAuth();
-//  fetchUserProfile(); // Avoid ESLint warning for unhandled promise
-// }, []);
+// Fetch user and addresses
+useEffect(() => {
 
- const userProfile = {
-      name: 'Vineetha Sharma',
-      user_email: 'vineetha@example.com',
-      user_profile_img: '/images/vineetha.jpg',
-      user_address: {
-        street: '123 Rainbow Road',
-        apartment: 'Apt 4B',
-        city: 'Hyderabad',
-        state: 'Telangana',
-        postal_code: '500081',
-        country: 'India',
-        phone: '+91 9876543210',
-      },
-      delivery_address: {
-        street: '456 Delivery Lane',
-        apartment: 'Suite 10',
-        city: 'Hyderabad',
-        state: 'Telangana',
-        postal_code: '500081',
-        country: 'India',
-        phone: '+91 9123456780',
-      },
+   const fetchOrders = async () => {
+      try {
+        const response = await axiosInstance.get(`/orders/orders?user_id=${userId}`);
+        setOrders(response.data.data);
+      } catch (error: any) {
+        console.error('Error fetching orders:', error);
+        const errorMessage = error.response?.data?.detail || error.message || 'Failed to fetch orders';
+        setError(errorMessage);
+        console.log("error fetching orders")
+      } finally {
+        setIsLoading(false);
+      }
     };
+
+
+  const fetchUser = async () => {
+    if (!userId || !token) return;
+
+    try {
+      const res = await axiosInstance.get(`/users/profiles/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const userData = res.data.data;
+      setUser(userData);
+
+      // Map backend "address" array into your Address[] shape
+      if (userData.address && Array.isArray(userData.address)) {
+        const mappedAddresses: Address[] = userData.address.map((addr: any) => ({
+          id: String(addr.id),
+          type: addr.label,
+          default: addr.is_default,
+          
+          address: addr.details.street,
+          apartment: addr.details.apartment || "",
+          city: addr.details.city,
+          state: addr.details.state,
+          zipCode: addr.details.postcode,
+          country: addr.details.country,
+          phone: addr.details.phone || userData.phone_number || "",
+        }));
+        setAddresses(mappedAddresses);
+      }
+    } catch (err) {
+      console.error('Failed to fetch user info:', err);
+    }
+  };
+
+  fetchUser();
+  fetchOrders();
+}, [userId, token]);
+
+
   // Sign-out handler
   const handleSignOut = () => {
     logout();
-    console.log(
-      'Signed out, localStorage:',
-      localStorage.getItem('auth-storage')
-    );
     router.push('/login');
   };
-  useEffect(() => {
-    const fetchUser = async () => {
-      if (!userId || !token) return
 
-      try {
-        const res = await axiosInstance.get(`/users/user/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
+  // Address form handlers
+  const openAddressModal = (address?: Address) => {
+    if (address) {
+      setEditingAddress(address);
+      setAddressForm({
+        type: address.type,
+      
+        address: address.address,
+        apartment: address.apartment || '',
+        city: address.city,
+        state: address.state,
+        zipCode: address.zipCode,
+        country: address.country,
+        phone: address.phone,
+      });
+    } else {
+      setEditingAddress(null);
+      setAddressForm({
+        type: '',
+       
+        address: '',
+        apartment: '',
+        city: '',
+        state: '',
+        zipCode: '',
+        country: '',
+        phone: '',
+      });
+    }
+    setIsAddressModalOpen(true);
+  };
+
+const handleAddressSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  try {
+    let payload;
+    let res;
+
+    if (editingAddress) {
+      // Updating existing address
+      payload = {
+        id: editingAddress.id,
+        addresses: [
+          {
+            label: addressForm.type || addressForm.label,
+            details: {
+              street: addressForm.address,
+              apartment: addressForm.apartment || undefined,
+              city: addressForm.city,
+              state: addressForm.state,
+              postcode: addressForm.zipCode,
+              country: addressForm.country,
+              phone: addressForm.phone,
+            },
           },
-        })
-        SetUser(res.data.data)
-      } catch (err) {
-        console.error('Failed to fetch user info:', err)
-      }
+        ],
+      };
+
+      res = await axiosInstance.put(
+        `/users/profiles/address/${userId}`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } else {
+      // Adding new address
+      payload = {
+        addresses: [
+          {
+            label: addressForm.type || addressForm.label,
+            details: {
+              street: addressForm.address,
+              apartment: addressForm.apartment || undefined,
+              city: addressForm.city,
+              state: addressForm.state,
+              postcode: addressForm.zipCode,
+              country: addressForm.country,
+              phone: addressForm.phone,
+            },
+          },
+        ],
+      };
+
+      res = await axiosInstance.put(
+        `/users/profiles/add_address/${userId}`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
     }
 
-    fetchUser()
-  }, [userId, token])
-  // Form submission handlers
+    // 👇 new parsing logic
+    const rawAddresses = res.data?.data?.address || [];
+    if (!Array.isArray(rawAddresses) || rawAddresses.length === 0) {
+      throw new Error("API did not return addresses");
+    }
+
+    // For add → take the last address; for update → find by id
+    const raw = editingAddress
+      ? rawAddresses.find((a: any) => String(a.id) === String(editingAddress.id))
+      : rawAddresses[rawAddresses.length - 1];
+
+    if (!raw?.details) {
+      throw new Error("API did not return address.details");
+    }
+
+    const parsedAddress: Address = {
+      id: String(raw.id),
+      type: raw.label,
+      default: raw.is_default || false,
+      address: raw.details.street,
+      apartment: raw.details.apartment || "",
+      city: raw.details.city,
+      state: raw.details.state,
+      zipCode: raw.details.postcode,
+      country: raw.details.country,
+      phone: raw.details.phone || user.phone_number || "",
+    };
+
+    if (editingAddress) {
+      setAddresses(addresses.map((addr) =>
+        addr.id === editingAddress.id ? parsedAddress : addr
+      ));
+    } else {
+      setAddresses([...addresses, parsedAddress]);
+    }
+
+    // Reset modal + form
+    setIsAddressModalOpen(false);
+    setAddressForm({
+      label: '',
+      address: '',
+      apartment: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: '',
+      phone: '',
+    });
+  } catch (err) {
+    console.error('Failed to save address:', err);
+  }
+};
+
+
+  const handleSetDefault = async (addressId: string) => {
+    try {
+      await axiosInstance.patch(
+        `/users/addresses/${addressId}/set-default`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setAddresses(addresses.map((addr) => ({
+        ...addr,
+        default: addr.id === addressId,
+      })));
+    } catch (err) {
+      console.error('Failed to set default address:', err);
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: string) => {
+    if (window.confirm('Are you sure you want to delete this address?')) {
+      try {
+        await axiosInstance.delete(`/users/addresses/${addressId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAddresses(addresses.filter((addr) => addr.id !== addressId));
+      } catch (err) {
+        console.error('Failed to delete address:', err);
+      }
+    }
+  };
+
   const handlePersonalInfoSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Add logic to update personal information via API
     console.log('Personal info submitted');
   };
 
@@ -238,84 +421,12 @@ export default function AccountPage() {
 
   const accountNavigation = [
     { name: 'Overview', href: '/account', icon: User, id: 'overview' },
-    {
-      name: 'Orders',
-      href: '/account/orders',
-      icon: ShoppingBag,
-      id: 'orders',
-    },
-    {
-      name: 'Addresses',
-      href: '/account/addresses',
-      icon: Package,
-      id: 'addresses',
-    },
-    {
-      name: 'Payment Methods',
-      href: '/account/payment',
-      icon: CreditCard,
-      id: 'payment',
-    },
-    {
-      name: 'Wishlist',
-      href: '/account/wishlist',
-      icon: Heart,
-      id: 'wishlist',
-    },
-    {
-      name: 'Settings',
-      href: '/account/settings',
-      icon: Settings,
-      id: 'settings',
-    },
+    { name: 'Orders', href: '/account/orders', icon: ShoppingBag, id: 'orders' },
+    { name: 'Addresses', href: '/account/addresses', icon: Package, id: 'addresses' },
+    { name: 'Payment Methods', href: '/account/payment', icon: CreditCard, id: 'payment' },
+    { name: 'Wishlist', href: '/account/wishlist', icon: Heart, id: 'wishlist' },
+    { name: 'Settings', href: '/account/settings', icon: Settings, id: 'settings' },
   ];
-
-  // Fallback for unauthenticated or loading state
-//   if (!isAuthenticated) {
-//     return <div>Redirecting to login...</div>;
-//   }
-
-//   if (isLoading || !userProfile) {
-//     return <div>Loading account details...</div>;
-//   }
-
-  // Dynamic addresses from API or fallback to static data
-  const addresses = [
-    ...(userProfile?.user_address ? [userProfile.user_address] : []),
-    ...(userProfile?.delivery_address ? [userProfile.delivery_address] : []),
-  ].length
-    ? [
-        ...(userProfile?.user_address ? [userProfile.user_address] : []),
-        ...(userProfile?.delivery_address ? [userProfile.delivery_address] : []),
-      ]
-    : [
-        {
-          id: '1',
-          type: 'Home',
-          default: true,
-          name: userProfile?.name,
-          address: '123 Main Street',
-          apartment: 'Apt 4B',
-          city: 'New York',
-          state: 'NY',
-          zipCode: '10001',
-          country: 'United States',
-          phone: '(555) 123-4567',
-        },
-        {
-          id: '2',
-          type: 'Work',
-          default: false,
-          name: userProfile?.name,
-          address: '456 Business Ave',
-          apartment: 'Suite 200',
-          city: 'New York',
-          state: 'NY',
-          zipCode: '10002',
-          country: 'United States',
-          phone: '(555) 987-6543',
-        },
-      ];
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -329,28 +440,17 @@ export default function AccountPage() {
             <span className="text-foreground">My Account</span>
           </div>
 
-          {/* {error && (
-            <div className="mb-6 rounded-md bg-red-50 p-4 text-red-600">
-              {error}
-            </div>
-          )} */}
-
           <div className="grid gap-8 md:grid-cols-[240px_1fr]">
             {/* Sidebar Navigation */}
             <aside className="hidden md:block">
               <div className="mb-8 flex items-center gap-3">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage
-                    src={userProfile?.avatar}
-                    alt={userProfile?.name}
-                  />
+                  <AvatarImage src={userProfile?.user_profile_img} alt={userProfile?.name} />
                   <AvatarFallback>{userProfile?.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
                   <h2 className="text-lg font-semibold">{user?.username}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {user?.email}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{user?.email}</p>
                 </div>
               </div>
 
@@ -380,11 +480,7 @@ export default function AccountPage() {
 
             {/* Mobile Navigation */}
             <div className="mb-6 md:hidden">
-              <Tabs
-                defaultValue="overview"
-                value={activeTab}
-                onValueChange={setActiveTab}
-              >
+              <Tabs defaultValue="overview" value={activeTab} onValueChange={setActiveTab}>
                 <TabsList className="mb-4 grid grid-cols-3">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="orders">Orders</TabsTrigger>
@@ -425,11 +521,7 @@ export default function AccountPage() {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold">Account Overview</h1>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="hidden md:flex"
-                    >
+                    <Button variant="outline" size="sm" className="hidden md:flex">
                       <Bell className="mr-2 h-4 w-4" />
                       Notifications
                     </Button>
@@ -444,17 +536,14 @@ export default function AccountPage() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">
-                          {orders.length}
-                        </div>
+                        <div className="text-2xl font-bold">{orders.length}</div>
                         <p className="text-xs text-muted-foreground">
-                          Last order on {orders[0].date}
-                        </p>
-                        <Button
-                          variant="link"
-                          className="mt-2 px-0"
-                          onClick={() => setActiveTab('orders')}
-                        >
+  {orders.length > 0 
+    ? `Last order on ${new Date(orders[0].created_at).toLocaleDateString()}`
+    : "No recent orders"}
+</p>
+
+                        <Button variant="link" className="mt-2 px-0" onClick={() => setActiveTab('orders')}>
                           View Orders
                         </Button>
                       </CardContent>
@@ -468,18 +557,11 @@ export default function AccountPage() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">
-                          {addresses.length}
-                        </div>
+                        <div className="text-2xl font-bold">{addresses.length}</div>
                         <p className="text-xs text-muted-foreground">
-                          {addresses.filter((a) => a.default).length} default
-                          address
+                          {addresses.filter((a) => a.default).length} default address
                         </p>
-                        <Button
-                          variant="link"
-                          className="mt-2 px-0"
-                          onClick={() => setActiveTab('addresses')}
-                        >
+                        <Button variant="link" className="mt-2 px-0" onClick={() => setActiveTab('addresses')}>
                           Manage Addresses
                         </Button>
                       </CardContent>
@@ -493,18 +575,11 @@ export default function AccountPage() {
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="text-2xl font-bold">
-                          {wishlistItems.length}
-                        </div>
+                        <div className="text-2xl font-bold">{wishlistItems.length}</div>
                         <p className="text-xs text-muted-foreground">
-                          {wishlistItems.filter((item) => item.inStock).length}{' '}
-                          items in stock
+                          {wishlistItems.filter((item) => item.inStock).length} items in stock
                         </p>
-                        <Button
-                          variant="link"
-                          className="mt-2 px-0"
-                          onClick={() => setActiveTab('wishlist')}
-                        >
+                        <Button variant="link" className="mt-2 px-0" onClick={() => setActiveTab('wishlist')}>
                           View Wishlist
                         </Button>
                       </CardContent>
@@ -515,26 +590,20 @@ export default function AccountPage() {
                     <h2 className="text-xl font-semibold">Recent Orders</h2>
                     <div className="rounded-md border">
                       {orders.slice(0, 2).map((order, index) => (
-                        <div
-                          key={order.id}
-                          className={cn('p-4', index !== 0 && 'border-t')}
-                        >
+                        <div key={order.order_id} className={cn('p-4', index !== 0 && 'border-t')}>
                           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                             <div>
                               <div className="flex items-center gap-2">
-                                <h3 className="font-medium">{order.id}</h3>
+                                <h3 className="font-medium">{order.order_id}</h3>
                                 <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-600">
-                                  {order.status}
+                                  {order.order_status}
                                 </span>
                               </div>
                               <p className="text-sm text-muted-foreground">
-                                Ordered on {order.date} • $
-                                {order.total.toFixed(2)}
+                                Ordered on {order.date} • ${order.total.toFixed(2)}
                               </p>
                             </div>
-                            <Button variant="outline" size="sm">
-                              View Order
-                            </Button>
+                            <Button variant="outline" size="sm">View Order</Button>
                           </div>
                         </div>
                       ))}
@@ -542,10 +611,7 @@ export default function AccountPage() {
 
                     {orders.length > 2 && (
                       <div className="text-center">
-                        <Button
-                          variant="link"
-                          onClick={() => setActiveTab('orders')}
-                        >
+                        <Button variant="link" onClick={() => setActiveTab('orders')}>
                           View All Orders
                         </Button>
                       </div>
@@ -558,30 +624,19 @@ export default function AccountPage() {
                       <CardContent className="p-6">
                         <div className="space-y-2">
                           <div className="flex justify-between">
-                            <div className="text-sm text-muted-foreground">
-                              Name
-                            </div>
+                            <div className="text-sm text-muted-foreground">Name</div>
                             <div>{user?.username}</div>
                           </div>
                           <div className="flex justify-between">
-                            <div className="text-sm text-muted-foreground">
-                              Email
-                            </div>
+                            <div className="text-sm text-muted-foreground">Email</div>
                             <div>{user?.email}</div>
                           </div>
                           <div className="flex justify-between">
-                            <div className="text-sm text-muted-foreground">
-                              Member Since
-                            </div>
+                            <div className="text-sm text-muted-foreground">Member Since</div>
                             <div>{userProfile.joinDate}</div>
                           </div>
                         </div>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="mt-4"
-                          onClick={() => setActiveTab('settings')}
-                        >
+                        <Button variant="outline" size="sm" className="mt-4" onClick={() => setActiveTab('settings')}>
                           Edit Profile
                         </Button>
                       </CardContent>
@@ -594,42 +649,29 @@ export default function AccountPage() {
               {activeTab === 'orders' && (
                 <div className="space-y-6">
                   <h1 className="text-2xl font-bold">Order History</h1>
-
                   <div className="rounded-md border">
                     {orders.map((order, index) => (
-                      <div
-                        key={order.id}
-                        className={cn('p-6', index !== 0 && 'border-t')}
-                      >
+                      <div key={order.order_id} className={cn('p-6', index !== 0 && 'border-t')}>
                         <div className="mb-4 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                           <div>
                             <div className="flex items-center gap-2">
-                              <h3 className="font-medium">{order.id}</h3>
+                              <h3 className="font-medium">{order.order_id}</h3>
                               <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-600">
-                                {order.status}
+                                {order.order_status}
                               </span>
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              Ordered on {order.date} • $
-                              {order.total.toFixed(2)}
+                              Ordered on {order.date} • ${order.total.toFixed(2)}
                             </p>
                           </div>
                           <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
-                              Track Order
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              View Invoice
-                            </Button>
+                            <Button variant="outline" size="sm">Track Order</Button>
+                            <Button variant="outline" size="sm">View Invoice</Button>
                           </div>
                         </div>
-
                         <div className="space-y-4">
                           {order.items.map((item) => (
-                            <div
-                              key={item.id}
-                              className="flex items-center gap-4"
-                            >
+                            <div key={item.id} className="flex items-center gap-4">
                               <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border">
                                 <Image
                                   src={item.image || '/placeholder.svg'}
@@ -642,13 +684,10 @@ export default function AccountPage() {
                               <div className="flex flex-1 flex-col">
                                 <h4 className="font-medium">{item.name}</h4>
                                 <p className="text-sm text-muted-foreground">
-                                  Qty: {item.quantity} • $
-                                  {item.price.toFixed(2)} each
+                                  Qty: {item.quantity} • ${item.price.toFixed(2)} each
                                 </p>
                               </div>
-                              <Button variant="ghost" size="sm">
-                                Buy Again
-                              </Button>
+                              <Button variant="ghost" size="sm">Buy Again</Button>
                             </div>
                           ))}
                         </div>
@@ -663,7 +702,7 @@ export default function AccountPage() {
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
                     <h1 className="text-2xl font-bold">My Addresses</h1>
-                    <Button>Add New Address</Button>
+                    <Button onClick={() => openAddressModal()}>Add New Address</Button>
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
@@ -671,9 +710,7 @@ export default function AccountPage() {
                       <Card key={address.id}>
                         <CardHeader className="pb-2">
                           <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg font-medium">
-                              {address.type}
-                            </CardTitle>
+                            <CardTitle className="text-lg font-medium">{address.type}</CardTitle>
                             {address.default && (
                               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
                                 Default
@@ -683,21 +720,19 @@ export default function AccountPage() {
                         </CardHeader>
                         <CardContent>
                           <div className="space-y-1">
-                            <p>{address.name}</p>
+                            
                             <p>{address.address}</p>
                             {address.apartment && <p>{address.apartment}</p>}
-                            <p>
-                              {address.city}, {address.state} {address.zipCode}
-                            </p>
+                            <p>{address.city}, {address.state} {address.zipCode}</p>
                             <p>{address.country}</p>
                             <p>{address.phone}</p>
                           </div>
                           <div className="mt-4 flex gap-2">
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => openAddressModal(address)}>
                               Edit
                             </Button>
                             {!address.default && (
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" onClick={() => handleSetDefault(address.id)}>
                                 Set as Default
                               </Button>
                             )}
@@ -706,6 +741,7 @@ export default function AccountPage() {
                                 variant="outline"
                                 size="sm"
                                 className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                                onClick={() => handleDeleteAddress(address.id)}
                               >
                                 Delete
                               </Button>
@@ -715,6 +751,109 @@ export default function AccountPage() {
                       </Card>
                     ))}
                   </div>
+
+                  {/* Address Form Modal */}
+                  <Dialog open={isAddressModalOpen} onOpenChange={setIsAddressModalOpen}>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{editingAddress ? 'Edit Address' : 'Add New Address'}</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleAddressSubmit} className="space-y-4">
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="type">Address Type</Label>
+                            <Input
+                              id="type"
+                              value={addressForm.type}
+                              onChange={(e) => setAddressForm({ ...addressForm, type: e.target.value })}
+                              placeholder="e.g., Home, Work"
+                              required
+                            />
+                          </div>
+                          
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="address">Street Address</Label>
+                          <Input
+                            id="address"
+                            value={addressForm.address}
+                            onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
+                            placeholder="Street Address"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="apartment">Apartment/Suite (Optional)</Label>
+                          <Input
+                            id="apartment"
+                            value={addressForm.apartment}
+                            onChange={(e) => setAddressForm({ ...addressForm, apartment: e.target.value })}
+                            placeholder="Apartment or Suite"
+                          />
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="city">City</Label>
+                            <Input
+                              id="city"
+                              value={addressForm.city}
+                              onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
+                              placeholder="City"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="state">State</Label>
+                            <Input
+                              id="state"
+                              value={addressForm.state}
+                              onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
+                              placeholder="State"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="zipCode">Zip Code</Label>
+                            <Input
+                              id="zipCode"
+                              value={addressForm.zipCode}
+                              onChange={(e) => setAddressForm({ ...addressForm, zipCode: e.target.value })}
+                              placeholder="Zip Code"
+                              required
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="country">Country</Label>
+                            <Input
+                              id="country"
+                              value={addressForm.country}
+                              onChange={(e) => setAddressForm({ ...addressForm, country: e.target.value })}
+                              placeholder="Country"
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Phone Number</Label>
+                          <Input
+                            id="phone"
+                            value={addressForm.phone}
+                            onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
+                            placeholder="Phone Number"
+                            required
+                          />
+                        </div>
+                        <DialogFooter>
+                          <Button type="button" variant="outline" onClick={() => setIsAddressModalOpen(false)}>
+                            Cancel
+                          </Button>
+                          <Button type="submit">Save Address</Button>
+                        </DialogFooter>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               )}
 
@@ -725,7 +864,6 @@ export default function AccountPage() {
                     <h1 className="text-2xl font-bold">Payment Methods</h1>
                     <Button>Add Payment Method</Button>
                   </div>
-
                   <div className="grid gap-4 md:grid-cols-2">
                     {paymentMethods.map((method) => (
                       <Card key={method.id}>
@@ -744,15 +882,11 @@ export default function AccountPage() {
                         <CardContent>
                           <div className="space-y-1">
                             <p>{method.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              Expires {method.expiryDate}
-                            </p>
+                            <p className="text-sm text-muted-foreground">Expires {method.expiryDate}</p>
                           </div>
                           <div className="mt-4 flex gap-2">
                             {!method.default && (
-                              <Button variant="outline" size="sm">
-                                Set as Default
-                              </Button>
+                              <Button variant="outline" size="sm">Set as Default</Button>
                             )}
                             {!method.default && (
                               <Button
@@ -775,13 +909,9 @@ export default function AccountPage() {
               {activeTab === 'wishlist' && (
                 <div className="space-y-6">
                   <h1 className="text-2xl font-bold">My Wishlist</h1>
-
                   <div className="rounded-md border">
                     {wishlistItems.map((item, index) => (
-                      <div
-                        key={item.id}
-                        className={cn('p-4', index !== 0 && 'border-t')}
-                      >
+                      <div key={item.id} className={cn('p-4', index !== 0 && 'border-t')}>
                         <div className="flex items-center gap-4">
                           <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border">
                             <Image
@@ -795,25 +925,14 @@ export default function AccountPage() {
                           <div className="flex flex-1 flex-col">
                             <h4 className="font-medium">{item.name}</h4>
                             <div className="flex items-center justify-between">
-                              <p className="font-medium">
-                                ${item.price.toFixed(2)}
-                              </p>
-                              <span
-                                className={cn(
-                                  'text-xs',
-                                  item.inStock
-                                    ? 'text-green-600'
-                                    : 'text-red-500'
-                                )}
-                              >
+                              <p className="font-medium">${item.price.toFixed(2)}</p>
+                              <span className={cn('text-xs', item.inStock ? 'text-green-600' : 'text-red-500')}>
                                 {item.inStock ? 'In Stock' : 'Out of Stock'}
                               </span>
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Button size="sm" disabled={!item.inStock}>
-                              Add to Cart
-                            </Button>
+                            <Button size="sm" disabled={!item.inStock}>Add to Cart</Button>
                             <Button
                               variant="outline"
                               size="sm"
@@ -833,76 +952,42 @@ export default function AccountPage() {
               {activeTab === 'settings' && (
                 <div className="space-y-6">
                   <h1 className="text-2xl font-bold">Account Settings</h1>
-
                   <Card>
                     <CardHeader>
                       <CardTitle>Personal Information</CardTitle>
-                      <CardDescription>
-                        Update your personal details
-                      </CardDescription>
+                      <CardDescription>Update your personal details</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <form
-                        className="space-y-4"
-                        onSubmit={handlePersonalInfoSubmit}
-                      >
+                      <form className="space-y-4" onSubmit={handlePersonalInfoSubmit}>
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
-                            <label
-                              htmlFor="firstName"
-                              className="text-sm font-medium"
-                            >
-                              First Name
-                            </label>
-                            <input
+                            <Label htmlFor="firstName">First Name</Label>
+                            <Input
                               id="firstName"
-                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              defaultValue={
-                                user?.first_name
-                              }
+                              defaultValue={user?.first_name}
                             />
                           </div>
                           <div className="space-y-2">
-                            <label
-                              htmlFor="lastName"
-                              className="text-sm font-medium"
-                            >
-                              Last Name
-                            </label>
-                            <input
+                            <Label htmlFor="lastName">Last Name</Label>
+                            <Input
                               id="lastName"
-                              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                              defaultValue={
-                                user?.last_name||''
-                              }
+                              defaultValue={user?.last_name || ''}
                             />
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label
-                            htmlFor="email"
-                            className="text-sm font-medium"
-                          >
-                            Email
-                          </label>
-                          <input
+                          <Label htmlFor="email">Email</Label>
+                          <Input
                             id="email"
                             type="email"
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             defaultValue={user.email}
                           />
                         </div>
                         <div className="space-y-2">
-                          <label
-                            htmlFor="phone"
-                            className="text-sm font-medium"
-                          >
-                            Phone Number
-                          </label>
-                          <input
+                          <Label htmlFor="phone">Phone Number</Label>
+                          <Input
                             id="phone"
                             type="tel"
-                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                             defaultValue={user.phone_number || '1234567890'}
                           />
                         </div>
@@ -921,13 +1006,9 @@ export default function AccountPage() {
                         <div className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
                             <h3 className="font-medium">Password</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Last updated: Never
-                            </p>
+                            <p className="text-sm text-muted-foreground">Last updated: Never</p>
                           </div>
-                          <Button onClick={handlePasswordUpdateClick}>
-                            Update Password
-                          </Button>
+                          <Button onClick={handlePasswordUpdateClick}>Update Password</Button>
                         </div>
                         <p className="text-xs text-muted-foreground">
                           For security reasons, password updates are handled on a separate secure page.
@@ -939,18 +1020,14 @@ export default function AccountPage() {
                   <Card>
                     <CardHeader>
                       <CardTitle>Notifications</CardTitle>
-                      <CardDescription>
-                        Manage your notification preferences
-                      </CardDescription>
+                      <CardDescription>Manage your notification preferences</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
                           <div>
-                            <h3 className="font-medium">Order_updates</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Receive updates about your orders
-                            </p>
+                            <h3 className="font-medium">Order Updates</h3>
+                            <p className="text-sm text-muted-foreground">Receive updates about your orders</p>
                           </div>
                           <div className="flex h-6 w-11 items-center rounded-full bg-primary p-1">
                             <div className="h-4 w-4 rounded-full bg-white transition-transform translate-x-5" />
@@ -959,9 +1036,7 @@ export default function AccountPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <h3 className="font-medium">Promotional Emails</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Receive emails about new products and deals
-                            </p>
+                            <p className="text-sm text-muted-foreground">Receive emails about new products and deals</p>
                           </div>
                           <div className="flex h-6 w-11 items-center rounded-full bg-muted p-1">
                             <div className="h-4 w-4 rounded-full bg-muted-foreground transition-transform" />
@@ -970,9 +1045,7 @@ export default function AccountPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <h3 className="font-medium">Account Activity</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Receive notifications about account activity
-                            </p>
+                            <p className="text-sm text-muted-foreground">Receive notifications about account activity</p>
                           </div>
                           <div className="flex h-6 w-11 items-center rounded-full bg-primary p-1">
                             <div className="h-4 w-4 rounded-full bg-white transition-transform translate-x-5" />
@@ -981,17 +1054,15 @@ export default function AccountPage() {
                       </div>
                     </CardContent>
                   </Card>
+
                   <Card>
                     <CardHeader>
                       <CardTitle>Delete Account</CardTitle>
-                      <CardDescription>
-                        Permanently delete your account and all data
-                      </CardDescription>
+                      <CardDescription>Permanently delete your account and all data</CardDescription>
                     </CardHeader>
                     <CardContent>
                       <p className="mb-4 text-sm text-muted-foreground">
-                        Once you delete your account, there is no going back.
-                        Please be certain.
+                        Once you delete your account, there is no going back. Please be certain.
                       </p>
                       <Button variant="destructive">Delete Account</Button>
                     </CardContent>
