@@ -28,7 +28,7 @@ export function CountdownTimer() {
   }, [])
 
   return (
-    <div className="bg-accent text-accent-foreground rounded-lg p-6 mb-8 text-center">
+    <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-lg p-6 mb-8 text-center">
       <div className="flex items-center justify-center gap-2 mb-4">
         <Clock className="h-6 w-6" />
         <h2 className="text-2xl font-bold">Flash Sale Ends In</h2>

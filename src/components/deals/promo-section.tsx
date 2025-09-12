@@ -5,7 +5,7 @@ export function PromoSection() {
   return (
     <div className="grid md:grid-cols-2 gap-6 mb-8">
       {/* Main Promo */}
-      <div className="bg-primary text-primary-foreground rounded-lg p-8 relative overflow-hidden">
+      <div className="bg-purple-700 text-primary-foreground rounded-lg p-8 relative overflow-hidden">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-4">
             <Zap className="h-6 w-6" />
@@ -23,7 +23,7 @@ export function PromoSection() {
       </div>
 
       {/* Secondary Promo */}
-      <div className="bg-secondary text-secondary-foreground rounded-lg p-8 relative overflow-hidden">
+      <div className="bg-yellow-500 text-secondary-foreground rounded-lg p-8 relative overflow-hidden">
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-4">
             <Gift className="h-6 w-6" />

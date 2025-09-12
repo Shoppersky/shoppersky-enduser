@@ -853,8 +853,6 @@
 //   );
 // }
 
-
-
 "use client";
 
 import type React from "react";
@@ -925,14 +923,14 @@ function CheckoutContent() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+
   // Check if this is a "Buy Now" checkout
-  const isBuyNow = searchParams.get('buyNow') === 'true';
-  
+  const isBuyNow = searchParams.get("buyNow") === "true";
+
   // State for checkout items (either cart items or buy now item)
   const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
   const [checkoutTotal, setCheckoutTotal] = useState(0);
-  
+
   const [step, setStep] = useState(1);
   const [shippingAddress, setShippingAddress] = useState({
     firstName: "",
@@ -955,23 +953,87 @@ function CheckoutContent() {
     null
   );
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+  // Inside CheckoutContent component
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateField = (name: string, value: string) => {
+    let error = "";
+
+    switch (name) {
+      case "postcode":
+        if (!/^\d{4}$/.test(value)) {
+          error = "Postcode must be 4 digits.";
+        }
+        break;
+
+      case "phone":
+        // Matches 10-digit numbers starting with 02, 03, 04, 07, or 08
+        if (!/^(0[23478]\d{8})$/.test(value)) {
+          error = "Enter a valid Australian phone number (landline or mobile).";
+        }
+        break;
+
+      case "email":
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          error = "Enter a valid email address.";
+        }
+        break;
+
+      default:
+        if (!value.trim()) {
+          error = "This field is required.";
+        }
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: error }));
+    return error === "";
+  };
+
+  const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setShippingAddress((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
+  };
+
+  const validateForm = () => {
+    const fieldsToValidate = [
+      "firstName",
+      "lastName",
+      "address",
+      "city",
+      "state",
+      "postcode",
+      "phone",
+      "email",
+    ];
+    const results = fieldsToValidate.map((f) =>
+      validateField(f, (shippingAddress as any)[f] || "")
+    );
+    return results.every(Boolean);
+  };
+
+  const handleNextStep = () => {
+    if (validateForm()) {
+      nextStep();
+    }
+  };
 
   // Initialize checkout items based on mode (Buy Now vs Cart)
   useEffect(() => {
     if (isBuyNow) {
       // Get buy now product from localStorage
-      const buyNowProductStr = localStorage.getItem('buyNowProduct');
+      const buyNowProductStr = localStorage.getItem("buyNowProduct");
 
       if (buyNowProductStr) {
         const buyNowProduct: CheckoutItem = JSON.parse(buyNowProductStr);
         setCheckoutItems([buyNowProduct]);
         setCheckoutTotal(buyNowProduct.price * buyNowProduct.quantity);
-        
+
         // Clear the localStorage item after reading
         // localStorage.removeItem('buyNowProduct');
       } else {
         // If no buy now product found, redirect to home
-        router.push('/');
+        router.push("/");
       }
     } else {
       // Use cart items
@@ -998,11 +1060,6 @@ function CheckoutContent() {
 
   // Final total (includes GST)
   const orderTotal = checkoutTotal + finalShippingCost + taxAmount;
-
-  const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setShippingAddress((prev) => ({ ...prev, [name]: value }));
-  };
 
   const nextStep = () => {
     setStep((prev) => prev + 1);
@@ -1076,9 +1133,9 @@ function CheckoutContent() {
             vendor_id: response.data.vendor_id,
             quantity: item.quantity,
             name: item.name,
-            color: item.color || "Unknown",
-            size: item.size || "Unknown",
-            material: item.material || "Unknown",
+            // color: item.color || "Unknown",
+            // size: item.size || "Unknown",
+            // material: item.material || "Unknown",
           };
         } catch (err) {
           console.error(`Failed to fetch vendor for product ${item.id}:`, err);
@@ -1095,9 +1152,7 @@ function CheckoutContent() {
           ...acc,
           [item.product_id]: {
             name: item.name,
-            color: item.color,
-            size: item.size,
-            material: item.material,
+
             quantity: item.quantity,
           },
         }),
@@ -1176,10 +1231,9 @@ function CheckoutContent() {
       <div className="flex flex-col items-center justify-center py-12">
         <h2 className="mb-2 text-2xl font-bold">No items to checkout</h2>
         <p className="mb-8 text-center text-muted-foreground">
-          {isBuyNow 
-            ? "The product you tried to buy is no longer available." 
-            : "You need to add items to your cart before checking out."
-          }
+          {isBuyNow
+            ? "The product you tried to buy is no longer available."
+            : "You need to add items to your cart before checking out."}
         </p>
         <Button asChild>
           <Link href="/products">Browse Products</Link>
@@ -1394,6 +1448,7 @@ function CheckoutContent() {
                               </SelectContent>
                             </Select>
                           </div>
+
                           <div className="space-y-2">
                             <Label htmlFor="postcode">Postcode</Label>
                             <Input
@@ -1403,6 +1458,11 @@ function CheckoutContent() {
                               onChange={handleShippingChange}
                               required
                             />
+                            {errors.postcode && (
+                              <p className="text-sm text-red-600">
+                                {errors.postcode}
+                              </p>
+                            )}
                           </div>
                         </div>
 
@@ -1434,29 +1494,38 @@ function CheckoutContent() {
                           </Select>
                         </div>
 
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <div className="space-y-2">
-                            <Label htmlFor="phone">Phone Number</Label>
-                            <Input
-                              id="phone"
-                              name="phone"
-                              type="tel"
-                              value={shippingAddress.phone}
-                              onChange={handleShippingChange}
-                              required
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label htmlFor="email">Email Address</Label>
-                            <Input
-                              id="email"
-                              name="email"
-                              type="email"
-                              value={shippingAddress.email}
-                              onChange={handleShippingChange}
-                              required
-                            />
-                          </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Phone Number</Label>
+                          <Input
+                            id="phone"
+                            name="phone"
+                            type="tel"
+                            value={shippingAddress.phone}
+                            onChange={handleShippingChange}
+                            required
+                          />
+                          {errors.phone && (
+                            <p className="text-sm text-red-600">
+                              {errors.phone}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="email">Email Address</Label>
+                          <Input
+                            id="email"
+                            name="email"
+                            type="email"
+                            value={shippingAddress.email}
+                            onChange={handleShippingChange}
+                            required
+                          />
+                          {errors.email && (
+                            <p className="text-sm text-red-600">
+                              {errors.email}
+                            </p>
+                          )}
                         </div>
 
                         {addresses.length > 0 && (
@@ -1556,7 +1625,7 @@ function CheckoutContent() {
                         <li key={item.id} className="py-4 flex items-center">
                           <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border">
                             <Image
-                              src={item.image || "/placeholder.svg"}
+                              src={item.image || "/images/placeholder.svg"}
                               alt={item.name}
                               width={64}
                               height={64}

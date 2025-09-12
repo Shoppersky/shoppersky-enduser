@@ -39,7 +39,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import { toast } from "sonner";
 
 const paymentMethods = [
   {
@@ -57,7 +57,7 @@ const wishlistItems = [
     id: "1",
     name: "Smart Watch",
     price: 199.99,
-    image: "/images/placeholder.svg?height=80&width=80",
+    image: "/images/images/placeholder.svg?height=80&width=80",
     inStock: true,
   },
 ];
@@ -66,7 +66,6 @@ interface Address {
   id: string;
   type: string;
   default: boolean;
-
   address: string;
   apartment?: string;
   city: string;
@@ -76,14 +75,7 @@ interface Address {
   phone: string;
 }
 
-interface UserProfile {
-  name: string;
-  email: string;
-  avatar?: string;
-  joinDate?: string;
-  user_address?: Address;
-  delivery_address?: Address;
-}
+
 
 interface Order {
   order_id: string;
@@ -113,6 +105,20 @@ export default function AccountPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<{
+    [key: string]: string;
+  }>({});
+
+  const australianStates = [
+    { label: "New South Wales", value: "NSW" },
+    { label: "Victoria", value: "VIC" },
+    { label: "Queensland", value: "QLD" },
+    { label: "Western Australia", value: "WA" },
+    { label: "South Australia", value: "SA" },
+    { label: "Tasmania", value: "TAS" },
+    { label: "Northern Territory", value: "NT" },
+    { label: "Australian Capital Territory", value: "ACT" },
+  ];
 
   const [addressForm, setAddressForm] = useState({
     label: "",
@@ -129,24 +135,7 @@ export default function AccountPage() {
     name: "Vineetha Sharma",
     user_email: "vineetha@example.com",
     user_profile_img: "/images/vineetha.jpg",
-    user_address: {
-      street: "123 Rainbow Road",
-      apartment: "Apt 4B",
-      city: "Hyderabad",
-      state: "Telangana",
-      postal_code: "500081",
-      country: "India",
-      phone: "+91 9876543210",
-    },
-    delivery_address: {
-      street: "456 Delivery Lane",
-      apartment: "Suite 10",
-      city: "Hyderabad",
-      state: "Telangana",
-      postal_code: "500081",
-      country: "India",
-      phone: "+91 9123456780",
-    },
+  
   };
 
   // Fetch user and addresses
@@ -188,7 +177,6 @@ export default function AccountPage() {
               id: String(addr.id),
               type: addr.label,
               default: addr.is_default,
-
               address: addr.details.street,
               apartment: addr.details.apartment || "",
               city: addr.details.city,
@@ -220,8 +208,7 @@ export default function AccountPage() {
     if (address) {
       setEditingAddress(address);
       setAddressForm({
-        type: address.type,
-
+        label: address.type,
         address: address.address,
         apartment: address.apartment || "",
         city: address.city,
@@ -233,8 +220,7 @@ export default function AccountPage() {
     } else {
       setEditingAddress(null);
       setAddressForm({
-        type: "",
-
+        label: "",
         address: "",
         apartment: "",
         city: "",
@@ -249,25 +235,66 @@ export default function AccountPage() {
 
   const handleAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const street = addressForm.address.trim();
+    const apartment = addressForm.apartment?.trim();
+    const city = addressForm.city.trim();
+    const state = addressForm.state.trim().toUpperCase();
+    const postcode = addressForm.zipCode.trim();
+    const country = addressForm.country.trim();
+    const phone = addressForm.phone.trim();
+    const type = addressForm.label.trim();
+
+    // Reset previous errors
+    const newErrors: { [key: string]: string } = {};
+
+    if (!type) newErrors.type = "Address type is required";
+    if (!street) newErrors.address = "Street address is required";
+    if (!city) newErrors.city = "City is required";
+    if (!state) newErrors.state = "State is required";
+    if (!postcode) newErrors.zipCode = "Postcode is required";
+    if (!country) newErrors.country = "Country is required";
+    if (!phone) newErrors.phone = "Phone number is required";
+
+    // Validate postcode (Australian)
+    if (postcode && !/^\d{4}$/.test(postcode)) {
+      newErrors.zipCode = "Postcode must be a 4-digit Australian postcode";
+    }
+
+    // Validate state
+    const validStates = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"];
+    if (state && !validStates.includes(state)) {
+      newErrors.state = `State must be one of: ${validStates.join(", ")}`;
+    }
+
+    // Validate phone
+    if (phone && !/^(?:\+?61|0)[2-478]\d{8}$/.test(phone.replace(/\s+/g, ""))) {
+      newErrors.phone = "Enter a valid Australian phone number";
+    }
+
+    setErrors(newErrors);
+
+    // If any errors, stop submission
+    if (Object.keys(newErrors).length > 0) return;
+
     try {
       let payload;
       let res;
 
       if (editingAddress) {
-        // Updating existing address
         payload = {
           id: editingAddress.id,
           addresses: [
             {
-              label: addressForm.type || addressForm.label,
+              label: type || addressForm.label,
               details: {
-                street: addressForm.address,
-                apartment: addressForm.apartment || undefined,
-                city: addressForm.city,
-                state: addressForm.state,
-                postcode: addressForm.zipCode,
-                country: addressForm.country,
-                phone: addressForm.phone,
+                street,
+                apartment: apartment || undefined,
+                city,
+                state,
+                postcode,
+                country,
+                phone,
               },
             },
           ],
@@ -279,19 +306,18 @@ export default function AccountPage() {
           { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
-        // Adding new address
         payload = {
           addresses: [
             {
-              label: addressForm.type || addressForm.label,
+              label: type || addressForm.label,
               details: {
-                street: addressForm.address,
-                apartment: addressForm.apartment || undefined,
-                city: addressForm.city,
-                state: addressForm.state,
-                postcode: addressForm.zipCode,
-                country: addressForm.country,
-                phone: addressForm.phone,
+                street,
+                apartment: apartment || undefined,
+                city,
+                state,
+                postcode,
+                country,
+                phone,
               },
             },
           ],
@@ -304,22 +330,16 @@ export default function AccountPage() {
         );
       }
 
-      // 👇 new parsing logic
       const rawAddresses = res.data?.data?.address || [];
       if (!Array.isArray(rawAddresses) || rawAddresses.length === 0) {
         throw new Error("API did not return addresses");
       }
 
-      // For add → take the last address; for update → find by id
       const raw = editingAddress
         ? rawAddresses.find(
             (a: any) => String(a.id) === String(editingAddress.id)
           )
         : rawAddresses[rawAddresses.length - 1];
-
-      if (!raw?.details) {
-        throw new Error("API did not return address.details");
-      }
 
       const parsedAddress: Address = {
         id: String(raw.id),
@@ -344,7 +364,6 @@ export default function AccountPage() {
         setAddresses([...addresses, parsedAddress]);
       }
 
-      // Reset modal + form
       setIsAddressModalOpen(false);
       setAddressForm({
         label: "",
@@ -358,6 +377,7 @@ export default function AccountPage() {
       });
     } catch (err) {
       console.error("Failed to save address:", err);
+      alert("Failed to save address. Please try again.");
     }
   };
 
@@ -651,11 +671,10 @@ export default function AccountPage() {
                                   {order.order_status}
                                 </span>
                               </div>
-                            
+
                               {/* <p className="text-sm text-muted-foreground">
   Ordered on {order.created_at ? new Date(order.created_at).toLocaleDateString() : "N/A"} • ${order.amount.toFixed(2)}
 </p> */}
-
                             </div>
                             <Button variant="outline" size="sm">
                               View Order
@@ -698,7 +717,18 @@ export default function AccountPage() {
                             <div className="text-sm text-muted-foreground">
                               Member Since
                             </div>
-                            <div>{userProfile.joinDate}</div>
+                            <div>
+                              {user?.created_at
+                                ? new Date(user.created_at).toLocaleDateString(
+                                    "en-AU",
+                                    {
+                                      day: "2-digit",
+                                      month: "short",
+                                      year: "numeric",
+                                    }
+                                  )
+                                : "N/A"}
+                            </div>
                           </div>
                         </div>
                         <Button
@@ -720,35 +750,42 @@ export default function AccountPage() {
                 <div className="space-y-6">
                   <h1 className="text-2xl font-bold">Order History</h1>
                   <div className="rounded-md border">
-                  <div className="space-y-4">
-  {orders.map((order) => (
-    <div key={order.order_id} className="border p-4 rounded-md">
-      <h3 className="font-medium">{order.order_id}</h3>
-      <p>
-        Status: {order.order_status} • ${order.amount.toFixed(2)}
-      </p>
-      {order.address && order.address.street && (
-        <div className="mt-2 text-sm text-muted-foreground">
-          <p>{order.address.street}</p>
-          {order.address.apartment && <p>{order.address.apartment}</p>}
-          <p>
-            {order.address.city}, {order.address.state}{" "}
-            {order.address.postcode}
-          </p>
-          <p>{order.address.country}</p>
-        </div>
-      )}
-      <div className="mt-2">
-        {Object.values(order.item_details).map((item, idx) => (
-          <p key={idx}>
-            {item.name} x{item.quantity}
-          </p>
-        ))}
-      </div>
-    </div>
-  ))}
-</div>
-
+                    <div className="space-y-4">
+                      {orders.map((order) => (
+                        <div
+                          key={order.order_id}
+                          className="border p-4 rounded-md"
+                        >
+                          <h3 className="font-medium">{order.order_id}</h3>
+                          <p>
+                            Status: {order.order_status} • $
+                            {order.amount.toFixed(2)}
+                          </p>
+                          {order.address && order.address.street && (
+                            <div className="mt-2 text-sm text-muted-foreground">
+                              <p>{order.address.street}</p>
+                              {order.address.apartment && (
+                                <p>{order.address.apartment}</p>
+                              )}
+                              <p>
+                                {order.address.city}, {order.address.state}{" "}
+                                {order.address.postcode}
+                              </p>
+                              <p>{order.address.country}</p>
+                            </div>
+                          )}
+                          <div className="mt-2">
+                            {Object.values(order.item_details).map(
+                              (item, idx) => (
+                                <p key={idx}>
+                                  {item.name} x{item.quantity}
+                                </p>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
@@ -822,6 +859,7 @@ export default function AccountPage() {
                   </div>
 
                   {/* Address Form Modal */}
+
                   <Dialog
                     open={isAddressModalOpen}
                     onOpenChange={setIsAddressModalOpen}
@@ -836,23 +874,29 @@ export default function AccountPage() {
                         onSubmit={handleAddressSubmit}
                         className="space-y-4"
                       >
-                        <div className="grid gap-4 sm:grid-cols-2">
-                          <div className="space-y-2">
-                            <Label htmlFor="type">Address Type</Label>
-                            <Input
-                              id="type"
-                              value={addressForm.type}
-                              onChange={(e) =>
-                                setAddressForm({
-                                  ...addressForm,
-                                  type: e.target.value,
-                                })
-                              }
-                              placeholder="e.g., Home, Work"
-                              required
-                            />
-                          </div>
+                        {/* Address Type */}
+                        <div className="space-y-2">
+                          <Label htmlFor="type">Address Type</Label>
+                          <Input
+                            id="type"
+                            value={addressForm.label}
+                            onChange={(e) =>
+                              setAddressForm({
+                                ...addressForm,
+                                label: e.target.value,
+                              })
+                            }
+                            placeholder="e.g., Home, Work"
+                            required
+                          />
+                          {errors.type && (
+                            <p className="text-xs text-red-500">
+                              {errors.type}
+                            </p>
+                          )}
                         </div>
+
+                        {/* Street Address */}
                         <div className="space-y-2">
                           <Label htmlFor="address">Street Address</Label>
                           <Input
@@ -867,7 +911,14 @@ export default function AccountPage() {
                             placeholder="Street Address"
                             required
                           />
+                          {errors.address && (
+                            <p className="text-xs text-red-500">
+                              {errors.address}
+                            </p>
+                          )}
                         </div>
+
+                        {/* Apartment/Suite */}
                         <div className="space-y-2">
                           <Label htmlFor="apartment">
                             Apartment/Suite (Optional)
@@ -884,6 +935,8 @@ export default function AccountPage() {
                             placeholder="Apartment or Suite"
                           />
                         </div>
+
+                        {/* City and State */}
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
                             <Label htmlFor="city">City</Label>
@@ -899,10 +952,15 @@ export default function AccountPage() {
                               placeholder="City"
                               required
                             />
+                            {errors.city && (
+                              <p className="text-xs text-red-500">
+                                {errors.city}
+                              </p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="state">State</Label>
-                            <Input
+                            <select
                               id="state"
                               value={addressForm.state}
                               onChange={(e) =>
@@ -911,14 +969,28 @@ export default function AccountPage() {
                                   state: e.target.value,
                                 })
                               }
-                              placeholder="State"
+                              className="w-full rounded-md border px-3 py-2 text-sm"
                               required
-                            />
+                            >
+                              <option value="">Select State</option>
+                              {australianStates.map((state) => (
+                                <option key={state.value} value={state.value}>
+                                  {state.label}
+                                </option>
+                              ))}
+                            </select>
+                            {errors.state && (
+                              <p className="text-xs text-red-500">
+                                {errors.state}
+                              </p>
+                            )}
                           </div>
                         </div>
+
+                        {/* Zip Code and Country */}
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
-                            <Label htmlFor="zipCode">Zip Code</Label>
+                            <Label htmlFor="zipCode">Postcode</Label>
                             <Input
                               id="zipCode"
                               value={addressForm.zipCode}
@@ -928,11 +1000,26 @@ export default function AccountPage() {
                                   zipCode: e.target.value,
                                 })
                               }
-                              placeholder="Zip Code"
+                              placeholder="4-digit Postcode"
                               required
                             />
+                            {errors.zipCode && (
+                              <p className="text-xs text-red-500">
+                                {errors.zipCode}
+                              </p>
+                            )}
                           </div>
                           <div className="space-y-2">
+                            <Label htmlFor="country">Country</Label>
+                            <Input
+                              id="country"
+                              value="Australia"
+                              disabled
+                              className="bg-gray-100 cursor-not-allowed"
+                            />
+                          </div>
+
+                          {/* <div className="space-y-2">
                             <Label htmlFor="country">Country</Label>
                             <Input
                               id="country"
@@ -946,8 +1033,15 @@ export default function AccountPage() {
                               placeholder="Country"
                               required
                             />
-                          </div>
+                            {errors.country && (
+                              <p className="text-xs text-red-500">
+                                {errors.country}
+                              </p>
+                            )}
+                          </div> */}
                         </div>
+
+                        {/* Phone Number */}
                         <div className="space-y-2">
                           <Label htmlFor="phone">Phone Number</Label>
                           <Input
@@ -959,10 +1053,17 @@ export default function AccountPage() {
                                 phone: e.target.value,
                               })
                             }
-                            placeholder="Phone Number"
+                            placeholder="Australian Phone Number"
                             required
                           />
+                          {errors.phone && (
+                            <p className="text-xs text-red-500">
+                              {errors.phone}
+                            </p>
+                          )}
                         </div>
+
+                        {/* Dialog Footer */}
                         <DialogFooter>
                           <Button
                             type="button"
@@ -971,7 +1072,9 @@ export default function AccountPage() {
                           >
                             Cancel
                           </Button>
-                          <Button type="submit">Save Address</Button>
+                          <Button type="submit">
+                            {editingAddress ? "Update Address" : "Save Address"}
+                          </Button>
                         </DialogFooter>
                       </form>
                     </DialogContent>
@@ -1044,7 +1147,7 @@ export default function AccountPage() {
                         <div className="flex items-center gap-4">
                           <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border">
                             <Image
-                              src={item.image || "/placeholder.svg"}
+                              src={item.image || "/images/placeholder.svg"}
                               alt={item.name}
                               className="h-full w-full object-cover"
                               width={64}
@@ -1125,6 +1228,7 @@ export default function AccountPage() {
                           <Input
                             id="email"
                             type="email"
+                            disabled
                             defaultValue={user.email}
                           />
                         </div>

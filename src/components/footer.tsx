@@ -209,8 +209,7 @@ export default function Footer() {
           <div className="space-y-4">
             <h3 className="text-2xl font-bold text-green-400">Shoppersky</h3>
             <p className="text-gray-300 text-sm">
-              Your trusted partner for fresh, organic groceries delivered right to your doorstep. 
-              Quality guaranteed, convenience delivered.
+             Everything you need, from groceries to gadgets, delivered to your doorstep with ease.
             </p>
             <div className="flex space-x-4">
               <Button size="sm" variant="ghost" className="text-gray-300 hover:text-green-400 p-2">

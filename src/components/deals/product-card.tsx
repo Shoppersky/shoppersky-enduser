@@ -34,7 +34,7 @@ export function ProductCard({ product }: ProductCardProps) {
           />
 
           {/* Discount Badge */}
-          <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground">
+          <Badge className="absolute top-3 left-3 bg-red-400 text-destructive-foreground">
             -{product.discount}%
           </Badge>
         </div>
@@ -65,7 +65,7 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {/* Add to Cart Button */}
-          <Button className="w-full" size="sm">
+          <Button className="bg-green-600 w-full" size="sm">
             <ShoppingCart className="h-4 w-4 mr-2" />
             Add to Cart
           </Button>

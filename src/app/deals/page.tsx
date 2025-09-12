@@ -7,7 +7,7 @@ import { DealsFilters } from "@/components/deals/deals-filters"
 export default function DealsPage() {
   return (
     <div className="min-h-screen bg-background">
-      <DealsHeader />
+      {/* <DealsHeader /> */}
 
       <main className="container mx-auto px-4 py-8">
         {/* Flash Sale Section */}
