@@ -29,7 +29,7 @@ export default function IndustryProducts({ title, subtitle, products }: Industry
           >
          <Link
   href={`/${encodeURIComponent(
-   p.category_name.toLowerCase().replace(/\s+/g, "-")
+   p.category_name?.toLowerCase().replace(/\s+/g, "-")
   )}/${encodeURIComponent(p.slug)}`}
 >
   <img
