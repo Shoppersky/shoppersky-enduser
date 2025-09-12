@@ -706,41 +706,82 @@ export function Header() {
                     w-full
                   "
                 >
-                  {industries.map((ind) => (
-                    <div key={ind.industry_id} className="flex-shrink-0">
-                      <Button
-                        variant="ghost"
-                        className={`
-                          h-10 px-2 text-xs font-medium whitespace-nowrap
-                          sm:h-11 sm:px-3 sm:text-sm
-                          md:h-12 md:px-4 md:text-base
-                          ${
-                            hoverIndustryId === ind.industry_id
-                              ? 'bg-green-100 text-green-600'
-                              : 'text-gray-700 hover:text-green-600'
-                          }
-                        `}
-                        onMouseEnter={(e) => {
-                          setHoverIndustryId(ind.industry_id);
-                          setHoverCategoryId(null);
-                          setShowMega(true);
- 
-                          const buttonRect = (e.currentTarget as HTMLButtonElement).getBoundingClientRect();
-                          const containerRect = e.currentTarget.offsetParent?.getBoundingClientRect();
- 
-                          if (containerRect) {
-                            setMegaPosition({
-                              left: buttonRect.left - containerRect.left,
-                              top: buttonRect.height,
-                            });
-                          }
-                        }}
-                      >
-                        {ind.industry_name}
-                        <ChevronDown className="ml-1 h-3 w-3 sm:h-4 sm:w-4 opacity-50" />
-                      </Button>
-                    </div>
-                  ))}
+     {industries.map((ind) => (
+        <div key={ind.industry_id} className="flex-shrink-0 relative">
+          {/* Industry Button */}
+          <Button
+            variant="ghost"
+            className={`
+              h-10 px-2 text-xs font-medium whitespace-nowrap
+              sm:h-11 sm:px-3 sm:text-sm
+              md:h-12 md:px-4 md:text-base
+              ${hoverIndustryId === ind.industry_id
+                ? 'bg-green-100 text-green-600'
+                : 'text-gray-700 hover:text-green-600'}
+            `}
+            onMouseEnter={(e) => {
+              setHoverIndustryId(ind.industry_id);
+              setHoverCategoryId(null);
+              setShowMega(true);
+
+              const buttonRect = e.currentTarget.getBoundingClientRect();
+              const containerRect = e.currentTarget.offsetParent?.getBoundingClientRect();
+              if (containerRect) {
+                setMegaPosition({
+                  left: buttonRect.left - containerRect.left,
+                  top: buttonRect.height,
+                });
+              }
+            }}
+          >
+            {ind.industry_name}
+            <ChevronDown className="ml-1 h-3 w-3 sm:h-4 sm:w-4 opacity-50" />
+          </Button>
+
+          {/* Mega menu */}
+          {hoverIndustryId === ind.industry_id && showMega && (
+            <div
+              className="absolute bg-white shadow-lg p-4 z-50 flex gap-6"
+              style={{ left: megaPosition.left, top: megaPosition.top }}
+              onMouseLeave={() => setShowMega(false)}
+            >
+              {/* Categories */}
+              <div className="flex flex-col gap-2">
+             {ind.categories?.map((cat) => (
+  <div key={cat.category_id} className="cursor-pointer relative">
+    {/* Category Link */}
+    <Link
+      href={`/category/${cat.category_slug}`}
+      className="font-medium hover:text-green-600 block"
+      onMouseEnter={() => setHoverCategoryId(cat.category_id)}
+      onClick={() => setShowMega(false)} // close mega menu
+    >
+      {cat.category_name}
+    </Link>
+
+    {/* Subcategories */}
+    {hoverCategoryId === cat.category_id && cat.subcategories && (
+      <div className="ml-4 mt-1 flex flex-col gap-1">
+        {cat.subcategories.map((sub) => (
+          <Link
+            key={sub.subcategory_id}
+            href={`/category/${sub.subcategory_slug}`}
+            className="text-sm hover:text-green-600 block"
+            onClick={() => setShowMega(false)}
+          >
+            {sub.subcategory_name}
+          </Link>
+        ))}
+      </div>
+    )}
+  </div>
+))}
+
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
                 </div>
  
                 {/* Mega menu */}
@@ -762,28 +803,26 @@ export function Header() {
                       .map((ind) => (
                         <div key={ind.industry_id} className="flex w-full">
                           {/* Categories (Left panel) */}
-                          <div className="flex flex-col w-full sm:w-60 border-r bg-gray-50">
-                            {ind.categories?.length ? (
-                              ind.categories.map((cat) => (
-                                <div
-                                  key={cat.category_id}
-                                  onMouseEnter={() => setHoverCategoryId(cat.category_id)}
-                                  className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${
-                                    hoverCategoryId === cat.category_id
-                                      ? 'bg-white font-medium'
-                                      : ''
-                                  }`}
-                                >
-                                  {cat.category_name}
-                                  <ChevronRight className="inline ml-2 h-4 w-4 opacity-50 float-right" />
-                                </div>
-                              ))
-                            ) : (
-                              <div className="px-4 py-2 text-sm text-muted-foreground">
-                                No categories
-                              </div>
-                            )}
-                          </div>
+                    <div className="flex flex-col w-full sm:w-60 border-r bg-gray-50">
+  {ind.categories?.length ? (
+    ind.categories.map((cat) => (
+      <Link
+        key={cat.category_id}
+        href={`/${cat.category_slug}`}
+        className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 flex justify-between items-center ${
+          hoverCategoryId === cat.category_id ? 'bg-white font-medium' : ''
+        }`}
+        onMouseEnter={() => setHoverCategoryId(cat.category_id)}
+        onClick={() => setShowMega(false)} // close menu on click
+      >
+        {cat.category_name}
+        <ChevronRight className="inline ml-2 h-4 w-4 opacity-50" />
+      </Link>
+    ))
+  ) : (
+    <div className="px-4 py-2 text-sm text-muted-foreground">No categories</div>
+  )}
+</div>
  
                           {/* Subcategories (Right panel) */}
                           <div className="flex-1 flex flex-col p-3 sm:p-4">
@@ -800,10 +839,7 @@ export function Header() {
                                         key={sub.subcategory_id}
                                         href={`/${encodeURIComponent(sub.subcategory_slug)}`}
                                         className="px-2 py-1 text-sm rounded hover:bg-gray-100"
-                                        onClick={(e) => {
-                                          e.preventDefault();
-                                          handleSelectSubcategory(sub.subcategory_id);
-                                        }}
+                                   
                                       >
                                         {sub.subcategory_name}
                                       </Link>
