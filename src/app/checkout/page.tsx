@@ -68,6 +68,7 @@ function CheckoutContent() {
     country: "AU",
     phone: "",
     email: "",
+    label: "",
   });
   const [orderNotes, setOrderNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -128,22 +129,26 @@ function CheckoutContent() {
 
         if (userData.address && Array.isArray(userData.address)) {
           const mappedAddresses: Address[] = userData.address.map(
-            (addr: any) => ({
-              id: String(addr.id),
-              type: addr.label,
-              default: addr.is_default,
-              name: userData.username || "N/A",
-              address: addr.details.street,
-              apartment: addr.details.apartment || "",
-              city: addr.details.city,
-              state: addr.details.state,
-              zipCode: addr.details.postcode,
-              country: addr.details.country,
-              phone: addr.details.phone || userData.phone_number || "",
-            })
+            (addr: any) => {
+              const details = addr.details || addr; // fallback to flat structure
+              return {
+                id: String(addr.id),
+                type: addr.label || "Other",
+                default: addr.is_default || false,
+                name: userData.username || "N/A",
+                address: details.street || "",
+                apartment: details.apartment || "",
+                city: details.city || "",
+                state: details.state || "",
+                zipCode: details.postcode || "",
+                country: details.country || "",
+                phone: details.phone || userData.phone_number || "",
+              };
+            }
           );
+
           setAddresses(mappedAddresses);
-          // Auto-select default address if available
+
           const defaultAddr = mappedAddresses.find((a) => a.default);
           if (defaultAddr) setSelectedAddressId(defaultAddr.id);
         }
@@ -204,6 +209,7 @@ function CheckoutContent() {
       if (selectedAddressId && addresses.length > 0 && !showNewAddressForm) {
         const chosen = addresses.find((a) => a.id === selectedAddressId)!;
         finalAddress = {
+          label: shippingAddress.label,
           street: `${chosen.address}${chosen.apartment ? `, ${chosen.apartment}` : ""}`,
           city: chosen.city,
           state: chosen.state,
@@ -400,6 +406,17 @@ function CheckoutContent() {
                               required
                             />
                           </div>
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="label">Address Label</Label>
+                          <Input
+                            id="label"
+                            name="label"
+                            placeholder="e.g. Home, Work, Parents"
+                            value={shippingAddress.label}
+                            onChange={handleShippingChange}
+                            required
+                          />
                         </div>
 
                         <div className="space-y-2">
