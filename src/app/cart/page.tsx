@@ -53,7 +53,7 @@ function CartPageContent() {
       router.push('/login');
     }
   };
-
+console.log(cartItems);
   if (cartItems.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -123,7 +123,7 @@ function CartPageContent() {
                           size="icon"
                           className="h-8 w-8 rounded-none"
                           onClick={() =>
-                            updateQuantity(item.id, item.quantity - 1)
+                            updateQuantity(item.id, Math.max(0, item.quantity - 1))
                           }
                           disabled={item.quantity <= 1}
                         >

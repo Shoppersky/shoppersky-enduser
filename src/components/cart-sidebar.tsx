@@ -429,6 +429,7 @@ export function CartSidebar() {
     removeFromCart,
     updateQuantity,
   } = useCart();
+console.log(cartCount)
   const [couponCode, setCouponCode] = useState("");
   const [scrollProgress, setScrollProgress] = useState(15);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -436,7 +437,7 @@ export function CartSidebar() {
   const freeShippingThreshold = 50;
   const amountForFreeShipping = Math.max(0, freeShippingThreshold - cartTotal);
   const shippingProgress = Math.min((cartTotal / freeShippingThreshold) * 100, 100);
-console.log(cartItems)
+
   const updateScrollState = () => {
     if (scrollContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;

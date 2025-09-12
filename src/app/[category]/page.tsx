@@ -363,6 +363,7 @@ import { ProductCard } from '../../components/product-card';
 
 // Interface for product data from API
 interface ApiProduct {
+  slug: any;
   thumbnail_image: string;
   stock: any;
   product_id: string;
@@ -419,10 +420,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
           image: item.thumbnail_image || FALLBACK_IMAGE,
           category: unwrappedParams.category,
           inStock: item.stock,
-          productSlug: slugify(item.product_name, {
-            lower: true,
-            strict: true,
-          }),
+          productSlug: item.slug,
           displayName: formatDisplayName(unwrappedParams.category), // Use formatted category
         }));
 

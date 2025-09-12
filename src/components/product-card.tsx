@@ -16,7 +16,7 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-  const { addToCart } = useCart();
+  const { addToCart, cartItems } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
   const [isAdding, setIsAdding] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -30,6 +30,8 @@ export function ProductCard({ product }: ProductCardProps) {
       setQuantity(1);
     }, 500);
   };
+
+  const isAlreadyInCart = cartItems?.some((item) => String(item.id) === String(product.id)) || false;
 
   const incrementQuantity = () => setQuantity((prev) => prev + 1);
   const decrementQuantity = () => setQuantity((prev) => Math.max(prev - 1, 1));
@@ -103,26 +105,40 @@ export function ProductCard({ product }: ProductCardProps) {
           }`}
         >
           {/* Quantity */}
-          <div className="flex items-center border rounded-lg">
-            <Button size="sm" variant="ghost" className="w-7 h-7 p-0" onClick={decrementQuantity} disabled={quantity <= 1}>
-              <Minus className="h-3 w-3" />
-            </Button>
-            <span className="w-7 text-center text-sm font-medium">{quantity}</span>
-            <Button size="sm" variant="ghost" className="w-7 h-7 p-0" onClick={incrementQuantity}>
-              <Plus className="h-3 w-3" />
-            </Button>
-          </div>
+          {!isAlreadyInCart && (
+            <div className="flex items-center border rounded-lg">
+              <Button size="sm" variant="ghost" className="w-7 h-7 p-0" onClick={decrementQuantity} disabled={quantity <= 1}>
+                <Minus className="h-3 w-3" />
+              </Button>
+              <span className="w-7 text-center text-sm font-medium">{quantity}</span>
+              <Button size="sm" variant="ghost" className="w-7 h-7 p-0" onClick={incrementQuantity}>
+                <Plus className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
 
-          {/* Add to Cart */}
+          {/* Add to Cart / Go to Cart */}
           <Button
-            onClick={handleAddToCart}
-            disabled={isAdding || !product.inStock}
+            onClick={isAlreadyInCart ? (() => { window.location.href = '/cart'; }) : handleAddToCart}
+            disabled={(!product.inStock) || (isAdding && !isAlreadyInCart)}
             className={`w-full rounded-full font-medium py-2 text-sm text-white ${
-              isAdding ? 'bg-green-500' : !product.inStock ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+              !product.inStock
+                ? 'bg-gray-400 cursor-not-allowed'
+                : isAlreadyInCart
+                ? 'bg-green-600 hover:bg-green-700'
+                : isAdding
+                ? 'bg-green-500'
+                : 'bg-green-600 hover:bg-green-700'
             }`}
           >
             <ShoppingCart className="w-4 h-4 mr-1" />
-            {!product.inStock ? 'Out of Stock' : isAdding ? 'Added' : 'Add to Bag'}
+            {!product.inStock
+              ? 'Out of Stock'
+              : isAlreadyInCart
+              ? 'Go to Cart'
+              : isAdding
+              ? 'Added'
+              : 'Add to Bag'}
           </Button>
         </div>
       </div>
@@ -166,41 +182,45 @@ export function ProductCard({ product }: ProductCardProps) {
         {/* Mobile Add to Cart */}
         <div className="md:hidden mt-auto flex flex-col gap-2">
           {/* Quantity in column */}
-          <div className="flex flex-col-2 ml- justify-center items-center border rounded-lg p-1 gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              className="w-8 h-8 p-0"
-              onClick={incrementQuantity}
-            >
-              <Plus className="h-3 w-3" />
-            </Button>
-            <span className="text-sm font-medium">{quantity}</span>
-            <Button
-              size="sm"
-              variant="ghost"
-              className="w-8 h-8 p-0"
-              onClick={decrementQuantity}
-              disabled={quantity <= 1}
-            >
-              <Minus className="h-3 w-3" />
-            </Button>
-          </div>
+          {!isAlreadyInCart && (
+            <div className="flex flex-col-2 ml- justify-center items-center border rounded-lg p-1 gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-8 h-8 p-0"
+                onClick={incrementQuantity}
+              >
+                <Plus className="h-3 w-3" />
+              </Button>
+              <span className="text-sm font-medium">{quantity}</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="w-8 h-8 p-0"
+                onClick={decrementQuantity}
+                disabled={quantity <= 1}
+              >
+                <Minus className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
 
-          {/* Add to Cart button */}
+          {/* Add to Cart / Go to Cart button */}
           <Button
-            onClick={handleAddToCart}
-            disabled={isAdding || !product.inStock}
+            onClick={isAlreadyInCart ? (() => { window.location.href = '/cart'; }) : handleAddToCart}
+            disabled={(!product.inStock) || (isAdding && !isAlreadyInCart)}
             className={`w-full rounded-lg font-medium py-2 text-xs text-white ${
-              isAdding
-                ? 'bg-green-500'
-                : !product.inStock
+              !product.inStock
                 ? 'bg-gray-400 cursor-not-allowed'
+                : isAlreadyInCart
+                ? 'bg-green-600 hover:bg-green-700'
+                : isAdding
+                ? 'bg-green-500'
                 : 'bg-green-600 hover:bg-green-700'
             }`}
           >
             <ShoppingCart className="w-4 h-4 mr-1" />
-            {!product.inStock ? 'Out of Stock' : isAdding ? 'Added' : 'Add'}
+            {!product.inStock ? 'Out of Stock' : isAlreadyInCart ? 'Go to Cart' : isAdding ? 'Added' : 'Add'}
           </Button>
         </div>
       </div>
