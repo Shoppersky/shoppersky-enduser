@@ -84,7 +84,7 @@ export function ProductCard({ product }: ProductCardProps) {
         )}
 
         {/* Wishlist */}
-        <Button
+        {/* <Button
           size="sm"
           variant="secondary"
           className="absolute top-1 right-1 sm:top-2 sm:right-2 w-6 h-6 sm:w-7 sm:h-7 p-0 rounded-full bg-white/90 hover:bg-white opacity-0 group-hover:opacity-100 sm:opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300"
@@ -96,7 +96,7 @@ export function ProductCard({ product }: ProductCardProps) {
               isInWishlist(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'
             }`}
           />
-        </Button>
+        </Button> */}
 
         {/* Desktop Overlay */}
         <div

@@ -229,13 +229,18 @@ console.log(cartCount)
       }
       return [...prevItems, { ...product, quantity: product.quantity || 1 }];
     });
-    setIsCartOpen(true);
+
   };
 
-  const removeFromCart = (productId: string) =>
+  const removeFromCart = (productId: string) =>{
+
+
     setCartItems((prevItems) =>
       prevItems.filter((item) => item.id !== productId)
+
     );
+     window.location.reload();
+  }
 
   const updateQuantity = (productId: string, quantity: number) => {
     if (quantity < 1) return;

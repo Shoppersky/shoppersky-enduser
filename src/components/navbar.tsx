@@ -849,7 +849,7 @@ const Navbar = () => {
               </Button>
 
               {/* Wishlist */}
-              <Button variant="ghost" size="icon" asChild className="relative h-8 w-8 sm:h-10 sm:w-10">
+              {/* <Button variant="ghost" size="icon" asChild className="relative h-8 w-8 sm:h-10 sm:w-10">
                 <Link href="/wishlist">
                   <Heart className="h-4 w-4 sm:h-5 sm:w-5" />
                   {wishlistCount > 0 && (
@@ -858,17 +858,19 @@ const Navbar = () => {
                     </Badge>
                   )}
                 </Link>
-              </Button>
+              </Button> */}
 
               {/* Cart */}
-              <Button variant="ghost" size="icon" className="relative h-8 w-8 sm:h-10 sm:w-10" onClick={toggleCart}>
-                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-                {cartCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 p-0 text-xs flex items-center justify-center">
-                    {cartCount}
-                  </Badge>
-                )}
-              </Button>
+       <Link href="/cart">
+  <Button variant="ghost" size="icon" className="relative h-8 w-8 sm:h-10 sm:w-10">
+    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+    {cartCount > 0 && (
+      <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 p-0 text-xs flex items-center justify-center">
+        {cartCount}
+      </Badge>
+    )}
+  </Button>
+</Link>
 
               {/* User Profile - Desktop and Mobile */}
               <div className="relative hidden sm:flex items-center" ref={userMenuRef}>

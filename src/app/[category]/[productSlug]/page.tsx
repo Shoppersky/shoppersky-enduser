@@ -925,10 +925,7 @@ function ProductDetails() {
         <div className="container mx-auto px-4 py-8">
           {/* Header */}
           <div className="flex items-center gap-4 mb-8">
-            <Button variant="ghost" className="text-green-600 hover:text-green-700">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Shop
-            </Button>
+      
             <div className="text-sm text-gray-500">
               <Link href="/" className="hover:text-gray-700">Home</Link>
               <ChevronRight className="inline mx-1 h-4 w-4" />
@@ -991,10 +988,10 @@ function ProductDetails() {
                     <span className="text-sm text-gray-600 ml-2">No reviews yet</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={toggleWishlist}>
+                    {/* <Button variant="ghost" size="sm" onClick={toggleWishlist}>
                       <Heart className={`w-4 h-4 mr-2 ${isWishlistedItem ? 'fill-red-500 text-red-500' : ''}`} />
                       {isWishlistedItem ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                    </Button>
+                    </Button> */}
                     <DropdownMenu open={shareDropdownOpen} onOpenChange={setShareDropdownOpen}>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm">

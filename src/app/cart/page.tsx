@@ -19,7 +19,7 @@ import { Separator } from '../../components/ui/separator';
 import { Input } from '../../components/ui/input';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import useStore from '../../lib/Zustand';
-
+import { RemoveFromCartButton } from '@/components/remove-cart';
 function CartPageContent() {
   const { cartItems, cartTotal, removeFromCart, updateQuantity } = useCart();
   const [promoCode, setPromoCode] = useState('');
@@ -145,15 +145,7 @@ console.log(cartItems);
                           <span className="sr-only">Increase quantity</span>
                         </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeFromCart(item.id)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Remove
-                      </Button>
+                  <RemoveFromCartButton productId={item.id} productName={item.name} />
                     </div>
                   </div>
                 </div>
