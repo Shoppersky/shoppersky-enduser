@@ -2,12 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -41,13 +36,18 @@ interface AddressesProps {
   token: string | null;
 }
 
-export default function Addresses({ addresses, setAddresses, userId, token }: AddressesProps) {
+export default function Addresses({
+  addresses,
+  setAddresses,
+  userId,
+  token,
+}: AddressesProps) {
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [addressToDelete, setAddressToDelete] = useState<string | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  
+
   const [addressForm, setAddressForm] = useState({
     label: "",
     address: "",
@@ -111,25 +111,60 @@ export default function Addresses({ addresses, setAddresses, userId, token }: Ad
     const type = addressForm.label.trim();
 
     // Validation
+    // Validation
     const newErrors: { [key: string]: string } = {};
-    if (!type) newErrors.type = "Address type is required";
-    if (!street) newErrors.address = "Street address is required";
-    if (!city) newErrors.city = "City is required";
-    if (!state) newErrors.state = "State is required";
-    if (!postcode) newErrors.zipCode = "Postcode is required";
-    if (!country) newErrors.country = "Country is required";
-    if (!phone) newErrors.phone = "Phone number is required";
 
-    if (postcode && !/^\d{4}$/.test(postcode)) {
+    const isEmpty = (val: string | undefined | null) =>
+      !val || val.trim() === "";
+
+    // Allowed characters: letters, numbers, space, -, (), ', /
+    const validCharsRegex = /^[A-Za-z0-9\s\-()'\/]+$/;
+
+    // Helper for invalid character check
+    const hasInvalidChars = (val: string) => !validCharsRegex.test(val.trim());
+
+    // Required field checks
+    if (isEmpty(type)) newErrors.type = "Address type is required";
+    if (isEmpty(street)) newErrors.address = "Street address is required";
+    if (isEmpty(city)) newErrors.city = "City is required";
+    if (isEmpty(state)) newErrors.state = "State is required";
+    if (isEmpty(postcode)) newErrors.zipCode = "Postcode is required";
+    if (isEmpty(country)) newErrors.country = "Country is required";
+    if (isEmpty(phone)) newErrors.phone = "Phone number is required";
+
+    // Special character restrictions (for applicable fields)
+    if (!isEmpty(street) && hasInvalidChars(street)) {
+      newErrors.address = "Street address contains invalid characters";
+    }
+    if (!isEmpty(city) && hasInvalidChars(city)) {
+      newErrors.city = "City contains invalid characters";
+    }
+    if (!isEmpty(state) && hasInvalidChars(state)) {
+      newErrors.state = "State contains invalid characters";
+    }
+    if (!isEmpty(country) && hasInvalidChars(country)) {
+      newErrors.country = "Country contains invalid characters";
+    }
+    if (!isEmpty(type) && hasInvalidChars(type)) {
+      newErrors.type = "Address type contains invalid characters";
+    }
+
+    // Postcode validation (must be 4-digit Australian postcode)
+    if (!isEmpty(postcode) && !/^\d{4}$/.test(postcode!.trim())) {
       newErrors.zipCode = "Postcode must be a 4-digit Australian postcode";
     }
 
+    // State validation (must be one of the known codes)
     const validStates = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"];
-    if (state && !validStates.includes(state)) {
+    if (!isEmpty(state) && !validStates.includes(state!.trim().toUpperCase())) {
       newErrors.state = `State must be one of: ${validStates.join(", ")}`;
     }
 
-    if (phone && !/^(?:\+?61|0)[2-478]\d{8}$/.test(phone.replace(/\s+/g, ""))) {
+    // Phone validation (Australian format)
+    if (
+      !isEmpty(phone) &&
+      !/^(?:\+?61|0)[2-478]\d{8}$/.test(phone.replace(/\s+/g, ""))
+    ) {
       newErrors.phone = "Enter a valid Australian phone number";
     }
 
@@ -201,7 +236,9 @@ export default function Addresses({ addresses, setAddresses, userId, token }: Ad
       }
 
       const raw = editingAddress
-        ? rawAddresses.find((a: any) => String(a.id) === String(editingAddress.id))
+        ? rawAddresses.find(
+            (a: any) => String(a.id) === String(editingAddress.id)
+          )
         : rawAddresses[rawAddresses.length - 1];
 
       const parsedAddress: Address = {
@@ -239,7 +276,9 @@ export default function Addresses({ addresses, setAddresses, userId, token }: Ad
         phone: "",
       });
     } catch (err: any) {
-      toast.error("Failed to save address: " + (err.response?.data?.detail || err.message));
+      toast.error(
+        "Failed to save address: " + (err.response?.data?.detail || err.message)
+      );
     }
   };
 
@@ -291,9 +330,7 @@ export default function Addresses({ addresses, setAddresses, userId, token }: Ad
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">My Addresses</h1>
-        <Button onClick={() => openAddressModal()}>
-          Add New Address
-        </Button>
+        <Button onClick={() => openAddressModal()}>Add New Address</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -355,10 +392,7 @@ export default function Addresses({ addresses, setAddresses, userId, token }: Ad
       </div>
 
       {/* Address Form Modal */}
-      <Dialog
-        open={isAddressModalOpen}
-        onOpenChange={setIsAddressModalOpen}
-      >
+      <Dialog open={isAddressModalOpen} onOpenChange={setIsAddressModalOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -514,7 +548,8 @@ export default function Addresses({ addresses, setAddresses, userId, token }: Ad
           <DialogHeader>
             <DialogTitle>Delete Address</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this address? This action cannot be undone.
+              Are you sure you want to delete this address? This action cannot
+              be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -524,10 +559,7 @@ export default function Addresses({ addresses, setAddresses, userId, token }: Ad
             >
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDeleteAddress}
-            >
+            <Button variant="destructive" onClick={handleDeleteAddress}>
               Delete
             </Button>
           </DialogFooter>

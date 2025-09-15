@@ -1458,40 +1458,44 @@ function CheckoutContent() {
                           className="grid gap-4"
                         >
                           {addresses.map((addr) => (
-  <div
-    key={addr.id}
-    className="flex items-start space-x-4 rounded-md border p-4 hover:border-primary hover:bg-blue-50 transition"
-  >
-    <RadioGroupItem
-      value={addr.id}
-      id={`addr-${addr.id}`}
-      className="mt-1"
-    />
-   <Label
-  htmlFor={`addr-${addr.id}`}
-  className="flex-1 cursor-pointer flex flex-col space-y-1 text-left"
->
-  {/* Row 1: Label + Name */}
-  <div className="flex items-center space-x-2">
-    <span className="font-semibold text-gray-900">
-      {addr.type} {addr.default && "(Default)"}
-    </span>
-    <span className="text-sm text-gray-600">{addr.name}</span>
-  </div>
+                            <div
+                              key={addr.id}
+                              className="flex items-start space-x-4 rounded-md border p-4 hover:border-primary hover:bg-blue-50 transition"
+                            >
+                              <RadioGroupItem
+                                value={addr.id}
+                                id={`addr-${addr.id}`}
+                                className="mt-1"
+                              />
+                              <Label
+                                htmlFor={`addr-${addr.id}`}
+                                className="flex-1 cursor-pointer flex flex-col space-y-1 text-left"
+                              >
+                                {/* Row 1: Label + Name */}
+                                <div className="flex items-center space-x-2">
+                                  <span className="font-semibold text-gray-900">
+                                    {addr.type} {addr.default && "(Default)"}
+                                  </span>
+                                  <span className="text-sm text-gray-600">
+                                    {addr.name}
+                                  </span>
+                                </div>
 
-  {/* Row 2: Full address */}
-  <div className="text-sm text-gray-700">
-    {addr.address}{addr.apartment && `, ${addr.apartment}`}, {addr.city}, {addr.state}, {addr.country} {addr.zipCode}
-  </div>
+                                {/* Row 2: Full address */}
+                                <div className="text-sm text-gray-700">
+                                  {addr.address}
+                                  {addr.apartment &&
+                                    `, ${addr.apartment}`}, {addr.city},{" "}
+                                  {addr.state}, {addr.country} {addr.zipCode}
+                                </div>
 
-  {/* Row 3: Phone */}
-  <div className="text-sm text-gray-600">{addr.phone}</div>
-</Label>
-
-  </div>
-))}
-
-
+                                {/* Row 3: Phone */}
+                                <div className="text-sm text-gray-600">
+                                  {addr.phone}
+                                </div>
+                              </Label>
+                            </div>
+                          ))}
                         </RadioGroup>
                         <Button
                           type="button"

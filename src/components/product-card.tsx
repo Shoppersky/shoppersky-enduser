@@ -147,7 +147,7 @@ href={`/${product.category_slug || 'unknown'}/${product.productSlug}`}
       {/* Product Info */}
       <div className="p-2 sm:p-3 md:p-4 flex-1 flex flex-col">
         <div className="mb-1 sm:mb-2 text-xs text-gray-600 uppercase tracking-wide">{product.category}</div>
-        <Link href={`/${product.category?.toLowerCase()}/${product.productSlug}`}>
+        <Link href={`/${product.category_slug}/${product.productSlug}`}>
           <h3 className="mb-2 line-clamp-2 text-xs sm:text-sm md:text-base font-medium transition-colors group-hover:text-[#1B4B33] leading-tight">
             {product.name}
           </h3>

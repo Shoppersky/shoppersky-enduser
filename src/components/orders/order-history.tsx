@@ -68,9 +68,27 @@ export default function OrderDetailsPage() {
     return <div className="p-8 text-center text-red-500">{error}</div>;
   }
 
-  if (!orders.length) {
-    return <div className="p-8 text-center">No orders found.</div>;
-  }
+ if (!orders.length) {
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-background">
+      <Card className="w-full max-w-md text-center p-8">
+        <CardContent className="flex flex-col items-center gap-4">
+          <Package className="h-12 w-12 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">No orders found</h2>
+          <p className="text-sm text-muted-foreground">
+            Looks like you haven’t placed any orders yet.
+          </p>
+          <Link href="/products">
+            <button className="mt-4 px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90">
+              Start Shopping
+            </button>
+          </Link>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 
   return (
     <div className="min-h-screen bg-background">
