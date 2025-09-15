@@ -234,152 +234,303 @@ export default function AccountPage() {
   };
 
   const handleAddressSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  e.preventDefault();
+  console.log("Form submitted with addressForm:", addressForm);
 
-    const street = addressForm.address.trim();
-    const apartment = addressForm.apartment?.trim();
-    const city = addressForm.city.trim();
-    const state = addressForm.state.trim().toUpperCase();
-    const postcode = addressForm.zipCode.trim();
-    const country = addressForm.country.trim();
-    const phone = addressForm.phone.trim();
-    const type = addressForm.label.trim();
+  const street = addressForm.address.trim();
+  const apartment = addressForm.apartment?.trim();
+  const city = addressForm.city.trim();
+  const state = addressForm.state.trim().toUpperCase();
+  const postcode = addressForm.zipCode.trim();
+  const country = addressForm.country.trim() || "Australia"; // Default to Australia
+  const phone = addressForm.phone.trim();
+  const type = addressForm.label.trim();
 
-    // Reset previous errors
-    const newErrors: { [key: string]: string } = {};
+  // Validation
+  const newErrors: { [key: string]: string } = {};
+  if (!type) newErrors.type = "Address type is required";
+  if (!street) newErrors.address = "Street address is required";
+  if (!city) newErrors.city = "City is required";
+  if (!state) newErrors.state = "State is required";
+  if (!postcode) newErrors.zipCode = "Postcode is required";
+  if (!country) newErrors.country = "Country is required";
+  if (!phone) newErrors.phone = "Phone number is required";
 
-    if (!type) newErrors.type = "Address type is required";
-    if (!street) newErrors.address = "Street address is required";
-    if (!city) newErrors.city = "City is required";
-    if (!state) newErrors.state = "State is required";
-    if (!postcode) newErrors.zipCode = "Postcode is required";
-    if (!country) newErrors.country = "Country is required";
-    if (!phone) newErrors.phone = "Phone number is required";
+  if (postcode && !/^\d{4}$/.test(postcode)) {
+    newErrors.zipCode = "Postcode must be a 4-digit Australian postcode";
+  }
 
-    // Validate postcode (Australian)
-    if (postcode && !/^\d{4}$/.test(postcode)) {
-      newErrors.zipCode = "Postcode must be a 4-digit Australian postcode";
-    }
+  const validStates = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"];
+  if (state && !validStates.includes(state)) {
+    newErrors.state = `State must be one of: ${validStates.join(", ")}`;
+  }
 
-    // Validate state
-    const validStates = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"];
-    if (state && !validStates.includes(state)) {
-      newErrors.state = `State must be one of: ${validStates.join(", ")}`;
-    }
+  if (phone && !/^(?:\+?61|0)[2-478]\d{8}$/.test(phone.replace(/\s+/g, ""))) {
+    newErrors.phone = "Enter a valid Australian phone number";
+  }
 
-    // Validate phone
-    if (phone && !/^(?:\+?61|0)[2-478]\d{8}$/.test(phone.replace(/\s+/g, ""))) {
-      newErrors.phone = "Enter a valid Australian phone number";
-    }
+  console.log("Validation errors:", newErrors);
+  setErrors(newErrors);
 
-    setErrors(newErrors);
+  if (Object.keys(newErrors).length > 0) {
+    toast.error("Please fix the form errors before submitting.");
+    return;
+  }
 
-    // If any errors, stop submission
-    if (Object.keys(newErrors).length > 0) return;
+  try {
+    let payload;
+    let res;
 
-    try {
-      let payload;
-      let res;
-
-      if (editingAddress) {
-        payload = {
-          id: editingAddress.id,
-          addresses: [
-            {
-              label: type || addressForm.label,
-              details: {
-                street,
-                apartment: apartment || undefined,
-                city,
-                state,
-                postcode,
-                country,
-                phone,
-              },
+    if (editingAddress) {
+      payload = {
+        id: editingAddress.id,
+        addresses: [
+          {
+            label: type,
+            details: {
+              street,
+              apartment: apartment || undefined,
+              city,
+              state,
+              postcode,
+              country,
+              phone,
             },
-          ],
-        };
-
-        res = await axiosInstance.put(
-          `/users/profiles/address/${userId}`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } else {
-        payload = {
-          addresses: [
-            {
-              label: type || addressForm.label,
-              details: {
-                street,
-                apartment: apartment || undefined,
-                city,
-                state,
-                postcode,
-                country,
-                phone,
-              },
-            },
-          ],
-        };
-
-        res = await axiosInstance.put(
-          `/users/profiles/add_address/${userId}`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
-
-      const rawAddresses = res.data?.data?.address || [];
-      if (!Array.isArray(rawAddresses) || rawAddresses.length === 0) {
-        throw new Error("API did not return addresses");
-      }
-
-      const raw = editingAddress
-        ? rawAddresses.find(
-            (a: any) => String(a.id) === String(editingAddress.id)
-          )
-        : rawAddresses[rawAddresses.length - 1];
-
-      const parsedAddress: Address = {
-        id: String(raw.id),
-        type: raw.label,
-        default: raw.is_default || false,
-        address: raw.details.street,
-        apartment: raw.details.apartment || "",
-        city: raw.details.city,
-        state: raw.details.state,
-        zipCode: raw.details.postcode,
-        country: raw.details.country,
-        phone: raw.details.phone || user.phone_number || "",
+          },
+        ],
       };
 
-      if (editingAddress) {
-        setAddresses(
-          addresses.map((addr) =>
-            addr.id === editingAddress.id ? parsedAddress : addr
-          )
-        );
-      } else {
-        setAddresses([...addresses, parsedAddress]);
-      }
+      console.log("Updating address with payload:", payload);
+      res = await axiosInstance.put(
+        `/users/profiles/address/${userId}`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } else {
+      payload = {
+        addresses: [
+          {
+            label: type,
+            details: {
+              street,
+              apartment: apartment || undefined,
+              city,
+              state,
+              postcode,
+              country,
+              phone,
+            },
+          },
+        ],
+      };
 
-      setIsAddressModalOpen(false);
-      setAddressForm({
-        label: "",
-        address: "",
-        apartment: "",
-        city: "",
-        state: "",
-        zipCode: "",
-        country: "",
-        phone: "",
-      });
-    } catch (err) {
-      console.error("Failed to save address:", err);
-      alert("Failed to save address. Please try again.");
+      console.log("Adding new address with payload:", payload);
+      res = await axiosInstance.put(
+        `/users/profiles/add_address/${userId}`,
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
     }
-  };
+
+    console.log("API response:", res.data);
+
+    const rawAddresses = res.data?.data?.address || [];
+    if (!Array.isArray(rawAddresses) || rawAddresses.length === 0) {
+      throw new Error("API did not return addresses");
+    }
+
+    const raw = editingAddress
+      ? rawAddresses.find((a: any) => String(a.id) === String(editingAddress.id))
+      : rawAddresses[rawAddresses.length - 1];
+
+    const parsedAddress: Address = {
+      id: String(raw.id),
+      type: raw.label,
+      default: raw.is_default || false,
+      address: raw.details.street,
+      apartment: raw.details.apartment || "",
+      city: raw.details.city,
+      state: raw.details.state,
+      zipCode: raw.details.postcode,
+      country: raw.details.country,
+      phone: raw.details.phone || user.phone_number || "",
+    };
+
+    if (editingAddress) {
+      setAddresses(
+        addresses.map((addr) =>
+          addr.id === editingAddress.id ? parsedAddress : addr
+        )
+      );
+    } else {
+      setAddresses([...addresses, parsedAddress]);
+    }
+
+    setIsAddressModalOpen(false);
+    setAddressForm({
+      label: "",
+      address: "",
+      apartment: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "Australia", // Reset to default
+      phone: "",
+    });
+    toast.success("Address saved successfully!");
+  } catch (err: any) {
+    console.error("Failed to save address:", err.response?.data || err.message);
+    toast.error("Failed to save address: " + (err.response?.data?.detail || err.message));
+  }
+};
+
+  // const handleAddressSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+
+  //   const street = addressForm.address.trim();
+  //   const apartment = addressForm.apartment?.trim();
+  //   const city = addressForm.city.trim();
+  //   const state = addressForm.state.trim().toUpperCase();
+  //   const postcode = addressForm.zipCode.trim();
+  //   const country = addressForm.country.trim();
+  //   const phone = addressForm.phone.trim();
+  //   const type = addressForm.label.trim();
+
+  //   // Reset previous errors
+  //   const newErrors: { [key: string]: string } = {};
+
+  //   if (!type) newErrors.type = "Address type is required";
+  //   if (!street) newErrors.address = "Street address is required";
+  //   if (!city) newErrors.city = "City is required";
+  //   if (!state) newErrors.state = "State is required";
+  //   if (!postcode) newErrors.zipCode = "Postcode is required";
+  //   if (!country) newErrors.country = "Country is required";
+  //   if (!phone) newErrors.phone = "Phone number is required";
+
+  //   // Validate postcode (Australian)
+  //   if (postcode && !/^\d{4}$/.test(postcode)) {
+  //     newErrors.zipCode = "Postcode must be a 4-digit Australian postcode";
+  //   }
+
+  //   // Validate state
+  //   const validStates = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"];
+  //   if (state && !validStates.includes(state)) {
+  //     newErrors.state = `State must be one of: ${validStates.join(", ")}`;
+  //   }
+
+  //   // Validate phone
+  //   if (phone && !/^(?:\+?61|0)[2-478]\d{8}$/.test(phone.replace(/\s+/g, ""))) {
+  //     newErrors.phone = "Enter a valid Australian phone number";
+  //   }
+
+  //   setErrors(newErrors);
+
+  //   // If any errors, stop submission
+  //   if (Object.keys(newErrors).length > 0) return;
+
+  //   try {
+  //     let payload;
+  //     let res;
+
+  //     if (editingAddress) {
+  //       payload = {
+  //         id: editingAddress.id,
+  //         addresses: [
+  //           {
+  //             label: type || addressForm.label,
+  //             details: {
+  //               street,
+  //               apartment: apartment || undefined,
+  //               city,
+  //               state,
+  //               postcode,
+  //               country,
+  //               phone,
+  //             },
+  //           },
+  //         ],
+  //       };
+
+  //       res = await axiosInstance.put(
+  //         `/users/profiles/address/${userId}`,
+  //         payload,
+  //         { headers: { Authorization: `Bearer ${token}` } }
+  //       );
+  //     } else {
+  //       payload = {
+  //         addresses: [
+  //           {
+  //             label: type || addressForm.label,
+  //             details: {
+  //               street,
+  //               apartment: apartment || undefined,
+  //               city,
+  //               state,
+  //               postcode,
+  //               country,
+  //               phone,
+  //             },
+  //           },
+  //         ],
+  //       };
+
+  //       res = await axiosInstance.put(
+  //         `/users/profiles/add_address/${userId}`,
+  //         payload,
+  //         { headers: { Authorization: `Bearer ${token}` } }
+  //       );
+  //     }
+
+  //     const rawAddresses = res.data?.data?.address || [];
+  //     if (!Array.isArray(rawAddresses) || rawAddresses.length === 0) {
+  //       throw new Error("API did not return addresses");
+  //     }
+
+  //     const raw = editingAddress
+  //       ? rawAddresses.find(
+  //           (a: any) => String(a.id) === String(editingAddress.id)
+  //         )
+  //       : rawAddresses[rawAddresses.length - 1];
+
+  //     const parsedAddress: Address = {
+  //       id: String(raw.id),
+  //       type: raw.label,
+  //       default: raw.is_default || false,
+  //       address: raw.details.street,
+  //       apartment: raw.details.apartment || "",
+  //       city: raw.details.city,
+  //       state: raw.details.state,
+  //       zipCode: raw.details.postcode,
+  //       country: raw.details.country,
+  //       phone: raw.details.phone || user.phone_number || "",
+  //     };
+
+  //     if (editingAddress) {
+  //       setAddresses(
+  //         addresses.map((addr) =>
+  //           addr.id === editingAddress.id ? parsedAddress : addr
+  //         )
+  //       );
+  //     } else {
+  //       setAddresses([...addresses, parsedAddress]);
+  //     }
+
+  //     setIsAddressModalOpen(false);
+  //     setAddressForm({
+  //       label: "",
+  //       address: "",
+  //       apartment: "",
+  //       city: "",
+  //       state: "",
+  //       zipCode: "",
+  //       country: "",
+  //       phone: "",
+  //     });
+  //   } catch (err) {
+  //     console.error("Failed to save address:", err);
+  //     alert("Failed to save address. Please try again.");
+  //   }
+  // };
 
   const handleSetDefault = async (addressId: string) => {
     try {
