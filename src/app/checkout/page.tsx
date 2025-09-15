@@ -2,6 +2,7 @@
 
 // import type React from "react";
 // import { useEffect, useState } from "react";
+// import { useSearchParams } from "next/navigation";
 // import Image from "next/image";
 // import Link from "next/link";
 // import { ChevronRight, Truck, Package, ShieldCheck, Check } from "lucide-react";
@@ -37,6 +38,16 @@
 //   phone: string;
 // };
 
+// type CheckoutItem = {
+//   id: string;
+//   name: string;
+//   price: number;
+//   image: string;
+//   quantity: number;
+//   category: string;
+//   productSlug?: string;
+// };
+
 // // Australian states for the dropdown
 // const states = [
 //   { value: "NSW", label: "New South Wales" },
@@ -56,6 +67,15 @@
 //   const { userId, isAuthenticated } = useStore();
 //   const { cartItems, cartTotal, clearCart } = useCart();
 //   const router = useRouter();
+//   const searchParams = useSearchParams();
+
+//   // Check if this is a "Buy Now" checkout
+//   const isBuyNow = searchParams.get("buyNow") === "true";
+
+//   // State for checkout items (either cart items or buy now item)
+//   const [checkoutItems, setCheckoutItems] = useState<CheckoutItem[]>([]);
+//   const [checkoutTotal, setCheckoutTotal] = useState(0);
+
 //   const [step, setStep] = useState(1);
 //   const [shippingAddress, setShippingAddress] = useState({
 //     firstName: "",
@@ -78,6 +98,94 @@
 //     null
 //   );
 //   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
+//   // Inside CheckoutContent component
+//   const [errors, setErrors] = useState<Record<string, string>>({});
+
+//   const validateField = (name: string, value: string) => {
+//     let error = "";
+
+//     switch (name) {
+//       case "postcode":
+//         if (!/^\d{4}$/.test(value)) {
+//           error = "Postcode must be 4 digits.";
+//         }
+//         break;
+
+//       case "phone":
+//         // Matches 10-digit numbers starting with 02, 03, 04, 07, or 08
+//         if (!/^(0[23478]\d{8})$/.test(value)) {
+//           error = "Enter a valid Australian phone number (landline or mobile).";
+//         }
+//         break;
+
+//       case "email":
+//         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+//           error = "Enter a valid email address.";
+//         }
+//         break;
+
+//       default:
+//         if (!value.trim()) {
+//           error = "This field is required.";
+//         }
+//     }
+
+//     setErrors((prev) => ({ ...prev, [name]: error }));
+//     return error === "";
+//   };
+
+//   const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const { name, value } = e.target;
+//     setShippingAddress((prev) => ({ ...prev, [name]: value }));
+//     validateField(name, value);
+//   };
+
+//   const validateForm = () => {
+//     const fieldsToValidate = [
+//       "firstName",
+//       "lastName",
+//       "address",
+//       "city",
+//       "state",
+//       "postcode",
+//       "phone",
+//       "email",
+//     ];
+//     const results = fieldsToValidate.map((f) =>
+//       validateField(f, (shippingAddress as any)[f] || "")
+//     );
+//     return results.every(Boolean);
+//   };
+
+//   const handleNextStep = () => {
+//     if (validateForm()) {
+//       nextStep();
+//     }
+//   };
+
+//   // Initialize checkout items based on mode (Buy Now vs Cart)
+//   useEffect(() => {
+//     if (isBuyNow) {
+//       // Get buy now product from localStorage
+//       const buyNowProductStr = localStorage.getItem("buyNowProduct");
+
+//       if (buyNowProductStr) {
+//         const buyNowProduct: CheckoutItem = JSON.parse(buyNowProductStr);
+//         setCheckoutItems([buyNowProduct]);
+//         setCheckoutTotal(buyNowProduct.price * buyNowProduct.quantity);
+
+//         // Clear the localStorage item after reading
+//         // localStorage.removeItem('buyNowProduct');
+//       } else {
+//         // If no buy now product found, redirect to home
+//         router.push("/");
+//       }
+//     } else {
+//       // Use cart items
+//       setCheckoutItems(cartItems);
+//       setCheckoutTotal(cartTotal);
+//     }
+//   }, [isBuyNow, cartItems, cartTotal, router]);
 
 //   // Shipping calculation based on method
 //   const [shippingMethod, setShippingMethod] = useState("standard");
@@ -89,19 +197,14 @@
 //         : 0;
 
 //   // Free shipping for orders over A$50
-//   const finalShippingCost = cartTotal > 50 ? 0 : shippingCost;
+//   const finalShippingCost = checkoutTotal > 50 ? 0 : shippingCost;
 
 //   // GST calculation (10% for Australia)
 //   const taxRate = 0.1;
-//   const taxAmount = cartTotal * taxRate;
+//   const taxAmount = checkoutTotal * taxRate;
 
 //   // Final total (includes GST)
-//   const orderTotal = cartTotal + finalShippingCost + taxAmount;
-
-//   const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     const { name, value } = e.target;
-//     setShippingAddress((prev) => ({ ...prev, [name]: value }));
-//   };
+//   const orderTotal = checkoutTotal + finalShippingCost + taxAmount;
 
 //   const nextStep = () => {
 //     setStep((prev) => prev + 1);
@@ -166,8 +269,8 @@
 //     setError(null);
 
 //     try {
-//       // Fetch vendor IDs for all cart items
-//       const vendorPromises = cartItems.map(async (item) => {
+//       // Fetch vendor IDs for all checkout items
+//       const vendorPromises = checkoutItems.map(async (item) => {
 //         try {
 //           const response = await axiosInstance.get(`/products/${item.id}`);
 //           return {
@@ -175,9 +278,9 @@
 //             vendor_id: response.data.vendor_id,
 //             quantity: item.quantity,
 //             name: item.name,
-//             color: item.color || "Unknown",
-//             size: item.size || "Unknown",
-//             material: item.material || "Unknown",
+//             // color: item.color || "Unknown",
+//             // size: item.size || "Unknown",
+//             // material: item.material || "Unknown",
 //           };
 //         } catch (err) {
 //           console.error(`Failed to fetch vendor for product ${item.id}:`, err);
@@ -194,9 +297,7 @@
 //           ...acc,
 //           [item.product_id]: {
 //             name: item.name,
-//             color: item.color,
-//             size: item.size,
-//             material: item.material,
+
 //             quantity: item.quantity,
 //           },
 //         }),
@@ -209,7 +310,7 @@
 //       if (selectedAddressId && addresses.length > 0 && !showNewAddressForm) {
 //         const chosen = addresses.find((a) => a.id === selectedAddressId)!;
 //         finalAddress = {
-//           label: shippingAddress.label,
+//           label: chosen.type,
 //           street: `${chosen.address}${chosen.apartment ? `, ${chosen.apartment}` : ""}`,
 //           city: chosen.city,
 //           state: chosen.state,
@@ -220,6 +321,7 @@
 //       } else {
 //         // fallback: use new address form state
 //         finalAddress = {
+//           label: shippingAddress.label,
 //           street: `${shippingAddress.address}${shippingAddress.apartment ? `, ${shippingAddress.apartment}` : ""}`,
 //           city: shippingAddress.city,
 //           state: shippingAddress.state,
@@ -247,8 +349,10 @@
 //       // Axios automatically parses JSON response
 //       const { data } = response.data; // Assuming api_response format: { status_code, message, data }
 
-//       // Clear cart on successful order placement
-//       clearCart();
+//       // Clear cart only if this was a cart checkout (not buy now)
+//       if (!isBuyNow) {
+//         clearCart();
+//       }
 
 //       // Store email in localStorage for SuccessPage
 //       localStorage.setItem("checkoutEmail", shippingAddress.email);
@@ -268,12 +372,14 @@
 //     }
 //   };
 
-//   if (cartItems.length === 0) {
+//   if (checkoutItems.length === 0) {
 //     return (
 //       <div className="flex flex-col items-center justify-center py-12">
-//         <h2 className="mb-2 text-2xl font-bold">Your cart is empty</h2>
+//         <h2 className="mb-2 text-2xl font-bold">No items to checkout</h2>
 //         <p className="mb-8 text-center text-muted-foreground">
-//           You need to add items to your cart before checking out.
+//           {isBuyNow
+//             ? "The product you tried to buy is no longer available."
+//             : "You need to add items to your cart before checking out."}
 //         </p>
 //         <Button asChild>
 //           <Link href="/products">Browse Products</Link>
@@ -284,6 +390,15 @@
 
 //   return (
 //     <div>
+//       {/* Checkout Mode Indicator */}
+//       {isBuyNow && (
+//         <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+//           <p className="text-blue-800 font-medium">
+//             🚀 Quick Checkout - You're purchasing this item directly
+//           </p>
+//         </div>
+//       )}
+
 //       {/* Checkout Progress */}
 //       <div className="mb-8">
 //         <div className="flex justify-between">
@@ -479,6 +594,7 @@
 //                               </SelectContent>
 //                             </Select>
 //                           </div>
+
 //                           <div className="space-y-2">
 //                             <Label htmlFor="postcode">Postcode</Label>
 //                             <Input
@@ -488,6 +604,11 @@
 //                               onChange={handleShippingChange}
 //                               required
 //                             />
+//                             {errors.postcode && (
+//                               <p className="text-sm text-red-600">
+//                                 {errors.postcode}
+//                               </p>
+//                             )}
 //                           </div>
 //                         </div>
 
@@ -519,29 +640,38 @@
 //                           </Select>
 //                         </div>
 
-//                         <div className="grid gap-4 sm:grid-cols-2">
-//                           <div className="space-y-2">
-//                             <Label htmlFor="phone">Phone Number</Label>
-//                             <Input
-//                               id="phone"
-//                               name="phone"
-//                               type="tel"
-//                               value={shippingAddress.phone}
-//                               onChange={handleShippingChange}
-//                               required
-//                             />
-//                           </div>
-//                           <div className="space-y-2">
-//                             <Label htmlFor="email">Email Address</Label>
-//                             <Input
-//                               id="email"
-//                               name="email"
-//                               type="email"
-//                               value={shippingAddress.email}
-//                               onChange={handleShippingChange}
-//                               required
-//                             />
-//                           </div>
+//                         <div className="space-y-2">
+//                           <Label htmlFor="phone">Phone Number</Label>
+//                           <Input
+//                             id="phone"
+//                             name="phone"
+//                             type="tel"
+//                             value={shippingAddress.phone}
+//                             onChange={handleShippingChange}
+//                             required
+//                           />
+//                           {errors.phone && (
+//                             <p className="text-sm text-red-600">
+//                               {errors.phone}
+//                             </p>
+//                           )}
+//                         </div>
+
+//                         <div className="space-y-2">
+//                           <Label htmlFor="email">Email Address</Label>
+//                           <Input
+//                             id="email"
+//                             name="email"
+//                             type="email"
+//                             value={shippingAddress.email}
+//                             onChange={handleShippingChange}
+//                             required
+//                           />
+//                           {errors.email && (
+//                             <p className="text-sm text-red-600">
+//                               {errors.email}
+//                             </p>
+//                           )}
 //                         </div>
 
 //                         {addresses.length > 0 && (
@@ -581,7 +711,7 @@
 //                         </div>
 //                         <div className="text-right">
 //                           <div className="font-medium">
-//                             {cartTotal > 50 ? "Free" : "A$5.99"}
+//                             {checkoutTotal > 50 ? "Free" : "A$5.99"}
 //                           </div>
 //                           <div className="text-sm text-muted-foreground">
 //                             3-5 business days
@@ -597,7 +727,7 @@
 //                         </div>
 //                         <div className="text-right">
 //                           <div className="font-medium">
-//                             {cartTotal > 50 ? "Free" : "A$12.99"}
+//                             {checkoutTotal > 50 ? "Free" : "A$12.99"}
 //                           </div>
 //                           <div className="text-sm text-muted-foreground">
 //                             1-2 business days
@@ -637,11 +767,11 @@
 //                   <div className="p-6">
 //                     <h3 className="mb-4 font-medium">Order Items</h3>
 //                     <ul className="divide-y">
-//                       {cartItems.map((item) => (
+//                       {checkoutItems.map((item) => (
 //                         <li key={item.id} className="py-4 flex items-center">
 //                           <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border">
 //                             <Image
-//                               src={item.image || "/placeholder.svg"}
+//                               src={item.image || "/images/placeholder.svg"}
 //                               alt={item.name}
 //                               width={64}
 //                               height={64}
@@ -742,11 +872,16 @@
 //             <div className="rounded-lg border bg-card">
 //               <div className="p-6">
 //                 <h2 className="text-xl font-bold">Order Summary</h2>
+//                 {isBuyNow && (
+//                   <p className="text-sm text-muted-foreground mt-1">
+//                     Quick Checkout
+//                   </p>
+//                 )}
 //               </div>
 //               <Separator />
 //               <div className="p-6">
 //                 <ul className="divide-y">
-//                   {cartItems.map((item) => (
+//                   {checkoutItems.map((item) => (
 //                     <li key={item.id} className="py-2 flex justify-between">
 //                       <div className="flex-1">
 //                         <span className="font-medium">{item.name}</span>
@@ -762,7 +897,7 @@
 //                 <div className="mt-4 space-y-2">
 //                   <div className="flex justify-between">
 //                     <span>Subtotal</span>
-//                     <span>A${cartTotal.toFixed(2)}</span>
+//                     <span>A${checkoutTotal.toFixed(2)}</span>
 //                   </div>
 //                   <div className="flex justify-between">
 //                     <span>Shipping</span>
@@ -953,46 +1088,73 @@ function CheckoutContent() {
     null
   );
   const [showNewAddressForm, setShowNewAddressForm] = useState(false);
-  // Inside CheckoutContent component
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateField = (name: string, value: string) => {
     let error = "";
 
     switch (name) {
+      case "firstName":
+      case "lastName":
+        if (!value.trim()) {
+          error = "This field is required.";
+        } else if (!/^[a-zA-Z\s-]+$/.test(value)) {
+          error = "Name can only contain letters, spaces, or hyphens.";
+        }
+        break;
+      case "address":
+        if (!value.trim()) {
+          error = "Street address is required.";
+        } else if (!/^[0-9a-zA-Z\s,/-]+$/.test(value)) {
+          error =
+            "Invalid street address. Use letters, numbers, spaces, commas, or hyphens.";
+        }
+        break;
+      case "apartment":
+        if (value && !/^[0-9a-zA-Z\s,/-]+$/.test(value)) {
+          error =
+            "Invalid apartment details. Use letters, numbers, spaces, commas, or hyphens.";
+        }
+        break;
+      case "city":
+        if (!value.trim()) {
+          error = "City is required.";
+        } else if (!/^[a-zA-Z\s-]+$/.test(value)) {
+          error = "City can only contain letters, spaces, or hyphens.";
+        }
+        break;
+      case "state":
+        if (!value) {
+          error = "State is required.";
+        } else if (!states.some((s) => s.value === value)) {
+          error = "Please select a valid Australian state or territory.";
+        }
+        break;
       case "postcode":
         if (!/^\d{4}$/.test(value)) {
-          error = "Postcode must be 4 digits.";
+          error = "Postcode must be exactly 4 digits.";
         }
         break;
-
       case "phone":
-        // Matches 10-digit numbers starting with 02, 03, 04, 07, or 08
         if (!/^(0[23478]\d{8})$/.test(value)) {
-          error = "Enter a valid Australian phone number (landline or mobile).";
+          error =
+            "Enter a valid Australian phone number (e.g., 04xxxxxxxx or 02xxxxxxxx).";
         }
         break;
-
       case "email":
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           error = "Enter a valid email address.";
         }
         break;
-
-      default:
+      case "label":
         if (!value.trim()) {
-          error = "This field is required.";
+          error = "Address label is required.";
         }
+        break;
     }
 
     setErrors((prev) => ({ ...prev, [name]: error }));
     return error === "";
-  };
-
-  const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setShippingAddress((prev) => ({ ...prev, [name]: value }));
-    validateField(name, value);
   };
 
   const validateForm = () => {
@@ -1005,38 +1167,52 @@ function CheckoutContent() {
       "postcode",
       "phone",
       "email",
+      "label",
     ];
-    const results = fieldsToValidate.map((f) =>
-      validateField(f, (shippingAddress as any)[f] || "")
+    const results = fieldsToValidate.map((field) =>
+      validateField(field, (shippingAddress as any)[field] || "")
     );
-    return results.every(Boolean);
+    return results.every((result) => result);
+  };
+
+  const handleShippingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setShippingAddress((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
   };
 
   const handleNextStep = () => {
-    if (validateForm()) {
+    if (addresses.length > 0 && !showNewAddressForm && selectedAddressId) {
       nextStep();
+    } else if (showNewAddressForm && validateForm()) {
+      nextStep();
+    } else if (!selectedAddressId && !showNewAddressForm) {
+      setError("Please select an address or add a new one.");
     }
+  };
+
+  const nextStep = () => {
+    setStep((prev) => prev + 1);
+    window.scrollTo(0, 0);
+  };
+
+  const prevStep = () => {
+    setStep((prev) => prev - 1);
+    window.scrollTo(0, 0);
   };
 
   // Initialize checkout items based on mode (Buy Now vs Cart)
   useEffect(() => {
     if (isBuyNow) {
-      // Get buy now product from localStorage
       const buyNowProductStr = localStorage.getItem("buyNowProduct");
-
       if (buyNowProductStr) {
         const buyNowProduct: CheckoutItem = JSON.parse(buyNowProductStr);
         setCheckoutItems([buyNowProduct]);
         setCheckoutTotal(buyNowProduct.price * buyNowProduct.quantity);
-
-        // Clear the localStorage item after reading
-        // localStorage.removeItem('buyNowProduct');
       } else {
-        // If no buy now product found, redirect to home
         router.push("/");
       }
     } else {
-      // Use cart items
       setCheckoutItems(cartItems);
       setCheckoutTotal(cartTotal);
     }
@@ -1061,16 +1237,6 @@ function CheckoutContent() {
   // Final total (includes GST)
   const orderTotal = checkoutTotal + finalShippingCost + taxAmount;
 
-  const nextStep = () => {
-    setStep((prev) => prev + 1);
-    window.scrollTo(0, 0);
-  };
-
-  const prevStep = () => {
-    setStep((prev) => prev - 1);
-    window.scrollTo(0, 0);
-  };
-
   useEffect(() => {
     if (!isAuthenticated || !userId) {
       router.push("/login");
@@ -1080,15 +1246,13 @@ function CheckoutContent() {
   useEffect(() => {
     const fetchUser = async () => {
       if (!userId) return;
-
       try {
         const res = await axiosInstance.get(`/users/profiles/${userId}`);
         const userData = res.data.data;
-
         if (userData.address && Array.isArray(userData.address)) {
           const mappedAddresses: Address[] = userData.address.map(
             (addr: any) => {
-              const details = addr.details || addr; // fallback to flat structure
+              const details = addr.details || addr;
               return {
                 id: String(addr.id),
                 type: addr.label || "Other",
@@ -1104,9 +1268,7 @@ function CheckoutContent() {
               };
             }
           );
-
           setAddresses(mappedAddresses);
-
           const defaultAddr = mappedAddresses.find((a) => a.default);
           if (defaultAddr) setSelectedAddressId(defaultAddr.id);
         }
@@ -1114,7 +1276,6 @@ function CheckoutContent() {
         console.error("Failed to fetch user info:", err);
       }
     };
-
     fetchUser();
   }, [userId]);
 
@@ -1124,7 +1285,6 @@ function CheckoutContent() {
     setError(null);
 
     try {
-      // Fetch vendor IDs for all checkout items
       const vendorPromises = checkoutItems.map(async (item) => {
         try {
           const response = await axiosInstance.get(`/products/${item.id}`);
@@ -1133,9 +1293,6 @@ function CheckoutContent() {
             vendor_id: response.data.vendor_id,
             quantity: item.quantity,
             name: item.name,
-            // color: item.color || "Unknown",
-            // size: item.size || "Unknown",
-            // material: item.material || "Unknown",
           };
         } catch (err) {
           console.error(`Failed to fetch vendor for product ${item.id}:`, err);
@@ -1143,16 +1300,13 @@ function CheckoutContent() {
         }
       });
 
-      // Wait for all vendor ID requests to complete
       const itemsWithVendors = await Promise.all(vendorPromises);
 
-      // Construct item_details object
       const itemDetails = itemsWithVendors.reduce(
         (acc, item) => ({
           ...acc,
           [item.product_id]: {
             name: item.name,
-
             quantity: item.quantity,
           },
         }),
@@ -1165,7 +1319,7 @@ function CheckoutContent() {
       if (selectedAddressId && addresses.length > 0 && !showNewAddressForm) {
         const chosen = addresses.find((a) => a.id === selectedAddressId)!;
         finalAddress = {
-          label: shippingAddress.label,
+          label: chosen.type,
           street: `${chosen.address}${chosen.apartment ? `, ${chosen.apartment}` : ""}`,
           city: chosen.city,
           state: chosen.state,
@@ -1174,8 +1328,8 @@ function CheckoutContent() {
         };
         addressId = chosen.id;
       } else {
-        // fallback: use new address form state
         finalAddress = {
+          label: shippingAddress.label,
           street: `${shippingAddress.address}${shippingAddress.apartment ? `, ${shippingAddress.apartment}` : ""}`,
           city: shippingAddress.city,
           state: shippingAddress.state,
@@ -1193,29 +1347,21 @@ function CheckoutContent() {
         item_details: itemDetails,
         amount: orderTotal,
         address: finalAddress,
-        address_id: addressId, // ✅ Send selected address id if available
+        address_id: addressId,
         order_notes: orderNotes || null,
       };
 
-      // Call the API using axiosInstance
       const response = await axiosInstance.post("/orders/place-order", payload);
+      const { data } = response.data;
 
-      // Axios automatically parses JSON response
-      const { data } = response.data; // Assuming api_response format: { status_code, message, data }
-
-      // Clear cart only if this was a cart checkout (not buy now)
       if (!isBuyNow) {
         clearCart();
       }
 
-      // Store email in localStorage for SuccessPage
       localStorage.setItem("checkoutEmail", shippingAddress.email);
-
-      // Redirect to Stripe checkout
       window.location.href = data.checkout_url;
     } catch (error: any) {
       console.error("Error placing order:", error);
-      // Handle Axios error
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
@@ -1244,7 +1390,6 @@ function CheckoutContent() {
 
   return (
     <div>
-      {/* Checkout Mode Indicator */}
       {isBuyNow && (
         <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-blue-800 font-medium">
@@ -1253,7 +1398,6 @@ function CheckoutContent() {
         </div>
       )}
 
-      {/* Checkout Progress */}
       <div className="mb-8">
         <div className="flex justify-between">
           <div
@@ -1295,7 +1439,6 @@ function CheckoutContent() {
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <form onSubmit={handleSubmit}>
-            {/* Step 1: Shipping Information */}
             {step === 1 && (
               <div className="space-y-8">
                 <div className="rounded-lg border bg-card">
@@ -1309,40 +1452,47 @@ function CheckoutContent() {
                   <div className="p-6 space-y-4">
                     {addresses.length > 0 && !showNewAddressForm ? (
                       <>
-                        {/* Display existing addresses */}
                         <RadioGroup
                           value={selectedAddressId || ""}
                           onValueChange={(val) => setSelectedAddressId(val)}
+                          className="grid gap-4"
                         >
                           {addresses.map((addr) => (
-                            <div
-                              key={addr.id}
-                              className="flex items-start space-x-2 rounded-md border p-4"
-                            >
-                              <RadioGroupItem
-                                value={addr.id}
-                                id={`addr-${addr.id}`}
-                              />
-                              <Label
-                                htmlFor={`addr-${addr.id}`}
-                                className="flex-1 cursor-pointer"
-                              >
-                                <div className="font-medium">
-                                  {addr.type} {addr.default && "(Default)"}
-                                </div>
-                                <div className="text-sm text-muted-foreground">
-                                  {addr.name}, {addr.address}
-                                  {addr.apartment &&
-                                    `, ${addr.apartment}`}, {addr.city},{" "}
-                                  {addr.state} {addr.zipCode}, {addr.country}
-                                  <br />
-                                  {addr.phone}
-                                </div>
-                              </Label>
-                            </div>
-                          ))}
-                        </RadioGroup>
+  <div
+    key={addr.id}
+    className="flex items-start space-x-4 rounded-md border p-4 hover:border-primary hover:bg-blue-50 transition"
+  >
+    <RadioGroupItem
+      value={addr.id}
+      id={`addr-${addr.id}`}
+      className="mt-1"
+    />
+   <Label
+  htmlFor={`addr-${addr.id}`}
+  className="flex-1 cursor-pointer flex flex-col space-y-1 text-left"
+>
+  {/* Row 1: Label + Name */}
+  <div className="flex items-center space-x-2">
+    <span className="font-semibold text-gray-900">
+      {addr.type} {addr.default && "(Default)"}
+    </span>
+    <span className="text-sm text-gray-600">{addr.name}</span>
+  </div>
 
+  {/* Row 2: Full address */}
+  <div className="text-sm text-gray-700">
+    {addr.address}{addr.apartment && `, ${addr.apartment}`}, {addr.city}, {addr.state}, {addr.country} {addr.zipCode}
+  </div>
+
+  {/* Row 3: Phone */}
+  <div className="text-sm text-gray-600">{addr.phone}</div>
+</Label>
+
+  </div>
+))}
+
+
+                        </RadioGroup>
                         <Button
                           type="button"
                           variant="outline"
@@ -1353,7 +1503,6 @@ function CheckoutContent() {
                       </>
                     ) : (
                       <>
-                        {/* New address form */}
                         <div className="grid gap-4 sm:grid-cols-2">
                           <div className="space-y-2">
                             <Label htmlFor="firstName">First Name</Label>
@@ -1364,6 +1513,11 @@ function CheckoutContent() {
                               onChange={handleShippingChange}
                               required
                             />
+                            {errors.firstName && (
+                              <p className="text-sm text-red-600">
+                                {errors.firstName}
+                              </p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="lastName">Last Name</Label>
@@ -1374,6 +1528,11 @@ function CheckoutContent() {
                               onChange={handleShippingChange}
                               required
                             />
+                            {errors.lastName && (
+                              <p className="text-sm text-red-600">
+                                {errors.lastName}
+                              </p>
+                            )}
                           </div>
                         </div>
                         <div className="space-y-2">
@@ -1386,8 +1545,12 @@ function CheckoutContent() {
                             onChange={handleShippingChange}
                             required
                           />
+                          {errors.label && (
+                            <p className="text-sm text-red-600">
+                              {errors.label}
+                            </p>
+                          )}
                         </div>
-
                         <div className="space-y-2">
                           <Label htmlFor="address">Street Address</Label>
                           <Input
@@ -1397,8 +1560,12 @@ function CheckoutContent() {
                             onChange={handleShippingChange}
                             required
                           />
+                          {errors.address && (
+                            <p className="text-sm text-red-600">
+                              {errors.address}
+                            </p>
+                          )}
                         </div>
-
                         <div className="space-y-2">
                           <Label htmlFor="apartment">
                             Apartment, suite, etc. (optional)
@@ -1409,8 +1576,12 @@ function CheckoutContent() {
                             value={shippingAddress.apartment}
                             onChange={handleShippingChange}
                           />
+                          {errors.apartment && (
+                            <p className="text-sm text-red-600">
+                              {errors.apartment}
+                            </p>
+                          )}
                         </div>
-
                         <div className="grid gap-4 sm:grid-cols-3">
                           <div className="space-y-2">
                             <Label htmlFor="city">City</Label>
@@ -1421,17 +1592,23 @@ function CheckoutContent() {
                               onChange={handleShippingChange}
                               required
                             />
+                            {errors.city && (
+                              <p className="text-sm text-red-600">
+                                {errors.city}
+                              </p>
+                            )}
                           </div>
                           <div className="space-y-2">
-                            <Label htmlFor="state">State/Territory</Label>
+                            <Label htmlFor="state">State</Label>
                             <Select
                               value={shippingAddress.state}
-                              onValueChange={(value) =>
+                              onValueChange={(value) => {
                                 setShippingAddress((prev) => ({
                                   ...prev,
                                   state: value,
-                                }))
-                              }
+                                }));
+                                validateField("state", value);
+                              }}
                             >
                               <SelectTrigger id="state">
                                 <SelectValue placeholder="Select state" />
@@ -1447,8 +1624,12 @@ function CheckoutContent() {
                                 ))}
                               </SelectContent>
                             </Select>
+                            {errors.state && (
+                              <p className="text-sm text-red-600">
+                                {errors.state}
+                              </p>
+                            )}
                           </div>
-
                           <div className="space-y-2">
                             <Label htmlFor="postcode">Postcode</Label>
                             <Input
@@ -1465,7 +1646,6 @@ function CheckoutContent() {
                             )}
                           </div>
                         </div>
-
                         <div className="space-y-2">
                           <Label htmlFor="country">Country</Label>
                           <Select
@@ -1493,7 +1673,6 @@ function CheckoutContent() {
                             </SelectContent>
                           </Select>
                         </div>
-
                         <div className="space-y-2">
                           <Label htmlFor="phone">Phone Number</Label>
                           <Input
@@ -1510,7 +1689,6 @@ function CheckoutContent() {
                             </p>
                           )}
                         </div>
-
                         <div className="space-y-2">
                           <Label htmlFor="email">Email Address</Label>
                           <Input
@@ -1527,7 +1705,6 @@ function CheckoutContent() {
                             </p>
                           )}
                         </div>
-
                         {addresses.length > 0 && (
                           <Button
                             type="button"
@@ -1541,8 +1718,6 @@ function CheckoutContent() {
                     )}
                   </div>
                 </div>
-
-                {/* Shipping method and order notes */}
                 <div className="rounded-lg border bg-card">
                   <div className="p-6">
                     <h2 className="flex items-center text-xl font-bold">
@@ -1589,7 +1764,6 @@ function CheckoutContent() {
                         </div>
                       </div>
                     </RadioGroup>
-
                     <div className="mt-4 space-y-2">
                       <Label htmlFor="orderNotes">Order Notes (optional)</Label>
                       <Textarea
@@ -1601,16 +1775,22 @@ function CheckoutContent() {
                     </div>
                   </div>
                 </div>
-
                 <div className="flex justify-end">
-                  <Button type="button" onClick={nextStep}>
+                  <Button
+                    type="button"
+                    onClick={handleNextStep}
+                    disabled={
+                      addresses.length > 0 &&
+                      !showNewAddressForm &&
+                      !selectedAddressId
+                    }
+                  >
                     Review Order
                   </Button>
                 </div>
+                {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
               </div>
             )}
-
-            {/* Step 2: Order Review */}
             {step === 2 && (
               <div className="space-y-8">
                 <div className="rounded-lg border bg-card">
@@ -1646,7 +1826,6 @@ function CheckoutContent() {
                         </li>
                       ))}
                     </ul>
-
                     <div className="mt-6 space-y-4">
                       <div className="rounded-md border p-4">
                         <h3 className="mb-2 font-medium">Shipping Address</h3>
@@ -1658,7 +1837,7 @@ function CheckoutContent() {
                               (a) => a.id === selectedAddressId
                             )!;
                             return (
-                              <p>
+                              <p className="text-sm">
                                 {chosen.name}
                                 <br />
                                 {chosen.address}
@@ -1673,11 +1852,11 @@ function CheckoutContent() {
                             );
                           })()
                         ) : (
-                          <p>
+                          <p className="text-sm">
                             {shippingAddress.firstName}{" "}
                             {shippingAddress.lastName}
                             <br />
-                            {shippingAddress.address}{" "}
+                            {shippingAddress.address}
                             {shippingAddress.apartment &&
                               `, ${shippingAddress.apartment}`}
                             <br />
@@ -1693,10 +1872,9 @@ function CheckoutContent() {
                           </p>
                         )}
                       </div>
-
                       <div className="rounded-md border p-4">
                         <h3 className="mb-2 font-medium">Shipping Method</h3>
-                        <p>
+                        <p className="text-sm">
                           {shippingMethod === "standard"
                             ? "Standard Shipping (3-5 business days)"
                             : "Express Shipping (1-2 business days)"}
@@ -1705,7 +1883,6 @@ function CheckoutContent() {
                     </div>
                   </div>
                 </div>
-
                 <div className="flex justify-between">
                   <Button type="button" variant="outline" onClick={prevStep}>
                     Back to Shipping
@@ -1719,8 +1896,6 @@ function CheckoutContent() {
             )}
           </form>
         </div>
-
-        {/* Order Summary */}
         {step < 3 && (
           <div>
             <div className="rounded-lg border bg-card">
@@ -1747,7 +1922,6 @@ function CheckoutContent() {
                     </li>
                   ))}
                 </ul>
-
                 <div className="mt-4 space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
@@ -1771,7 +1945,6 @@ function CheckoutContent() {
                     <span>A${orderTotal.toFixed(2)}</span>
                   </div>
                 </div>
-
                 <div className="mt-6 space-y-4">
                   <div className="flex items-center rounded-md bg-muted p-4">
                     <ShieldCheck className="mr-2 h-5 w-5 text-green-600" />
@@ -1806,7 +1979,6 @@ export default function CheckoutPage() {
               <ChevronRight className="mx-1 h-4 w-4" />
               <span className="text-foreground">Checkout</span>
             </div>
-
             <CheckoutContent />
           </div>
         </main>
