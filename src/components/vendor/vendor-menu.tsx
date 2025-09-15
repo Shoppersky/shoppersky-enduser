@@ -56,53 +56,56 @@ export function VendorMenu({
     const allCategory = { category_name: 'All', category_id: 'all', subcategories: [] }
     const allCategories = [allCategory, ...categories]
 
-    return allCategories.map((category) => {
-      const hasSubcategories = category.subcategories && category.subcategories.length > 0
-      const categoryValue = category.category_id === 'all' ? 'all' : category.category_name
-      const isSelected = selectedCategory === categoryValue
+ return allCategories.map((category) => {
+  const hasSubcategories = category.subcategories && category.subcategories.length > 0
+  const categoryValue = category.category_id === 'all' ? 'all' : category.category_name
+  const isSelected = selectedCategory === categoryValue
 
-      return (
+  return (
+    <div
+      key={category.category_id}
+      className="relative group"
+      onMouseEnter={() => hasSubcategories && setHoveredCategory(category.category_id)}
+      onMouseLeave={() => setHoveredCategory(null)}
+    >
+      <button
+        onClick={() => onCategorySelect?.(categoryValue)}
+        className={`flex items-center gap-1 text-sm font-medium transition-colors ${
+          isSelected
+            ? 'text-foreground border-b-2 border-primary'
+            : 'text-muted-foreground hover:text-foreground'
+        }`}
+      >
+        {category.category_name}
+        {hasSubcategories && (
+          <ChevronDown className="w-3 h-3 transition-transform duration-200" />
+        )}
+      </button>
+
+      {/* Subcategories Dropdown */}
+      {hasSubcategories && hoveredCategory === category.category_id && (
         <div
-          key={category.category_id}
-          className="relative"
-          onMouseEnter={() => hasSubcategories && setHoveredCategory(category.category_id)}
-          onMouseLeave={() => setHoveredCategory(null)}
+          className="absolute top-full left-0 bg-background border rounded-md shadow-lg py-2 min-w-[200px] z-50"
         >
-          <button
-            onClick={() => onCategorySelect?.(categoryValue)}
-            className={`flex items-center gap-1 text-sm font-medium transition-colors ${
-              isSelected
-                ? 'text-foreground border-b-2 border-primary'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {category.category_name}
-            {hasSubcategories && (
-              <ChevronDown className="w-3 h-3 transition-transform duration-200" />
-            )}
-          </button>
-
-          {/* Subcategories Dropdown */}
-          {hasSubcategories && hoveredCategory === category.category_id && (
-            <div className="absolute top-full left-0 mt-1 bg-background border rounded-md shadow-lg py-2 min-w-[200px] z-50">
-              {category.subcategories.map((subcategory) => (
-                <button
-                  key={subcategory.category_id}
-                  onClick={() => onCategorySelect?.(subcategory.category_name)}
-                  className={`w-full text-left px-4 py-2 text-sm transition-colors hover:bg-muted ${
-                    selectedCategory === subcategory.category_name
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {subcategory.category_name}
-                </button>
-              ))}
-            </div>
-          )}
+          {category.subcategories.map((subcategory) => (
+            <button
+              key={subcategory.subcategory_id}
+              onClick={() => onCategorySelect?.(subcategory.subcategory_name)}
+              className={`w-full text-left px-4 py-2 text-sm transition-colors hover:bg-muted ${
+                selectedCategory === subcategory.subcategory_name
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {subcategory.subcategory_name}
+            </button>
+          ))}
         </div>
-      )
-    })
+      )}
+    </div>
+  )
+})
+
   }, [categories, isLoading, selectedCategory, onCategorySelect, hoveredCategory])
 
   return (

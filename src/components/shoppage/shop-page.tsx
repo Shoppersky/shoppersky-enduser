@@ -39,7 +39,7 @@ export default function ShopPage() {
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000]);
   const [sortOption, setSortOption] = useState<string>('featured');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
@@ -82,6 +82,7 @@ export default function ShopPage() {
           inStock: item.in_stock !== undefined ? item.in_stock : true,
           badge: item.badge,
           badgeColor: item.badge_color,
+          category_slug:item.category_slug
         }));
         setProducts(mappedProducts);
         setFilteredProducts(mappedProducts);

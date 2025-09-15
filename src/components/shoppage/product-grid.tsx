@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Product } from '../../types/product';
@@ -44,14 +44,29 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
         {products.map((product) => {
           const ListProductCard = () => {
             const [quantity, setQuantity] = useState(1);
+            const [added, setAdded] = useState(false);
             const discountPercentage = product.originalPrice
               ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
               : 0;
 
+            // Initialize from localStorage to reflect existing cart items
+            useEffect(() => {
+              try {
+                const raw = typeof window !== 'undefined' ? localStorage.getItem('cart') : null;
+                if (raw) {
+                  const items = JSON.parse(raw);
+                  const exists = Array.isArray(items) && items.some((i: any) => String(i.id) === String(product.id));
+                  if (exists) setAdded(true);
+                }
+              } catch (_) {
+                // ignore parse errors
+              }
+            }, [product.id]);
+
             return (
               <div className="flex gap-3 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                  <Link href={`/${product.category.toLowerCase()}/${product.productSlug}`}>
+                  <Link href={`/${product.category_slug}/${product.productSlug}`}>
                     <Image 
                       src={product.image} 
                       alt={product.name} 
@@ -79,13 +94,13 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
                       <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
                         {product.category}
                       </div>
-                      <Link href={`/${product.category.toLowerCase()}/${product.productSlug}`}>
+                      <Link href={`/${product.category_slug}/${product.productSlug}`}>
                         <h3 className="font-semibold text-sm sm:text-base text-gray-900 cursor-pointer hover:text-green-600 transition-colors line-clamp-2">
                           {product.name}
                         </h3>
                       </Link>
                     </div>
-                    <Button
+                    {/* <Button
                       variant="ghost"
                       size="sm"
                       className="ml-2 p-1 sm:p-2 flex-shrink-0"
@@ -100,7 +115,7 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
                           isInWishlist(product.id) ? 'fill-red-500 text-red-500' : ''
                         }`}
                       />
-                    </Button>
+                    </Button> */}
                   </div>
                   
                   {/* Rating */}
@@ -140,42 +155,67 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
                       )}
                     </div>
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="flex items-center border rounded-lg">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-6 h-6 sm:w-8 sm:h-8 p-0"
-                          onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                        >
-                          <Minus className="w-2 h-2 sm:w-3 sm:h-3" />
-                        </Button>
-                        <span className="w-6 sm:w-8 text-center text-xs sm:text-sm">{quantity}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="w-6 h-6 sm:w-8 sm:h-8 p-0"
-                          onClick={() => setQuantity(quantity + 1)}
-                        >
-                          <Plus className="w-2 h-2 sm:w-3 sm:h-3" />
-                        </Button>
-                      </div>
-                      <Button
-                        onClick={() => addToCart({ ...product, quantity })}
-                        disabled={!product.inStock}
-                        className={`text-xs sm:text-sm px-2 sm:px-3 ${
-                          !product.inStock
-                            ? 'bg-gray-400 cursor-not-allowed'
-                            : 'bg-green-600 hover:bg-green-700'
-                        }`}
-                      >
-                        <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                        <span className="hidden sm:inline">
-                          {!product.inStock ? 'Out of Stock' : 'Add'}
-                        </span>
-                        <span className="sm:hidden">
-                          {!product.inStock ? 'Out' : '+'}
-                        </span>
-                      </Button>
+                      {!added && (
+                        <>
+                          <div className="flex items-center border rounded-lg">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-6 h-6 sm:w-8 sm:h-8 p-0"
+                              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                            >
+                              <Minus className="w-2 h-2 sm:w-3 sm:h-3" />
+                            </Button>
+                            <span className="w-6 sm:w-8 text-center text-xs sm:text-sm">{quantity}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="w-6 h-6 sm:w-8 sm:h-8 p-0"
+                              onClick={() => setQuantity(quantity + 1)}
+                            >
+                              <Plus className="w-2 h-2 sm:w-3 sm:h-3" />
+                            </Button>
+                          </div>
+                          <Button
+                            onClick={() => {
+                              addToCart({ ...product, quantity });
+                              try {
+                                const raw = localStorage.getItem('cart');
+                                const items = raw ? JSON.parse(raw) : [];
+                                const idx = items.findIndex((i: any) => String(i.id) === String(product.id));
+                                if (idx === -1) items.push({ ...product, quantity });
+                                else items[idx].quantity = (items[idx].quantity || 0) + quantity;
+                                localStorage.setItem('cart', JSON.stringify(items));
+                              } catch (_) {
+                                // ignore storage errors
+                              }
+                              setAdded(true);
+                            }}
+                            disabled={!product.inStock}
+                            className={`text-xs sm:text-sm px-2 sm:px-3 ${
+                              !product.inStock
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700'
+                            }`}
+                          >
+                            <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                            <span className="hidden sm:inline">
+                              {!product.inStock ? 'Out of Stock' : 'Add'}
+                            </span>
+                            <span className="sm:hidden">
+                              {!product.inStock ? 'Out' : '+'}
+                            </span>
+                          </Button>
+                        </>
+                      )}
+
+                      {added && (
+                        <Link href="/cart">
+                          <Button className="text-xs sm:text-sm px-2 sm:px-3 bg-green-600 hover:bg-green-700">
+                            Go to Cart
+                          </Button>
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>

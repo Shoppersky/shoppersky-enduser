@@ -674,7 +674,7 @@ const Navbar = () => {
   // Debounced search
   useEffect(() => {
     const handleSearch = async () => {
-      if (searchQuery.length < 2) {
+      if (searchQuery.length < 1) {
         setSearchResults([])
         setShowSearchDropout(false)
         return
@@ -754,6 +754,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout()
+     setUsername(null);
     router.push('/login')
   }
 
@@ -782,7 +783,7 @@ const Navbar = () => {
               <nav className="hidden lg:flex items-center gap-6 ml-6">
                 <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">Shop</Link>
                 <Link href="/vendors" className="text-sm font-medium hover:text-primary transition-colors">Vendors</Link>
-                <Link href="/deals" className="text-sm font-medium hover:text-primary transition-colors">Deals</Link>
+                {/* <Link href="/deals" className="text-sm font-medium hover:text-primary transition-colors">Deals</Link> */}
               </nav>
             </div>
 
@@ -791,14 +792,22 @@ const Navbar = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search products, vendors..."
-                  className="pl-10 pr-4 h-9 sm:h-10"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => {
-                    if (searchQuery.length >= 2) setShowSearchDropout(true)
-                  }}
-                />
+  placeholder="Search products, vendors..."
+  className="pl-10 pr-4 h-9 sm:h-10"
+  value={searchQuery}
+  onChange={(e) => setSearchQuery(e.target.value)}
+  onFocus={() => {
+    if (searchQuery.length >= 2) setShowSearchDropout(true)
+  }}
+  onKeyDown={(e) => {
+    if (e.key === "Enter" && searchResults.length > 0) {
+      window.location.href = `/${searchResults[0].category_slug}/${searchResults[0].slug}`
+      setSearchQuery("")
+      setShowSearchDropout(false)
+    }
+  }}
+/>
+
               </div>
 
               {showSearchDropout && (
@@ -1004,13 +1013,13 @@ const Navbar = () => {
             >
               Vendors
             </Link>
-            <Link
+            {/* <Link
               href="/deals"
               className="block px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
               onClick={closeMobileMenu}
             >
               Deals
-            </Link>
+            </Link> */}
           </div>
 
           {/* Industries Section */}

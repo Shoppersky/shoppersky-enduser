@@ -56,7 +56,8 @@ export function ProductCard({ product }: ProductCardProps) {
       {/* Product Image */}
       <div className="relative w-full aspect-square bg-gray-50 overflow-hidden">
         <Link 
-  href={`/${product.category?.toLowerCase() || 'unknown'}/${product.productSlug}`}
+href={`/${product.category_slug || 'unknown'}/${product.productSlug}`}
+
 >
 
           <Image

@@ -419,6 +419,7 @@ export default function CategoryPage({ params }: CategoryPageProps) {
           price: parseFloat(item.selling_price) || 0,
           image: item.thumbnail_image || FALLBACK_IMAGE,
           category: unwrappedParams.category,
+          category_slug:item.category_slug,
           inStock: item.stock,
           productSlug: item.slug,
           displayName: formatDisplayName(unwrappedParams.category), // Use formatted category

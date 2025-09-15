@@ -57,7 +57,9 @@ const fetchCategories=async()=>{
                 : undefined,
               image: item.images?.urls?.[0] || '/images/placeholder.svg', 
               category:item.category_name || 'Uncategorized',
+              subCategory: item.subcategory_name || 'General',
               productSlug: item.slug,
+              category_slug:item.category_slug,
               timestamp: item.timestamp,
               unit: 'unit',
               rating: item.rating || 0,
@@ -98,7 +100,7 @@ const fetchvendor=async()=>{
   }, [])
   const filteredProducts = products.filter(product => {
     // Filter by category
-    const categoryMatch = selectedCategory === 'all' || product.category === selectedCategory;
+    const categoryMatch = selectedCategory === 'all' || product.category === selectedCategory || product.subCategory === selectedCategory;
     
     // Filter by search query
     const searchMatch = !searchQuery || 

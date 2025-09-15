@@ -35,20 +35,28 @@ export default function SignupPage() {
   
   const router = useRouter();
 
-  // Local validation functions
-  const validateName = (name: string) => {
-    if (!name) {
-      return { isValid: false, error: 'Name is required' };
-    }
-    const nameRegex = /^[A-Za-z0-9\s!@#$%^&*(),.?":{}|<>_-]+$/;
-    if (!nameRegex.test(name)) {
-      return {
-        isValid: false,
-        error: 'Name can only contain letters, digits, spaces, and specific special characters',
-      };
-    }
-    return { isValid: true };
-  };
+const validateName = (name: string) => {
+  if (!name) {
+    return { isValid: false, error: "Name is required" };
+  }
+
+  // 🧹 Trim and collapse multiple spaces into one
+  const cleanedName = name.trim().replace(/\s+/g, " ");
+
+  // ✅ Only letters and single spaces allowed
+  const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+
+  if (!nameRegex.test(cleanedName)) {
+    return {
+      isValid: false,
+      error:
+        "Name can only contain letters and single spaces (no digits, no special characters).",
+    };
+  }
+
+  return { isValid: true, value: cleanedName };
+};
+
 
   const validateUsername = (username: string) => {
     if (!username) {
@@ -372,13 +380,17 @@ export default function SignupPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastname">Last Name *</Label>
+                    <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                   <Input
                     id="lastname"
                     placeholder="Doe"
                     value={formData.lastname}
+                    className='pl-10'
                     onChange={(e) => handleInputChange('lastname', e.target.value)}
                     required
                   />
+                  </div>
                   {errors.lastname && (
                     <p className="text-red-500 text-xs">{errors.lastname}</p>
                   )}

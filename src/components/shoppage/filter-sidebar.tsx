@@ -170,7 +170,7 @@ export function FilterSidebar({
               <Slider
                 value={priceRange}
                 onValueChange={(value) => onPriceChange(value as [number, number])}
-                max={99000}
+                max={9000}
                 step={10}
                 className="py-4"
               />
