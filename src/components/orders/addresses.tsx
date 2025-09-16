@@ -27,6 +27,9 @@ interface Address {
   zipCode: string;
   country: string;
   phone: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
 }
 
 interface AddressesProps {
@@ -49,6 +52,9 @@ export default function Addresses({
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const [addressForm, setAddressForm] = useState({
+    first_name: "",
+    last_name: "",
+    email: "",
     label: "",
     address: "",
     apartment: "",
@@ -74,6 +80,9 @@ export default function Addresses({
     if (address) {
       setEditingAddress(address);
       setAddressForm({
+        first_name: address.first_name || "",
+        last_name: address.last_name || "",
+        email: address.email || "",
         label: address.type,
         address: address.address,
         apartment: address.apartment || "",
@@ -86,6 +95,9 @@ export default function Addresses({
     } else {
       setEditingAddress(null);
       setAddressForm({
+        first_name: "",
+        last_name: "",
+        email: "",
         label: "",
         address: "",
         apartment: "",
@@ -101,75 +113,57 @@ export default function Addresses({
 
   const handleAddressSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const street = addressForm.address.trim();
-    const apartment = addressForm.apartment?.trim();
-    const city = addressForm.city.trim();
-    const state = addressForm.state.trim().toUpperCase();
-    const postcode = addressForm.zipCode.trim();
-    const country = addressForm.country.trim() || "Australia";
-    const phone = addressForm.phone.trim();
-    const type = addressForm.label.trim();
+    const {
+      first_name,
+      last_name,
+      email,
+      label,
+      address,
+      apartment,
+      city,
+      state,
+      zipCode,
+      country,
+      phone,
+    } = addressForm;
 
-    // Validation
-    // Validation
     const newErrors: { [key: string]: string } = {};
 
-    const isEmpty = (val: string | undefined | null) =>
-      !val || val.trim() === "";
+// Safer empty check
+const isEmpty = (val: any) => typeof val !== "string" || val.trim() === "";
 
-    // Allowed characters: letters, numbers, space, -, (), ', /
-    const validCharsRegex = /^[A-Za-z0-9\s\-()'\/]+$/;
+// Required checks
+if (isEmpty(first_name)) newErrors.first_name = "First name is required";
+if (isEmpty(last_name)) newErrors.last_name = "Last name is required";
+if (isEmpty(email)) newErrors.email = "Email is required";
+else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+  newErrors.email = "Enter a valid email address";
+if (isEmpty(label)) newErrors.type = "Address type is required";
+if (isEmpty(address)) newErrors.address = "Street address is required";
+if (isEmpty(city)) newErrors.city = "City is required";
+if (isEmpty(state)) newErrors.state = "State is required";
+if (isEmpty(zipCode)) newErrors.zipCode = "Postcode is required";
+if (isEmpty(country)) newErrors.country = "Country is required";
+if (isEmpty(phone)) newErrors.phone = "Phone number is required";
 
-    // Helper for invalid character check
-    const hasInvalidChars = (val: string) => !validCharsRegex.test(val.trim());
 
-    // Required field checks
-    if (isEmpty(type)) newErrors.type = "Address type is required";
-    if (isEmpty(street)) newErrors.address = "Street address is required";
-    if (isEmpty(city)) newErrors.city = "City is required";
-    if (isEmpty(state)) newErrors.state = "State is required";
-    if (isEmpty(postcode)) newErrors.zipCode = "Postcode is required";
-    if (isEmpty(country)) newErrors.country = "Country is required";
-    if (isEmpty(phone)) newErrors.phone = "Phone number is required";
-
-    // Special character restrictions (for applicable fields)
-    if (!isEmpty(street) && hasInvalidChars(street)) {
-      newErrors.address = "Street address contains invalid characters";
-    }
-    if (!isEmpty(city) && hasInvalidChars(city)) {
-      newErrors.city = "City contains invalid characters";
-    }
-    if (!isEmpty(state) && hasInvalidChars(state)) {
-      newErrors.state = "State contains invalid characters";
-    }
-    if (!isEmpty(country) && hasInvalidChars(country)) {
-      newErrors.country = "Country contains invalid characters";
-    }
-    if (!isEmpty(type) && hasInvalidChars(type)) {
-      newErrors.type = "Address type contains invalid characters";
-    }
-
-    // Postcode validation (must be 4-digit Australian postcode)
-    if (!isEmpty(postcode) && !/^\d{4}$/.test(postcode!.trim())) {
+    // Postcode validation
+    if (!isEmpty(zipCode) && !/^\d{4}$/.test(zipCode.trim())) {
       newErrors.zipCode = "Postcode must be a 4-digit Australian postcode";
     }
 
-    // State validation (must be one of the known codes)
+    // State validation
     const validStates = ["NSW", "VIC", "QLD", "WA", "SA", "TAS", "NT", "ACT"];
-    if (!isEmpty(state) && !validStates.includes(state!.trim().toUpperCase())) {
+    if (!isEmpty(state) && !validStates.includes(state.trim().toUpperCase())) {
       newErrors.state = `State must be one of: ${validStates.join(", ")}`;
     }
 
-    // Phone validation (Australian format)
-    if (
-      !isEmpty(phone) &&
-      !/^(?:\+?61|0)[2-478]\d{8}$/.test(phone.replace(/\s+/g, ""))
-    ) {
+    // Phone validation
+    if (!isEmpty(phone) && !/^(?:\+?61|0)[2-478]\d{8}$/.test(phone.replace(/\s+/g, ""))) {
       newErrors.phone = "Enter a valid Australian phone number";
     }
 
     setErrors(newErrors);
-
     if (Object.keys(newErrors).length > 0) {
       toast.error("Please fix the form errors before submitting.");
       return;
@@ -184,13 +178,16 @@ export default function Addresses({
           id: editingAddress.id,
           addresses: [
             {
-              label: type,
+              label,
               details: {
-                street,
+                first_name,
+                last_name,
+                email,
+                street: address,
                 apartment: apartment || undefined,
                 city,
                 state,
-                postcode,
+                postcode: zipCode,
                 country,
                 phone,
               },
@@ -198,23 +195,24 @@ export default function Addresses({
           ],
         };
 
-        res = await axiosInstance.put(
-          `/users/profiles/address/${userId}`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        res = await axiosInstance.put(`/users/profiles/address/${userId}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         toast.success("Address updated successfully!");
       } else {
         payload = {
           addresses: [
             {
-              label: type,
+              label,
               details: {
-                street,
+                first_name,
+                last_name,
+                email,
+                street: address,
                 apartment: apartment || undefined,
                 city,
                 state,
-                postcode,
+                postcode: zipCode,
                 country,
                 phone,
               },
@@ -222,11 +220,9 @@ export default function Addresses({
           ],
         };
 
-        res = await axiosInstance.put(
-          `/users/profiles/add_address/${userId}`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        res = await axiosInstance.put(`/users/profiles/add_address/${userId}`, payload, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         toast.success("Address added successfully!");
       }
 
@@ -236,9 +232,7 @@ export default function Addresses({
       }
 
       const raw = editingAddress
-        ? rawAddresses.find(
-            (a: any) => String(a.id) === String(editingAddress.id)
-          )
+        ? rawAddresses.find((a: any) => String(a.id) === String(editingAddress.id))
         : rawAddresses[rawAddresses.length - 1];
 
       const parsedAddress: Address = {
@@ -252,20 +246,22 @@ export default function Addresses({
         zipCode: raw.details.postcode,
         country: raw.details.country,
         phone: raw.details.phone || "",
+        first_name: raw.details.first_name || "",
+        last_name: raw.details.last_name || "",
+        email: raw.details.email || "",
       };
 
       if (editingAddress) {
-        setAddresses(
-          addresses.map((addr) =>
-            addr.id === editingAddress.id ? parsedAddress : addr
-          )
-        );
+        setAddresses(addresses.map((addr) => (addr.id === editingAddress.id ? parsedAddress : addr)));
       } else {
         setAddresses([...addresses, parsedAddress]);
       }
 
       setIsAddressModalOpen(false);
       setAddressForm({
+        first_name: "",
+        last_name: "",
+        email: "",
         label: "",
         address: "",
         apartment: "",
@@ -276,9 +272,7 @@ export default function Addresses({
         phone: "",
       });
     } catch (err: any) {
-      toast.error(
-        "Failed to save address: " + (err.response?.data?.detail || err.message)
-      );
+      toast.error("Failed to save address: " + (err.response?.data?.detail || err.message));
     }
   };
 
@@ -289,15 +283,9 @@ export default function Addresses({
         { address_id: Number(addressId) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setAddresses(
-        addresses.map((addr) => ({
-          ...addr,
-          default: addr.id === addressId,
-        }))
-      );
+      setAddresses(addresses.map((addr) => ({ ...addr, default: addr.id === addressId })));
       toast.success("Default address updated successfully!");
-    } catch (err) {
+    } catch {
       toast.error("Failed to set default address.");
     }
   };
@@ -309,16 +297,14 @@ export default function Addresses({
 
   const handleDeleteAddress = async () => {
     if (!addressToDelete) return;
-
     try {
       await axiosInstance.delete(`/users/profiles/address/${userId}`, {
         data: { address_id: Number(addressToDelete) },
         headers: { Authorization: `Bearer ${token}` },
       });
-
       setAddresses(addresses.filter((addr) => addr.id !== addressToDelete));
       toast.success("Address deleted successfully!");
-    } catch (err) {
+    } catch {
       toast.error("Failed to delete address.");
     } finally {
       setIsDeleteDialogOpen(false);
@@ -338,9 +324,7 @@ export default function Addresses({
           <Card key={address.id}>
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
-                <CardTitle className="text-lg font-medium">
-                  {address.type}
-                </CardTitle>
+                <CardTitle className="text-lg font-medium">{address.type}</CardTitle>
                 {address.default && (
                   <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
                     Default
@@ -350,6 +334,9 @@ export default function Addresses({
             </CardHeader>
             <CardContent>
               <div className="space-y-1">
+                <p>
+                  {address.first_name} {address.last_name} ({address.email})
+                </p>
                 <p>{address.address}</p>
                 {address.apartment && <p>{address.apartment}</p>}
                 <p>
@@ -359,19 +346,11 @@ export default function Addresses({
                 <p>{address.phone}</p>
               </div>
               <div className="mt-4 flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => openAddressModal(address)}
-                >
+                <Button variant="outline" size="sm" onClick={() => openAddressModal(address)}>
                   Edit
                 </Button>
                 {!address.default && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleSetDefault(address.id)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => handleSetDefault(address.id)}>
                     Set as Default
                   </Button>
                 )}
@@ -395,41 +374,68 @@ export default function Addresses({
       <Dialog open={isAddressModalOpen} onOpenChange={setIsAddressModalOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {editingAddress ? "Edit Address" : "Add New Address"}
-            </DialogTitle>
+            <DialogTitle>{editingAddress ? "Edit Address" : "Add New Address"}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAddressSubmit} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="firstname">First Name</Label>
+                <Input
+                  id="firstname"
+                  value={addressForm.first_name}
+                  onChange={(e) => setAddressForm({ ...addressForm, first_name: e.target.value })}
+                  placeholder="Jane"
+                  required
+                />
+                {errors.first_name && <p className="text-xs text-red-500">{errors.first_name}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="lastname">Last Name</Label>
+                <Input
+                  id="lastname"
+                  value={addressForm.last_name}
+                  onChange={(e) => setAddressForm({ ...addressForm, last_name: e.target.value })}
+                  placeholder="Doe"
+                  required
+                />
+                {errors.last_name && <p className="text-xs text-red-500">{errors.last_name}</p>}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                value={addressForm.email}
+                onChange={(e) => setAddressForm({ ...addressForm, email: e.target.value })}
+                placeholder="janedoe@gmail.com"
+                required
+              />
+              {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="type">Address Type</Label>
               <Input
                 id="type"
                 value={addressForm.label}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, label: e.target.value })
-                }
+                onChange={(e) => setAddressForm({ ...addressForm, label: e.target.value })}
                 placeholder="e.g., Home, Work"
                 required
               />
-              {errors.type && (
-                <p className="text-xs text-red-500">{errors.type}</p>
-              )}
+              {errors.type && <p className="text-xs text-red-500">{errors.type}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="address">Street Address</Label>
+              <Label htmlFor="address">Street</Label>
               <Input
                 id="address"
                 value={addressForm.address}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, address: e.target.value })
-                }
+                onChange={(e) => setAddressForm({ ...addressForm, address: e.target.value })}
                 placeholder="Street Address"
                 required
               />
-              {errors.address && (
-                <p className="text-xs text-red-500">{errors.address}</p>
-              )}
+              {errors.address && <p className="text-xs text-red-500">{errors.address}</p>}
             </div>
 
             <div className="space-y-2">
@@ -437,9 +443,7 @@ export default function Addresses({
               <Input
                 id="apartment"
                 value={addressForm.apartment}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, apartment: e.target.value })
-                }
+                onChange={(e) => setAddressForm({ ...addressForm, apartment: e.target.value })}
                 placeholder="Apartment or Suite"
               />
             </div>
@@ -450,24 +454,18 @@ export default function Addresses({
                 <Input
                   id="city"
                   value={addressForm.city}
-                  onChange={(e) =>
-                    setAddressForm({ ...addressForm, city: e.target.value })
-                  }
+                  onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
                   placeholder="City"
                   required
                 />
-                {errors.city && (
-                  <p className="text-xs text-red-500">{errors.city}</p>
-                )}
+                {errors.city && <p className="text-xs text-red-500">{errors.city}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="state">State</Label>
                 <select
                   id="state"
                   value={addressForm.state}
-                  onChange={(e) =>
-                    setAddressForm({ ...addressForm, state: e.target.value })
-                  }
+                  onChange={(e) => setAddressForm({ ...addressForm, state: e.target.value })}
                   className="w-full rounded-md border px-3 py-2 text-sm"
                   required
                 >
@@ -478,9 +476,7 @@ export default function Addresses({
                     </option>
                   ))}
                 </select>
-                {errors.state && (
-                  <p className="text-xs text-red-500">{errors.state}</p>
-                )}
+                {errors.state && <p className="text-xs text-red-500">{errors.state}</p>}
               </div>
             </div>
 
@@ -490,15 +486,11 @@ export default function Addresses({
                 <Input
                   id="zipCode"
                   value={addressForm.zipCode}
-                  onChange={(e) =>
-                    setAddressForm({ ...addressForm, zipCode: e.target.value })
-                  }
+                  onChange={(e) => setAddressForm({ ...addressForm, zipCode: e.target.value })}
                   placeholder="4-digit Postcode"
                   required
                 />
-                {errors.zipCode && (
-                  <p className="text-xs text-red-500">{errors.zipCode}</p>
-                )}
+                {errors.zipCode && <p className="text-xs text-red-500">{errors.zipCode}</p>}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="country">Country</Label>
@@ -516,28 +508,18 @@ export default function Addresses({
               <Input
                 id="phone"
                 value={addressForm.phone}
-                onChange={(e) =>
-                  setAddressForm({ ...addressForm, phone: e.target.value })
-                }
+                onChange={(e) => setAddressForm({ ...addressForm, phone: e.target.value })}
                 placeholder="Australian Phone Number"
                 required
               />
-              {errors.phone && (
-                <p className="text-xs text-red-500">{errors.phone}</p>
-              )}
+              {errors.phone && <p className="text-xs text-red-500">{errors.phone}</p>}
             </div>
 
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsAddressModalOpen(false)}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsAddressModalOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit">
-                {editingAddress ? "Update Address" : "Save Address"}
-              </Button>
+              <Button type="submit">{editingAddress ? "Update Address" : "Save Address"}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
@@ -548,15 +530,11 @@ export default function Addresses({
           <DialogHeader>
             <DialogTitle>Delete Address</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete this address? This action cannot
-              be undone.
+              Are you sure you want to delete this address? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
               Cancel
             </Button>
             <Button variant="destructive" onClick={handleDeleteAddress}>
