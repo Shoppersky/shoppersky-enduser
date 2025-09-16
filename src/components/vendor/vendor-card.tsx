@@ -72,7 +72,9 @@ export function VendorCard({ vendor }: VendorCardProps) {
 
           {/* Stats */}
           <div className="space-y-2 mb-4">
+            <h3 className="font-semibold text-lg truncate">{vendor.store_name}</h3>
             <div className="flex items-center gap-1">
+               
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span className="text-sm font-medium">{vendor.rating}</span>
               <span className="text-sm text-muted-foreground">

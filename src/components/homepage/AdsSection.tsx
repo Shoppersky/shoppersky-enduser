@@ -1215,7 +1215,7 @@ export default function Home() {
             <>
               <button
                 onClick={() => prevSlide(section.id, totalSlides)}
-                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-200 -ml-4 sm:-ml-6"
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-10 rounded-full p-1 bg-white shadow-lg hover:shadow-xl transition-all duration-200 -ml-4 sm:-ml-6"
                 disabled={currentSlide === 0}
                 aria-label="Previous slide"
               >
@@ -1223,7 +1223,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => nextSlide(section.id, totalSlides)}
-                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 sm:p-3 shadow-lg hover:shadow-xl transition-all duration-200 -mr-4 sm:-mr-6"
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-10 rounded-full p-1 bg-white  shadow-lg hover:shadow-xl transition-all duration-200 -mr-4 sm:-mr-6"
                 disabled={currentSlide === totalSlides - 1}
                 aria-label="Next slide"
               >
