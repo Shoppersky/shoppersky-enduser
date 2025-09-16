@@ -14,6 +14,12 @@ import { useWishlist } from './wishlist-provider'
 import { CartSidebar } from './cart-sidebar'
 import axiosInstance from '../lib/axiosInstance'
 import useAuthStore from '@/lib/Zustand'
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu"
 
 interface SearchResult {
   product_id: string
@@ -326,7 +332,7 @@ const Navbar = () => {
 </Link>
 
               {/* User Profile - Desktop and Mobile */}
-              <div className="relative hidden sm:flex items-center" ref={userMenuRef}>
+              {/* <div className="relative hidden sm:flex items-center" ref={userMenuRef}>
                 <Button variant="ghost" size="icon" onClick={handleUserClick} className="h-8 sm:h-10">
                   <User className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
@@ -351,7 +357,38 @@ const Navbar = () => {
                     </button>
                   </div>
                 )}
-              </div>
+              </div> */}
+{isAuthenticated ? (
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <div className="flex items-center cursor-pointer" ref={userMenuRef}>
+        <Button variant="ghost" size="icon" className="h-8 sm:h-10">
+          <User className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
+        {username && (
+          <span className=" text-sm hidden lg:inline">{username}</span>
+        )}
+      </div>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent align="end" className="w-40">
+      <DropdownMenuItem onClick={() => router.push("/MyAccount")}>
+        My Account
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={handleLogout}>
+        Logout
+      </DropdownMenuItem>
+    </DropdownMenuContent>
+  </DropdownMenu>
+) : (
+  <Button
+    variant="ghost"
+    size="icon"
+    className="h-8 sm:h-10"
+    onClick={() => router.push("/login")}
+  >
+    <User className="h-4 w-4 sm:h-5 sm:w-5" />
+  </Button>
+)}
 
               {/* Mobile Menu Button */}
               <Button

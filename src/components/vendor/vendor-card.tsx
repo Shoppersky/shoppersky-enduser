@@ -28,7 +28,8 @@ interface VendorCardProps {
 export function VendorCard({ vendor }: VendorCardProps) {
   console.log(vendor);
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+    <Card className="group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 p-0">
+      <Link href={`/vendors/${vendor.slug}`} className="block">
       <CardContent className="p-0">
         {/* Banner */}
         <div className="relative h-32 overflow-hidden rounded-t-lg">
@@ -96,7 +97,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
           </div>
 
           {/* Categories */}
-          <div className="flex flex-wrap gap-1 mb-4">
+          <div className="flex flex-wrap gap-1 mb-4 h-10">
             {vendor.categories.slice(1, 4).map((category) => (
               <Badge key={category} variant="secondary" className="text-xs">
                 {category}
@@ -117,6 +118,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
           </Link>
         </div>
       </CardContent>
+      </Link>
     </Card>
   );
 }

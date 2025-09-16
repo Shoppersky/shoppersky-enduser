@@ -1312,11 +1312,7 @@ export default function Home() {
                             </div>
 
                             {/* Options Info */}
-                            {product.optionsFrom && (
-                              <p className="text-xs text-gray-600 mb-1 sm:mb-2">
-                                More options from ${product.optionsFrom.toFixed(2)}
-                              </p>
-                            )}
+                       
 
                             {/* Product Name */}
                             <h3 className="text-xs sm:text-sm text-gray-800 mb-2 sm:mb-3 line-clamp-2 leading-relaxed">

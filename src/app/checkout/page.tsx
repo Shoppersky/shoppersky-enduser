@@ -1469,7 +1469,7 @@ function CheckoutContent() {
                               />
                               <Label
                                 htmlFor={`addr-${addr.id}`}
-                                className="flex-1 cursor-pointer flex flex-col space-y-1 text-left"
+                                className="flex-1 cursor-pointer flex flex-col space-y-1 text-left items-start"
                               >
                                 {/* Row 1: Label + Name */}
                                 <div className="flex items-center space-x-2">

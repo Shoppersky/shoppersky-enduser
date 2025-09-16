@@ -66,16 +66,16 @@ const FeaturedProducts = () => {
                       <Tag className="h-4 w-4 text-indigo-600" />
                       <h3 className="text-lg font-semibold text-gray-800">{cat.category}</h3>
                     </div>
-                    <p className="text-sm text-gray-600 line-clamp-2">{cat.description}</p>
+                    <p className="text-sm text-gray-600 line-clamp-2 h-10">{cat.description}</p>
                   </div>
                 </div>
 
                 <div className="mt-4 flex items-center justify-between">
-                  <button className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-blue-600 transition-colors">
+                  <button className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-indigo-600 text-white text-sm font-semibold hover:bg-blue-600 transition-colors whitespace-nowrap">
                     Shop {cat.category}
                     <ArrowRight className="h-4 w-4" />
                   </button>
-                  <span className="text-xs text-gray-500">Limited time</span>
+                 
                 </div>
               </div>
             </div>
