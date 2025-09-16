@@ -88,7 +88,6 @@ interface Order {
 }
 
 export default function AccountPage() {
-  // const [activeTab, setActiveTab] = useState("overview");
   const { userId, token, isAuthenticated, logout, checkAuth } = useStore();
   const router = useRouter();
   const [user, setUser] = useState<any>({});

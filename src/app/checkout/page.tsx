@@ -29,13 +29,14 @@ type Address = {
   type: string;
   default: boolean;
   name: string;
-  address: string;
+  street: string;
   apartment?: string;
   city: string;
   state: string;
   zipCode: string;
   country: string;
   phone: string;
+  email: string;
 };
 
 type CheckoutItem = {
@@ -97,7 +98,7 @@ function CheckoutContent() {
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
     null
   );
-  const [showNewAddressForm, setShowNewAddressForm] = useState(addresses.length === 0);
+  const [showNewAddressForm, setShowNewAddressForm] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateField = (name: string, value: string) => {
@@ -171,7 +172,8 @@ function CheckoutContent() {
     const fieldsToValidate = [
       "firstName",
       "lastName",
-      "address",
+      "street",
+      "apartment",
       "city",
       "state",
       "postcode",
@@ -259,36 +261,48 @@ function CheckoutContent() {
       try {
         const res = await axiosInstance.get(`/users/profiles/${userId}`);
         const userData = res.data.data;
+
         if (userData.address && Array.isArray(userData.address)) {
           const mappedAddresses: Address[] = userData.address.map(
             (addr: any) => {
-              const details = addr.details || addr;
+              const details = addr.details || {};
               return {
                 id: String(addr.id),
                 type: addr.label || "Other",
                 default: addr.is_default || false,
-                name: userData.username || "N/A",
-                address: details.street || "",
+                name: `${details.first_name || ""} ${details.last_name || ""}`.trim(),
+                street: details.street || "",
                 apartment: details.apartment || "",
                 city: details.city || "",
                 state: details.state || "",
                 zipCode: details.postcode || "",
                 country: details.country || "",
-                phone: details.phone || userData.phone_number || "",
+                phone: details.phone || "",
+                email: details.email || "",
               };
             }
           );
+
           setAddresses(mappedAddresses);
           const defaultAddr = mappedAddresses.find((a) => a.default);
-          if (defaultAddr) setSelectedAddressId(defaultAddr.id);
+          if (defaultAddr) {
+            setSelectedAddressId(defaultAddr.id);
+          } else if (mappedAddresses.length > 0) {
+            setSelectedAddressId(mappedAddresses[0].id); // Select first address if no default
+          } else {
+            setShowNewAddressForm(true); // Show new address form if no addresses
+          }
+        } else {
+          setShowNewAddressForm(true); // Show new address form if no addresses
         }
       } catch (err) {
         console.error("Failed to fetch user info:", err);
+        setShowNewAddressForm(true); // Fallback to new address form on error
       }
     };
+
     fetchUser();
   }, [userId]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -330,15 +344,25 @@ function CheckoutContent() {
         const chosen = addresses.find((a) => a.id === selectedAddressId)!;
         finalAddress = {
           label: chosen.type,
-          street: `${chosen.address}${chosen.apartment ? `, ${chosen.apartment}` : ""}`,
+          street: chosen.street,
+          apartment: chosen.apartment || "",
           city: chosen.city,
           state: chosen.state,
           postcode: chosen.zipCode,
           country: chosen.country,
+          first_name: chosen.name.split(" ")[0] || "",
+          last_name: chosen.name.split(" ")[1] || "",
+          phone: chosen.phone,
+          email: chosen.email, // fallback
         };
         addressId = chosen.id;
       } else {
         finalAddress = {
+          first_name: shippingAddress.firstName,
+          last_name: shippingAddress.lastName,
+          phone: shippingAddress.phone,
+          email: shippingAddress.email,
+          apartment: shippingAddress.apartment,
           label: shippingAddress.label,
           street: `${shippingAddress.address}${shippingAddress.apartment ? `, ${shippingAddress.apartment}` : ""}`,
           city: shippingAddress.city,
@@ -493,7 +517,7 @@ function CheckoutContent() {
 
                                 {/* Row 2: Full address */}
                                 <div className="text-sm text-gray-700">
-                                  {addr.address}
+                                  {addr.street}
                                   {addr.apartment &&
                                     `, ${addr.apartment}`}, {addr.city},{" "}
                                   {addr.state}, {addr.country} {addr.zipCode}
@@ -854,7 +878,7 @@ function CheckoutContent() {
                               <p className="text-sm">
                                 {chosen.name}
                                 <br />
-                                {chosen.address}
+                                {chosen.street}
                                 {chosen.apartment && `, ${chosen.apartment}`}
                                 <br />
                                 {chosen.city}, {chosen.state} {chosen.zipCode}

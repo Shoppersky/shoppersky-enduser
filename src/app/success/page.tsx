@@ -1,12 +1,11 @@
+"use client";
 
-'use client';
-
-import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { Check } from 'lucide-react';
-import axiosInstance from '@/lib/axiosInstance';
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Check } from "lucide-react";
+import axiosInstance from "@/lib/axiosInstance";
 
 function SuccessPage() {
   return (
@@ -24,29 +23,34 @@ function SuccessPage() {
 
 function SuccessContent() {
   const searchParams = useSearchParams();
-  const sessionId = searchParams.get('session_id');
+  const sessionId = searchParams.get("session_id");
   const [orderId, setOrderId] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     if (!sessionId) {
-      setError('No session ID provided');
+      setError("No session ID provided");
       setIsLoading(false);
       return;
     }
 
     const verifySession = async () => {
       try {
-        const response = await axiosInstance.get(`/orders/checkout-session/${sessionId}`);
+        const response = await axiosInstance.get(
+          `/orders/checkout-session/${sessionId}`
+        );
         const { data } = response.data;
         setOrderId(data.order.order_id);
-        setEmail(localStorage.getItem('checkoutEmail') || 'your email');
+        setEmail(localStorage.getItem("checkoutEmail") || "your email");
       } catch (error: any) {
-        console.error('Error verifying session:', error);
+        console.error("Error verifying session:", error);
         setError(
-          error.response?.data?.detail || error.message || 'Failed to verify payment'
+          error.response?.data?.detail ||
+            error.message ||
+            "Failed to verify payment"
         );
       } finally {
         setIsLoading(false);
@@ -86,16 +90,21 @@ function SuccessContent() {
         </div>
         <h2 className="mb-2 text-2xl font-bold">Thank You for Your Order!</h2>
         <p className="mb-6 text-muted-foreground">
-          Your order has been placed successfully. We&apos;ve sent a confirmation email to {email}.
+          Your order has been placed successfully. We&apos;ve sent a
+          confirmation email to {email}.
         </p>
         <div className="mb-6 rounded-md border p-4 text-left">
           <h3 className="mb-2 font-medium">Order Number</h3>
           <p className="text-lg font-bold">{orderId}</p>
         </div>
         <div className="space-y-4">
-          <Button asChild className="w-full">
-            <Link href="/account/orders">View Order</Link>
+          <Button
+            className="w-full"
+            onClick={() => router.push(`/MyAccount/orders/${orderId}`)}
+          >
+            View Order
           </Button>
+
           <Button variant="outline" asChild className="w-full">
             <Link href="/">Continue Shopping</Link>
           </Button>
