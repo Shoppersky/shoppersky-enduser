@@ -311,7 +311,7 @@ if (isEmpty(phone)) newErrors.phone = "Phone number is required";
       setAddressToDelete(null);
     }
   };
-
+console.log("Addresses component rendered with addresses:", addresses);
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -335,8 +335,9 @@ if (isEmpty(phone)) newErrors.phone = "Phone number is required";
             <CardContent>
               <div className="space-y-1">
                 <p>
-                  {address.first_name} {address.last_name} ({address.email})
+                  {address.name} 
                 </p>
+                <p>{address.email}</p>
                 <p>{address.address}</p>
                 {address.apartment && <p>{address.apartment}</p>}
                 <p>

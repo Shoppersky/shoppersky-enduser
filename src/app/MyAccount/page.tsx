@@ -47,15 +47,15 @@ const paymentMethods = [
   },
 ];
 
-const wishlistItems = [
-  {
-    id: "1",
-    name: "Smart Watch",
-    price: 199.99,
-    image: "/images/images/placeholder.svg?height=80&width=80",
-    inStock: true,
-  },
-];
+// const wishlistItems = [
+//   {
+//     id: "1",
+//     name: "Smart Watch",
+//     price: 199.99,
+//     image: "/images/images/placeholder.svg?height=80&width=80",
+//     inStock: true,
+//   },
+// ];
 
 interface Address {
   id: string;
@@ -161,6 +161,8 @@ export default function AccountPage() {
             (addr: any) => ({
               id: String(addr.id),
               type: addr.label,
+              email: addr.details.email,
+              name: addr.details.first_name + " " + addr.details.last_name,
               default: addr.is_default,
               address: addr.details.street,
               apartment: addr.details.apartment || "",
@@ -260,12 +262,12 @@ export default function AccountPage() {
       icon: CreditCard,
       id: "payment",
     },
-    {
-      name: "Wishlist",
-      href: "/account/wishlist",
-      icon: Heart,
-      id: "wishlist",
-    },
+    // {
+    //   name: "Wishlist",
+    //   href: "/account/wishlist",
+    //   icon: Heart,
+    //   id: "wishlist",
+    // },
     {
       name: "Settings",
       href: "/account/settings",
@@ -342,7 +344,7 @@ export default function AccountPage() {
 
                 {activeTab === "more" && (
                   <div className="mt-4 space-y-1">
-                    {accountNavigation.slice(3).map((item) => (
+                    {accountNavigation.slice(2).map((item) => (
                       <Button
                         key={item.name}
                         variant="ghost"
@@ -437,7 +439,7 @@ export default function AccountPage() {
                       </CardContent>
                     </Card>
 
-                    <Card>
+                    {/* <Card>
                       <CardHeader className="pb-2">
                         <CardTitle className="flex items-center text-sm font-medium">
                           <Heart className="mr-2 h-4 w-4" />
@@ -460,7 +462,7 @@ export default function AccountPage() {
                           View Wishlist
                         </Button>
                       </CardContent>
-                    </Card>
+                    </Card> */}
                   </div>
 
                   <div className="space-y-4">
@@ -619,7 +621,7 @@ export default function AccountPage() {
               )}
 
               {/* Wishlist Tab */}
-              {activeTab === "wishlist" && (
+              {/* {activeTab === "wishlist" && (
                 <div className="space-y-6">
                   <h1 className="text-2xl font-bold">My Wishlist</h1>
                   <div className="rounded-md border">
@@ -673,7 +675,7 @@ export default function AccountPage() {
                     ))}
                   </div>
                 </div>
-              )}
+              )} */}
 
               {/* Settings Tab */}
               {activeTab === "settings" && (

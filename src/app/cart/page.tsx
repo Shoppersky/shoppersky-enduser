@@ -50,7 +50,7 @@ function CartPageContent() {
     if (isAuthenticated) {
       router.push('/checkout');
     } else {
-      router.push('/login');
+      router.push('/login?redirect=/checkout');
     }
   };
 console.log(cartItems);
@@ -150,6 +150,7 @@ console.log(cartItems);
                   </div>
                 </div>
               </li>
+              
             ))}
           </ul>
 

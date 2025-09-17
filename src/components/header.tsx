@@ -61,7 +61,7 @@ export function Header() {
   const { isLoggedIn, userId, token, checkAuth } = useAuth();
  
   const [industries, setIndustries] = useState<Industry[]>([]);
-  const [userName, setUserName] = useState<string>('User');
+
   const carouselRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
  
@@ -75,23 +75,7 @@ export function Header() {
   const decodedPathname = decodeURIComponent(pathname);
  
   // Fetch user profile
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (!isLoggedIn || !userId || !token) {
-        setUserName('User');
-        return;
-      }
-      try {
-        const response = await axiosInstance.get(`user-profile/${userId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUserName(response.data.user_fullname || 'User');
-      } catch {
-        setUserName('User');
-      }
-    };
-    fetchUserProfile();
-  }, [isLoggedIn, userId, token]);
+
  
   // Fetch industries
   useEffect(() => {

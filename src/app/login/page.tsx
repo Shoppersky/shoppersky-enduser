@@ -211,12 +211,14 @@ import { ArrowLeft, Eye, EyeOff, Mail, Lock, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 import Link from 'next/link';
 import useStore from '../../lib/Zustand';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import axiosInstance from '../../lib/axiosInstance';
 
 export default function LoginPage() {
   const { login, validateEmail, validatePassword } = useStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectPath = searchParams.get('redirect') || '/';
 
   const [formData, setFormData] = useState({
     email: "",
@@ -275,7 +277,7 @@ export default function LoginPage() {
         console.log('Post-login localStorage:', localStorage.getItem('auth-storage'));
         
         toast.success("Welcome back! You've been logged in successfully.");
-        router.push('/');
+        router.push(redirectPath);
       }
     } catch (error: any) {
       console.log('Login error:', error);
