@@ -133,8 +133,18 @@ export default function Addresses({
 const isEmpty = (val: any) => typeof val !== "string" || val.trim() === "";
 
 // Required checks
-if (isEmpty(first_name)) newErrors.first_name = "First name is required";
-if (isEmpty(last_name)) newErrors.last_name = "Last name is required";
+if (isEmpty(first_name)) {
+  newErrors.first_name = "First name is required";
+} else if (first_name.length > 50) {
+  newErrors.first_name = "First name must not exceed 50 characters";
+}
+
+if (isEmpty(last_name)) {
+  newErrors.last_name = "Last name is required";
+} else if (last_name.length > 50) {
+  newErrors.last_name = "Last name must not exceed 50 characters";
+}
+
 if (isEmpty(email)) newErrors.email = "Email is required";
 else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
   newErrors.email = "Enter a valid email address";
@@ -335,7 +345,7 @@ console.log("Addresses component rendered with addresses:", addresses);
             <CardContent>
               <div className="space-y-1">
                 <p>
-                  {address.name} 
+      {address.first_name} {address.last_name}
                 </p>
                 <p>{address.email}</p>
                 <p>{address.address}</p>

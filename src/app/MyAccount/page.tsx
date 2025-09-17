@@ -35,6 +35,7 @@ import { Label } from "@/components/ui/label";
 import OrderDetailsPage from "@/components/orders/order-history";
 import Addresses from "@/components/orders/addresses";
 import { useSearchParams } from "next/navigation";
+import { toast } from "sonner";
 
 const paymentMethods = [
   {
@@ -162,8 +163,9 @@ export default function AccountPage() {
               id: String(addr.id),
               type: addr.label,
               email: addr.details.email,
-              name: addr.details.first_name + " " + addr.details.last_name,
-              default: addr.is_default,
+ first_name:addr.details.first_name,
+ last_name:addr.details.last_name,
+               default: addr.is_default,
               address: addr.details.street,
               apartment: addr.details.apartment || "",
               city: addr.details.city,
@@ -206,8 +208,8 @@ export default function AccountPage() {
     (formData.get("primaryPhone") as string) || "",
     (formData.get("secondaryPhone") as string) || "",
   ],
-  date_of_birth: user?.date_of_birth,
-  gender: user?.gender || "unspecified",
+  date_of_birth:formData.get('date_of_birth') ,
+  gender: formData.get('gendar')
 };
 
 
@@ -220,13 +222,13 @@ export default function AccountPage() {
         }
       );
 
-      alert("Profile updated successfully!");
+     toast.success("Profile updated successfully!");
       setUser((prev: any) => ({ ...prev, ...res.data.data }));
        if (!isDobDisabled && payload.date_of_birth) setIsDobDisabled(true);
   if (!isGenderDisabled && payload.gender) setIsGenderDisabled(true);
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      alert(
+     toast.error(
         error.response?.data?.detail ||
           "Failed to update profile. Please try again."
       );
@@ -714,6 +716,16 @@ export default function AccountPage() {
 
   <div className="grid gap-4 sm:grid-cols-2">
     <div className="space-y-2">
+      <Label htmlFor="email">Email</Label>
+      <Input
+        id="email"
+        name="email"
+        type="email"
+        defaultValue={user?.email}
+        disabled
+      />
+    </div>
+    <div className="space-y-2">
       <Label htmlFor="primaryPhone">Primary Contact</Label>
       <Input
         id="primaryPhone"
@@ -731,9 +743,7 @@ export default function AccountPage() {
         defaultValue={user.phone_number?.[1] || ""}
       />
     </div>
-  </div>
-
-  <div className="space-y-2">
+      <div className="space-y-2">
     <Label htmlFor="dob">Date of Birth</Label>
     <Input
       id="dob"
@@ -743,6 +753,9 @@ export default function AccountPage() {
       disabled={isDobDisabled}
     />
   </div>
+  </div>
+
+
 
   <div className="space-y-2">
     <Label htmlFor="gender">Gender</Label>

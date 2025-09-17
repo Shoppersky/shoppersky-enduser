@@ -67,7 +67,7 @@ export default function OrderDetailsPage() {
   if (error) {
     return <div className="p-8 text-center text-red-500">{error}</div>;
   }
-
+console.log(orders)
  if (!orders.length) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background">
@@ -99,9 +99,9 @@ export default function OrderDetailsPage() {
           <h1 className="text-2xl font-bold">My Orders</h1>
         </div>
 
-        {orders.map((order) => (
+        {orders.map((order,index) => (
           <Link href={`/MyAccount/orders/${order.order_id}`}>
-            <Card key={order.order_id} className="mb-6">
+            <Card key={index} className="mb-6">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Order {order.order_id}</CardTitle>
@@ -121,7 +121,7 @@ export default function OrderDetailsPage() {
                 {/* Items */}
                 <div className="space-y-4">
                   {Object.values(order.item_details || {}).map(
-                    (item: any, idx) => (
+                    (item: unknown, idx) => (
                       <div key={idx} className="flex items-center gap-4">
                         <img
                           src={item.images?.[0] || "/placeholder.svg"}
@@ -153,6 +153,8 @@ export default function OrderDetailsPage() {
                     <Separator />
                     <div>
                       <p className="font-medium">Delivery Address</p>
+                      <p>{order.address.first_name} {order.address.last_name}</p>
+                      <p>{order.address.phone}</p>
                       <p className="text-sm text-muted-foreground">
                         {order.address.street}, {order.address.city},{" "}
                         {order.address.state} {order.address.postcode},{" "}
