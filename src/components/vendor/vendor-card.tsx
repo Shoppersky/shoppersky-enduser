@@ -100,7 +100,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
 
           {/* Categories */}
           <div className="flex flex-wrap gap-1 mb-4 h-10">
-            {vendor.categories.slice(1, 4).map((category) => (
+            {vendor.categories.slice(0, 4).map((category) => (
               <Badge key={category} variant="secondary" className="text-xs">
                 {category}
               </Badge>

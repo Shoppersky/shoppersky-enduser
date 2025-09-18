@@ -58,7 +58,7 @@ export default function VendorsPage() {
     rating: "All Ratings",
     sort: "featured",
   });
-  console.log(vendors);
+
   const filteredVendors = useMemo(() => {
     let filtered = vendors.filter((vendor: any) => {
       const matchSearch =
@@ -105,7 +105,7 @@ export default function VendorsPage() {
 
     return filtered;
   }, [vendors, filters]);
-  console.log(filteredVendors);
+console.log(filteredVendors);
   const updateFilter = (key: keyof typeof filters, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
