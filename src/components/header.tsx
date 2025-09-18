@@ -262,84 +262,76 @@ export function Header() {
                 {showMega && hoverIndustryId && megaPosition && (
                   <div
                     className={`
-                      absolute bg-white border shadow-xl flex flex-col sm:flex-row
-                      w-full md:w-fit z-50
+                      absolute bg-white border shadow-xl flex flex-col sm:flex-row 
+                      w-full md:w-fit z-50 rounded-md
                     `}
                     style={{
                       top: megaPosition.top,
                       left: megaPosition.left,
                     }}
                   >
-                    {industries
-                      .filter((ind) => ind.industry_id === hoverIndustryId)
-                      .map((ind) => (
-                        <div key={ind.industry_id} className="flex w-full">
-                          {/* Categories (Left panel) */}
-                          <div className="flex flex-col w-full sm:w-60 border-r bg-gray-50">
-                            {ind.categories?.length ? (
-                              ind.categories.map((cat) => (
-                                <Link
-                                  href={`/${encodeURIComponent(cat.category_slug)}`}
-                                  key={cat.category_id}
-                                  onMouseEnter={() => setHoverCategoryId(cat.category_id)}
-                                  className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 ${
-                                    hoverCategoryId === cat.category_id
-                                      ? 'bg-white font-medium'
-                                      : ''
-                                  }`}
-                                >
-                                  {cat.category_name}
-                                  <ChevronRight className="inline ml-2 h-4 w-4 opacity-50 float-right" />
-                                </Link>
-                              ))
-                            ) : (
-                              <div className="px-4 py-2 text-sm text-muted-foreground">
-                                No categories
-                              </div>
+                       {industries
+                .filter((ind) => ind.industry_id === hoverIndustryId)
+                .map((ind) => (
+                  <div key={ind.industry_id} className="flex w-full">
+                    {/* Categories (Left panel) */}
+                    <div className="flex flex-col w-full sm:w-60 border-r ">
+                      {ind.categories?.length ? (
+                        ind.categories.map((cat) => (
+                          <Link
+                            href={`/${encodeURIComponent(cat.category_slug)}`}
+                            key={cat.category_id}
+                            onMouseEnter={() => setHoverCategoryId(cat.category_id)}
+                            className={`px-3 py-2 text-sm cursor-pointer hover:bg-gray-100 flex items-center justify-between ${
+                              hoverCategoryId === cat.category_id
+                                ? 'bg-white font-medium'
+                                : ''
+                            }`}
+                          >
+                            <span>{cat.category_name}</span>
+                            {/* Only show chevron if subcategories exist */}
+                            {cat.subcategories?.length > 0 && (
+                              <ChevronRight className="h-4 w-4 opacity-50" />
                             )}
-                          </div>
- 
-                          {/* Subcategories (Right panel) */}
-                          <div className="flex-1 flex flex-col p-3 sm:p-4">
-                            {ind.categories
-                              ?.filter((cat) => cat.category_id === hoverCategoryId)
-                              .map((cat) =>
-                                cat.subcategories?.length ? (
-                                  <div
-                                    key={cat.category_id}
-                                    className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-1 gap-2"
-                                  >
-                                    {cat.subcategories.map((sub) => (
-                                      <Link
-                                        key={sub.subcategory_id}
-                                        href={`/${encodeURIComponent(sub.subcategory_slug)}`}
-                                        className="px-2 py-1 text-sm rounded hover:bg-gray-100"
-                                        onClick={() => {
-                        
-                                          handleSelectSubcategory(sub.subcategory_id);
-                                        }}
-                                      >
-                                        {sub.subcategory_name}
-                                      </Link>
-                                    ))}
-                                  </div>
-                                ) : (
-                                  <div
-                                    key={cat.category_id}
-                                    className="text-sm text-muted-foreground"
-                                  >
-                                    No subcategories
-                                  </div>
-                                )
-                              )}
-                            {!hoverCategoryId && (
-                              <div className="text-sm text-muted-foreground">
-                                Hover a category to see subcategories
-                              </div>
-                            )}
-                          </div>
+                          </Link>
+                        ))
+                      ) : (
+                        <div className="px-4 py-2 text-sm text-gray-500">
+                          No categories
                         </div>
-                      ))}
+                      )}
+                    </div>
+
+                    {/* Subcategories (Right panel) */}
+{hoverCategoryId &&
+    ind.categories?.some(
+      (cat) => cat.category_id === hoverCategoryId && cat.subcategories?.length > 0
+    ) && (
+      <div className="flex-1 flex flex-col p-3 sm:p-4 min-w-64">
+        {ind.categories
+          ?.filter(
+            (cat) =>
+              cat.category_id === hoverCategoryId && cat.subcategories?.length > 0
+          )
+          .map((cat) => (
+            <div key={cat.category_id} className="grid grid-cols-1 gap-2">
+              {cat.subcategories!.map((sub) => (
+                <Link
+                  key={sub.subcategory_id}
+                  href={`/${encodeURIComponent(sub.subcategory_slug)}`}
+                  className="px-2 py-1 text-sm rounded hover:bg-gray-100 transition-colors"
+                  onClick={() => handleSelectSubcategory(sub.subcategory_id)}
+                >
+                  {sub.subcategory_name}
+                </Link>
+              ))}
+            </div>
+          ))}
+      </div>
+    )}
+
+                  </div>
+                ))}
                   </div>
                 )}
               </div>

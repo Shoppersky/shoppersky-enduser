@@ -36,7 +36,7 @@ type Address = {
   zipCode: string;
   country: string;
   phone: string;
-  email: string;
+
 };
 
 type CheckoutItem = {
@@ -88,7 +88,7 @@ function CheckoutContent() {
     postcode: "",
     country: "AU",
     phone: "",
-    email: "",
+ 
     label: "",
   });
   const [orderNotes, setOrderNotes] = useState("");
@@ -152,11 +152,9 @@ function CheckoutContent() {
             "Enter a valid Australian phone number (e.g., 04xxxxxxxx or 02xxxxxxxx).";
         }
         break;
-      case "email":
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          error = "Enter a valid email address.";
-        }
-        break;
+     
+
+    
       case "label":
         if (!value.trim()) {
           error = "Address label is required.";
@@ -178,7 +176,8 @@ function CheckoutContent() {
       "state",
       "postcode",
       "phone",
-      "email",
+   
+      
       "label",
     ];
     const results = fieldsToValidate.map((field) =>
@@ -278,7 +277,7 @@ function CheckoutContent() {
                 zipCode: details.postcode || "",
                 country: details.country || "",
                 phone: details.phone || "",
-                email: details.email || "",
+   
               };
             }
           );
@@ -326,16 +325,19 @@ function CheckoutContent() {
 
       const itemsWithVendors = await Promise.all(vendorPromises);
 
-      const itemDetails = itemsWithVendors.reduce(
+    const itemDetails = itemsWithVendors.reduce(
         (acc, item) => ({
           ...acc,
           [item.product_id]: {
             name: item.name,
             quantity: item.quantity,
+            unit_price: checkoutItems.find((ci) => ci.id === item.product_id)?.price || 0,
+            subtotal: (checkoutItems.find((ci) => ci.id === item.product_id)?.price || 0) * item.quantity,
           },
         }),
         {}
       );
+ 
 
       let finalAddress;
       let addressId: string | null = null;
@@ -353,7 +355,6 @@ function CheckoutContent() {
           first_name: chosen.name.split(" ")[0] || "",
           last_name: chosen.name.split(" ")[1] || "",
           phone: chosen.phone,
-          email: chosen.email, // fallback
         };
         addressId = chosen.id;
       } else {
@@ -361,10 +362,9 @@ function CheckoutContent() {
           first_name: shippingAddress.firstName,
           last_name: shippingAddress.lastName,
           phone: shippingAddress.phone,
-          email: shippingAddress.email,
           apartment: shippingAddress.apartment,
           label: shippingAddress.label,
-          street: `${shippingAddress.address}${shippingAddress.apartment ? `, ${shippingAddress.apartment}` : ""}`,
+          street: `${shippingAddress.address}`,
           city: shippingAddress.city,
           state: shippingAddress.state,
           postcode: shippingAddress.postcode,
@@ -390,9 +390,10 @@ function CheckoutContent() {
 
       if (!isBuyNow) {
         clearCart();
-      }
+    // fallback
+        };   
 
-      localStorage.setItem("checkoutEmail", shippingAddress.email);
+      // localStorage.setItem("checkoutEmail", shippingAddress.email);
       window.location.href = data.checkout_url;
     } catch (error: any) {
       console.error("Error placing order:", error);
@@ -727,22 +728,7 @@ function CheckoutContent() {
                             </p>
                           )}
                         </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email Address</Label>
-                          <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            value={shippingAddress.email}
-                            onChange={handleShippingChange}
-                            required
-                          />
-                          {errors.email && (
-                            <p className="text-sm text-red-600">
-                              {errors.email}
-                            </p>
-                          )}
-                        </div>
+              
                         {addresses.length > 0 && (
                           <Button
                             type="button"

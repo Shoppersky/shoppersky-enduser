@@ -29,7 +29,7 @@ interface Address {
   phone: string;
   first_name?: string;
   last_name?: string;
-  email?: string;
+
 }
 
 interface AddressesProps {
@@ -54,7 +54,7 @@ export default function Addresses({
   const [addressForm, setAddressForm] = useState({
     first_name: "",
     last_name: "",
-    email: "",
+
     label: "",
     address: "",
     apartment: "",
@@ -82,7 +82,7 @@ export default function Addresses({
       setAddressForm({
         first_name: address.first_name || "",
         last_name: address.last_name || "",
-        email: address.email || "",
+   
         label: address.type,
         address: address.address,
         apartment: address.apartment || "",
@@ -97,7 +97,7 @@ export default function Addresses({
       setAddressForm({
         first_name: "",
         last_name: "",
-        email: "",
+      
         label: "",
         address: "",
         apartment: "",
@@ -116,7 +116,7 @@ export default function Addresses({
     const {
       first_name,
       last_name,
-      email,
+
       label,
       address,
       apartment,
@@ -145,9 +145,8 @@ if (isEmpty(last_name)) {
   newErrors.last_name = "Last name must not exceed 50 characters";
 }
 
-if (isEmpty(email)) newErrors.email = "Email is required";
-else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-  newErrors.email = "Enter a valid email address";
+
+
 if (isEmpty(label)) newErrors.type = "Address type is required";
 if (isEmpty(address)) newErrors.address = "Street address is required";
 if (isEmpty(city)) newErrors.city = "City is required";
@@ -192,7 +191,7 @@ if (isEmpty(phone)) newErrors.phone = "Phone number is required";
               details: {
                 first_name,
                 last_name,
-                email,
+   
                 street: address,
                 apartment: apartment || undefined,
                 city,
@@ -217,7 +216,7 @@ if (isEmpty(phone)) newErrors.phone = "Phone number is required";
               details: {
                 first_name,
                 last_name,
-                email,
+          
                 street: address,
                 apartment: apartment || undefined,
                 city,
@@ -258,7 +257,7 @@ if (isEmpty(phone)) newErrors.phone = "Phone number is required";
         phone: raw.details.phone || "",
         first_name: raw.details.first_name || "",
         last_name: raw.details.last_name || "",
-        email: raw.details.email || "",
+ 
       };
 
       if (editingAddress) {
@@ -271,7 +270,7 @@ if (isEmpty(phone)) newErrors.phone = "Phone number is required";
       setAddressForm({
         first_name: "",
         last_name: "",
-        email: "",
+    
         label: "",
         address: "",
         apartment: "",
@@ -347,7 +346,7 @@ console.log("Addresses component rendered with addresses:", addresses);
                 <p>
       {address.first_name} {address.last_name}
                 </p>
-                <p>{address.email}</p>
+               
                 <p>{address.address}</p>
                 {address.apartment && <p>{address.apartment}</p>}
                 <p>
@@ -356,7 +355,7 @@ console.log("Addresses component rendered with addresses:", addresses);
                 <p>{address.country}</p>
                 <p>{address.phone}</p>
               </div>
-              <div className="mt-4 flex gap-2">
+              <div className="mt-4 flex gap-2 flex-wrap">
                 <Button variant="outline" size="sm" onClick={() => openAddressModal(address)}>
                   Edit
                 </Button>
@@ -413,17 +412,7 @@ console.log("Addresses component rendered with addresses:", addresses);
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                value={addressForm.email}
-                onChange={(e) => setAddressForm({ ...addressForm, email: e.target.value })}
-                placeholder="janedoe@gmail.com"
-                required
-              />
-              {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
-            </div>
+ 
 
             <div className="space-y-2">
               <Label htmlFor="type">Address Type</Label>

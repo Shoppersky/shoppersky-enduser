@@ -258,12 +258,12 @@ export default function AccountPage() {
       icon: Package,
       id: "addresses",
     },
-    {
-      name: "Payment Methods",
-      href: "/account/payment",
-      icon: CreditCard,
-      id: "payment",
-    },
+    // {
+    //   name: "Payment Methods",
+    //   href: "/account/payment",
+    //   icon: CreditCard,
+    //   id: "payment",
+    // },
     // {
     //   name: "Wishlist",
     //   href: "/account/wishlist",
