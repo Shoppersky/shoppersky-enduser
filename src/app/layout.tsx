@@ -7,7 +7,7 @@ import FooterSection from '../components/footer';
 import { WishlistProvider } from '../components/wishlist-provider';
 import { CartProvider } from '../components/cart-provider';
 import { Header } from "@/components/header";
-
+import { Toaster } from "sonner";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -43,6 +43,7 @@ export default function RootLayout({
           </CartProvider>
         </AuthProvider>
         <FooterSection />
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );

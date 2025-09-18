@@ -118,11 +118,11 @@ export default function AccountPage() {
     }
   }, [searchParams]);
 
-  const userProfile = {
-    name: "Vineetha Sharma",
-    user_email: "vineetha@example.com",
-    user_profile_img: "/images/vineetha.jpg",
-  };
+  // const userProfile = {
+  //   name: "Vineetha Sharma",
+  //   user_email: "vineetha@example.com",
+  //   user_profile_img: "/images/vineetha.jpg",
+  // };
 
   // Fetch user and addresses
   useEffect(() => {
@@ -294,13 +294,13 @@ export default function AccountPage() {
             {/* Sidebar Navigation */}
             <aside className="hidden md:block">
               <div className="mb-8 flex items-center gap-3">
-                <Avatar className="h-12 w-12">
+                {/* <Avatar className="h-12 w-12">
                   <AvatarImage
                     src={userProfile?.user_profile_img}
                     alt={userProfile?.name}
                   />
                   <AvatarFallback>{userProfile?.name.charAt(0)}</AvatarFallback>
-                </Avatar>
+                </Avatar> */}
                 <div>
                   <h2 className="text-lg font-semibold">{user?.username}</h2>
                   <p className="text-sm text-muted-foreground">{user?.email}</p>
