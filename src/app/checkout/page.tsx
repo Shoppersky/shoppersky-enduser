@@ -105,63 +105,74 @@ function CheckoutContent() {
     let error = "";
 
     switch (name) {
-      case "firstName":
-      case "lastName":
-        if (!value.trim()) {
-          error = "This field is required.";
-        } else if (!/^[a-zA-Z\s-]+$/.test(value)) {
-          error = "Name can only contain letters, spaces, or hyphens.";
-        }
-        break;
-      case "address":
-        if (!value.trim()) {
-          error = "Street address is required.";
-        } else if (!/^[0-9a-zA-Z\s,/-]+$/.test(value)) {
-          error =
-            "Invalid street address. Use letters, numbers, spaces, commas, or hyphens.";
-        }
-        break;
-      case "apartment":
-        if (value && !/^[0-9a-zA-Z\s,/-]+$/.test(value)) {
-          error =
-            "Invalid apartment details. Use letters, numbers, spaces, commas, or hyphens.";
-        }
-        break;
-      case "city":
-        if (!value.trim()) {
-          error = "City is required.";
-        } else if (!/^[a-zA-Z\s-]+$/.test(value)) {
-          error = "City can only contain letters, spaces, or hyphens.";
-        }
-        break;
-      case "state":
-        if (!value) {
-          error = "State is required.";
-        } else if (!states.some((s) => s.value === value)) {
-          error = "Please select a valid Australian state or territory.";
-        }
-        break;
-      case "postcode":
-        if (!/^\d{4}$/.test(value)) {
-          error = "Postcode must be exactly 4 digits.";
-        }
-        break;
-      case "phone":
-        if (!/^(0[23478]\d{8})$/.test(value)) {
-          error =
-            "Enter a valid Australian phone number (e.g., 04xxxxxxxx or 02xxxxxxxx).";
-        }
-        break;
-     
-
-    
-      case "label":
-        if (!value.trim()) {
-          error = "Address label is required.";
-        }
-        break;
+  case "firstName":
+  case "lastName":
+    if (!value.trim()) {
+      error = "This field is required.";
+    } else if (value.trim().length < 2) {
+      error = "Name must be at least 2 characters long.";
+    } else if (value.trim().length > 50) {
+      error = "Name cannot exceed 50 characters.";
+    } else if (!/^[a-zA-Z\s-]+$/.test(value)) {
+      error = "Name can only contain letters, spaces, or hyphens.";
     }
-
+    break;
+  case "address":
+    if (!value.trim()) {
+      error = "Street address is required.";
+    } else if (value.trim().length < 5) {
+      error = "Street address must be at least 5 characters long.";
+    } else if (value.trim().length > 100) {
+      error = "Street address cannot exceed 100 characters.";
+    } else if (!/^[0-9a-zA-Z\s,/-]+$/.test(value)) {
+      error = "Invalid street address. Use letters, numbers, spaces, commas, or hyphens.";
+    }
+    break;
+  case "apartment":
+    if (value && value.trim().length > 50) {
+      error = "Apartment details cannot exceed 50 characters.";
+    } else if (value && !/^[0-9a-zA-Z\s,/-]+$/.test(value)) {
+      error = "Invalid apartment details. Use letters, numbers, spaces, commas, or hyphens.";
+    }
+    break;
+  case "city":
+    if (!value.trim()) {
+      error = "City is required.";
+    } else if (value.trim().length < 2) {
+      error = "City must be at least 2 characters long.";
+    } else if (value.trim().length > 50) {
+      error = "City cannot exceed 50 characters.";
+    } else if (!/^[a-zA-Z\s-]+$/.test(value)) {
+      error = "City can only contain letters, spaces, or hyphens.";
+    }
+    break;
+  case "state":
+    if (!value) {
+      error = "State is required.";
+    } else if (!states.some((s) => s.value === value)) {
+      error = "Please select a valid Australian state or territory.";
+    }
+    break;
+  case "postcode":
+    if (!/^\d{4}$/.test(value)) {
+      error = "Postcode must be exactly 4 digits.";
+    }
+    break;
+  case "phone":
+    if (!/^(0[23478]\d{8})$/.test(value)) {
+      error = "Enter a valid Australian phone number (e.g., 04xxxxxxxx or 02xxxxxxxx).";
+    }
+    break;
+  case "label":
+    if (!value.trim()) {
+      error = "Address label is required.";
+    } else if (value.trim().length < 2) {
+      error = "Address label must be at least 2 characters long.";
+    } else if (value.trim().length > 50) {
+      error = "Address label cannot exceed 50 characters.";
+    }
+    break;
+}
     setErrors((prev) => ({ ...prev, [name]: error }));
     return error === "";
   };
@@ -730,14 +741,29 @@ function CheckoutContent() {
                         </div>
               
                         {addresses.length > 0 && (
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setShowNewAddressForm(false)}
-                          >
-                            Back to Saved Addresses
-                          </Button>
-                        )}
+  <Button
+    type="button"
+    variant="outline"
+    onClick={() => {
+      setShowNewAddressForm(false);
+      setShippingAddress({
+        firstName: "",
+        lastName: "",
+        address: "",
+        apartment: "",
+        city: "",
+        state: "",
+        postcode: "",
+        country: "AU",
+        phone: "",
+        label: "",
+      });
+      setErrors({});
+    }}
+  >
+    Back to Saved Addresses
+  </Button>
+)}
                       </>
                     )}
                   </div>

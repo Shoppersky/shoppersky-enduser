@@ -162,9 +162,12 @@ export default function Addresses({
 
     if (isEmpty(city)) {
       newErrors.city = "City is required";
+    } else if (!nameRegex.test(city)) {
+      newErrors.city = "City can only contain letters and spaces";
     } else if (city.length > 50) {
       newErrors.city = "City must not exceed 50 characters";
     }
+
     if (isEmpty(state)) newErrors.state = "State is required";
     if (isEmpty(zipCode)) newErrors.zipCode = "Postcode is required";
     if (isEmpty(country)) newErrors.country = "Country is required";
