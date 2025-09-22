@@ -36,7 +36,16 @@ import OrderDetailsPage from "@/components/orders/order-history";
 import Addresses from "@/components/orders/addresses";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const paymentMethods = [
   {
@@ -107,6 +116,7 @@ export default function AccountPage() {
     !!user?.gender
   );
   const [open, setOpen] = useState(false);
+  const today = new Date().toISOString().split("T")[0]; // format: YYYY-MM-DD
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -206,6 +216,12 @@ export default function AccountPage() {
     router.push("/login");
   };
 
+  const [errors, setErrors] = useState<{
+    primaryPhone?: string;
+    date_of_birth?: string;
+    gender?: string;
+  }>({});
+
   const handlePersonalInfoSubmit = async (
     e: React.FormEvent<HTMLFormElement>
   ) => {
@@ -214,15 +230,47 @@ export default function AccountPage() {
 
     const formData = new FormData(e.currentTarget);
 
+    const primaryPhone = formData.get("primaryPhone") as string;
+    const secondaryPhone = formData.get("secondaryPhone") as string;
+    const date_of_birth = formData.get("date_of_birth") as string;
+    const gender = formData.get("gender") as string;
+
+    const australianPhoneRegex = /^(?:\+?61|0)4\d{8}$|^(?:\+?61|0)[2-8]\d{8}$/;
+
+    const newErrors: typeof errors = {};
+
+    // At least one number is required
+    if (!primaryPhone?.trim() && !secondaryPhone?.trim()) {
+      newErrors.primaryPhone = "At least one contact number is required";
+    }
+
+    // Validate primary phone if provided
+    if (primaryPhone?.trim() && !australianPhoneRegex.test(primaryPhone)) {
+      newErrors.primaryPhone = "Enter a valid Australian phone number";
+    }
+
+    // Validate secondary phone if provided
+    if (secondaryPhone?.trim() && !australianPhoneRegex.test(secondaryPhone)) {
+      newErrors.secondaryPhone = "Enter a valid Australian phone number";
+    }
+
+    if (!date_of_birth?.trim())
+      newErrors.date_of_birth = "Date of birth is required";
+    if (!gender?.trim()) newErrors.gender = "Gender is required";
+
+    setErrors(newErrors);
+
+    // Stop if any error exists
+    if (Object.keys(newErrors).length > 0) return;
+
+    const phoneNumbers = [primaryPhone, secondaryPhone].filter(Boolean); // remove empty strings
+
     const payload = {
       first_name: formData.get("firstName") as string,
       last_name: formData.get("lastName") as string,
-      phone_number: [
-        (formData.get("primaryPhone") as string) || "",
-        (formData.get("secondaryPhone") as string) || "",
-      ],
-      date_of_birth: formData.get("date_of_birth"),
-      gender: formData.get("gendar"),
+      phone_number: phoneNumbers,
+      date_of_birth,
+      gender,
     };
 
     try {
@@ -233,7 +281,6 @@ export default function AccountPage() {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-
       toast.success("Profile updated successfully!");
       setUser((prev: any) => ({ ...prev, ...res.data.data }));
       if (!isDobDisabled && payload.date_of_birth) setIsDobDisabled(true);
@@ -743,6 +790,11 @@ export default function AccountPage() {
                               type="tel"
                               defaultValue={user.phone_number?.[0] || ""}
                             />
+                            {errors.primaryPhone && (
+                              <p className="text-red-500 text-sm">
+                                {errors.primaryPhone}
+                              </p>
+                            )}
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="secondaryPhone">
@@ -763,7 +815,13 @@ export default function AccountPage() {
                               type="date"
                               defaultValue={user?.date_of_birth || ""}
                               disabled={isDobDisabled}
+                              max={today} // restricts selection to past dates only
                             />
+                            {errors.date_of_birth && (
+                              <p className="text-red-500 text-sm">
+                                {errors.date_of_birth}
+                              </p>
+                            )}
                           </div>
                         </div>
 
@@ -782,6 +840,11 @@ export default function AccountPage() {
                             <option value="other">Other</option>
                             <option value="unspecified">Unspecified</option>
                           </select>
+                          {errors.gender && (
+                            <p className="text-red-500 text-sm">
+                              {errors.gender}
+                            </p>
+                          )}
                         </div>
 
                         <Button type="submit">Save Changes</Button>
@@ -805,9 +868,7 @@ export default function AccountPage() {
                               Last updated: Never
                             </p>
                           </div>
-                         <Button  onClick={handleOpen}>
-        Update Password
-      </Button>
+                          <Button onClick={handleOpen}>Update Password</Button>
                         </div>
                         <p className="text-xs text-muted-foreground">
                           For security reasons, password updates are handled on
@@ -883,22 +944,22 @@ export default function AccountPage() {
             </div>
           </div>
           <Dialog open={open} onOpenChange={setOpen}>
-      
-        <DialogContent className="sm:max-w-[475px]">
-          <DialogHeader>
-            <DialogTitle>Update Your Password</DialogTitle>
-            <DialogDescription>
-              Are you sure you want to update your password? You will be redirected to a secure page.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="secondary">Cancel</Button>
-            </DialogClose>
-            <Button onClick={handleConfirm}>Confirm</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            <DialogContent className="sm:max-w-[475px]">
+              <DialogHeader>
+                <DialogTitle>Update Your Password</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to update your password? You will be
+                  redirected to a secure page.
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <Button variant="secondary">Cancel</Button>
+                </DialogClose>
+                <Button onClick={handleConfirm}>Confirm</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </main>
     </div>

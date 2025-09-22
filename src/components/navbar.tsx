@@ -231,8 +231,8 @@ const Navbar = () => {
 
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex items-center gap-6 ml-6">
-                <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">Shop</Link>
-                <Link href="/vendors" className="text-sm font-medium hover:text-primary transition-colors">Vendors</Link>
+                <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">Shop Here</Link>
+                <Link href="/vendors" className="text-sm font-medium hover:text-primary transition-colors">Virtual Shop</Link>
                 {/* <Link href="/deals" className="text-sm font-medium hover:text-primary transition-colors">Deals</Link> */}
               </nav>
             </div>
@@ -485,14 +485,14 @@ const Navbar = () => {
               className="block px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
               onClick={closeMobileMenu}
             >
-              Shop
+              Shop Here
             </Link>
             <Link
               href="/vendors"
               className="block px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
               onClick={closeMobileMenu}
             >
-              Vendors
+              Virtual Shop
             </Link>
             {/* <Link
               href="/deals"

@@ -315,10 +315,7 @@ export default function LoginPage() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Store
           </Button>
-          {/* <div className="flex items-center justify-center gap-2 mb-4">
-            <ShoppingCart className="w-8 h-8 text-green-600" />
-            <h1 className="text-2xl font-bold text-green-600">Desi S-Mart</h1>
-          </div> */}
+        
           <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
           <p className="text-gray-600 mt-2">Sign in to your account to continue shopping</p>
         </div>
@@ -392,9 +389,9 @@ export default function LoginPage() {
                     Remember me
                   </Label>
                 </div>
-                {/* <Button variant="link" className="px-0 text-green-600" onClick={handleForgotPassword}>
+                <Button variant="link" className="px-0 text-green-600" onClick={handleForgotPassword}>
                   Forgot password?
-                </Button> */}
+                </Button>
               </div>
 
               <Button 
