@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Check } from "lucide-react";
 import axiosInstance from "@/lib/axiosInstance";
+import { useCart } from "@/components/cart-provider";
 
 function SuccessPage() {
   return (
@@ -30,6 +31,8 @@ function SuccessContent() {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  const { clearCart } = useCart();
+
   useEffect(() => {
     if (!sessionId) {
       setError("No session ID provided");
@@ -43,6 +46,9 @@ function SuccessContent() {
           `/orders/checkout-session/${sessionId}`
         );
         const { data } = response.data;
+        if (data.status === "paid") {
+          clearCart(); // <-- clear cart here
+        }
         setOrderId(data.order.order_id);
         setEmail(localStorage.getItem("checkoutEmail") || "your email");
       } catch (error: any) {

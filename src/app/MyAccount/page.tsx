@@ -36,6 +36,7 @@ import OrderDetailsPage from "@/components/orders/order-history";
 import Addresses from "@/components/orders/addresses";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const paymentMethods = [
   {
@@ -99,9 +100,21 @@ export default function AccountPage() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab") || "overview";
   const [activeTab, setActiveTab] = useState(initialTab);
-  const [isDobDisabled, setIsDobDisabled] = useState<boolean>(!!user?.date_of_birth);
-  const [isGenderDisabled, setIsGenderDisabled] = useState<boolean>(!!user?.gender);
+  const [isDobDisabled, setIsDobDisabled] = useState<boolean>(
+    !!user?.date_of_birth
+  );
+  const [isGenderDisabled, setIsGenderDisabled] = useState<boolean>(
+    !!user?.gender
+  );
+  const [open, setOpen] = useState(false);
 
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const handleConfirm = () => {
+    setOpen(false);
+    router.push("/update-password");
+  };
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -163,9 +176,9 @@ export default function AccountPage() {
               id: String(addr.id),
               type: addr.label,
               email: addr.details.email,
- first_name:addr.details.first_name,
- last_name:addr.details.last_name,
-               default: addr.is_default,
+              first_name: addr.details.first_name,
+              last_name: addr.details.last_name,
+              default: addr.is_default,
               address: addr.details.street,
               apartment: addr.details.apartment || "",
               city: addr.details.city,
@@ -201,17 +214,16 @@ export default function AccountPage() {
 
     const formData = new FormData(e.currentTarget);
 
-   const payload = {
-  first_name: formData.get("firstName") as string,
-  last_name: formData.get("lastName") as string,
-  phone_number: [
-    (formData.get("primaryPhone") as string) || "",
-    (formData.get("secondaryPhone") as string) || "",
-  ],
-  date_of_birth:formData.get('date_of_birth') ,
-  gender: formData.get('gendar')
-};
-
+    const payload = {
+      first_name: formData.get("firstName") as string,
+      last_name: formData.get("lastName") as string,
+      phone_number: [
+        (formData.get("primaryPhone") as string) || "",
+        (formData.get("secondaryPhone") as string) || "",
+      ],
+      date_of_birth: formData.get("date_of_birth"),
+      gender: formData.get("gendar"),
+    };
 
     try {
       const res = await axiosInstance.put(
@@ -222,25 +234,16 @@ export default function AccountPage() {
         }
       );
 
-     toast.success("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
       setUser((prev: any) => ({ ...prev, ...res.data.data }));
-       if (!isDobDisabled && payload.date_of_birth) setIsDobDisabled(true);
-  if (!isGenderDisabled && payload.gender) setIsGenderDisabled(true);
+      if (!isDobDisabled && payload.date_of_birth) setIsDobDisabled(true);
+      if (!isGenderDisabled && payload.gender) setIsGenderDisabled(true);
     } catch (error: any) {
       console.error("Error updating profile:", error);
-     toast.error(
+      toast.error(
         error.response?.data?.detail ||
           "Failed to update profile. Please try again."
       );
-    }
-  };
-
-  const handlePasswordUpdateClick = () => {
-    const confirmed = window.confirm(
-      "Are you sure you want to update your password? You will be redirected to a secure password update page."
-    );
-    if (confirmed) {
-      router.push("/update-password");
     }
   };
 
@@ -469,33 +472,38 @@ export default function AccountPage() {
 
                   <div className="space-y-4">
                     <h2 className="text-xl font-semibold">Recent Orders</h2>
-                   <div className="rounded-md border">
-  {orders.slice(0, 2).map((order, index) => (
-    <div
-      key={order.order_id}
-      className={cn("p-4", index !== 0 && "border-t")}
-    >
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div>
-          <div className="flex items-center gap-2">
-            <h3 className="font-medium">{order.order_id}</h3>
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-600">
-              {order.order_status}
-            </span>
-          </div>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => router.push(`/MyAccount/orders/${order.order_id}`)}
-        >
-          View Order
-        </Button>
-      </div>
-    </div>
-  ))}
-</div>
-
+                    <div className="rounded-md border">
+                      {orders.slice(0, 2).map((order, index) => (
+                        <div
+                          key={order.order_id}
+                          className={cn("p-4", index !== 0 && "border-t")}
+                        >
+                          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-medium">
+                                  {order.order_id}
+                                </h3>
+                                <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-600">
+                                  {order.order_status}
+                                </span>
+                              </div>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() =>
+                                router.push(
+                                  `/MyAccount/orders/${order.order_id}`
+                                )
+                              }
+                            >
+                              View Order
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
 
                     {orders.length > 2 && (
                       <div className="text-center">
@@ -691,92 +699,93 @@ export default function AccountPage() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                     <form
-  className="space-y-4"
-  onSubmit={handlePersonalInfoSubmit}
->
-  <div className="grid gap-4 sm:grid-cols-2">
-    <div className="space-y-2">
-      <Label htmlFor="firstName">First Name</Label>
-      <Input
-        id="firstName"
-        name="firstName"
-        defaultValue={user?.first_name}
-      />
-    </div>
-    <div className="space-y-2">
-      <Label htmlFor="lastName">Last Name</Label>
-      <Input
-        id="lastName"
-        name="lastName"
-        defaultValue={user?.last_name || ""}
-      />
-    </div>
-  </div>
+                      <form
+                        className="space-y-4"
+                        onSubmit={handlePersonalInfoSubmit}
+                      >
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="firstName">First Name</Label>
+                            <Input
+                              id="firstName"
+                              name="firstName"
+                              defaultValue={user?.first_name}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="lastName">Last Name</Label>
+                            <Input
+                              id="lastName"
+                              name="lastName"
+                              defaultValue={user?.last_name || ""}
+                            />
+                          </div>
+                        </div>
 
-  <div className="grid gap-4 sm:grid-cols-2">
-    <div className="space-y-2">
-      <Label htmlFor="email">Email</Label>
-      <Input
-        id="email"
-        name="email"
-        type="email"
-        defaultValue={user?.email}
-        disabled
-      />
-    </div>
-    <div className="space-y-2">
-      <Label htmlFor="primaryPhone">Primary Contact</Label>
-      <Input
-        id="primaryPhone"
-        name="primaryPhone"
-        type="tel"
-        defaultValue={user.phone_number?.[0] || ""}
-      />
-    </div>
-    <div className="space-y-2">
-      <Label htmlFor="secondaryPhone">Secondary Contact</Label>
-      <Input
-        id="secondaryPhone"
-        name="secondaryPhone"
-        type="tel"
-        defaultValue={user.phone_number?.[1] || ""}
-      />
-    </div>
-      <div className="space-y-2">
-    <Label htmlFor="dob">Date of Birth</Label>
-    <Input
-      id="dob"
-      name="date_of_birth"
-      type="date"
-      defaultValue={user?.date_of_birth || ""}
-      disabled={isDobDisabled}
-    />
-  </div>
-  </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-2">
+                            <Label htmlFor="email">Email</Label>
+                            <Input
+                              id="email"
+                              name="email"
+                              type="email"
+                              defaultValue={user?.email}
+                              disabled
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="primaryPhone">
+                              Primary Contact
+                            </Label>
+                            <Input
+                              id="primaryPhone"
+                              name="primaryPhone"
+                              type="tel"
+                              defaultValue={user.phone_number?.[0] || ""}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="secondaryPhone">
+                              Secondary Contact
+                            </Label>
+                            <Input
+                              id="secondaryPhone"
+                              name="secondaryPhone"
+                              type="tel"
+                              defaultValue={user.phone_number?.[1] || ""}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label htmlFor="dob">Date of Birth</Label>
+                            <Input
+                              id="dob"
+                              name="date_of_birth"
+                              type="date"
+                              defaultValue={user?.date_of_birth || ""}
+                              disabled={isDobDisabled}
+                            />
+                          </div>
+                        </div>
 
+                        <div className="space-y-2">
+                          <Label htmlFor="gender">Gender</Label>
+                          <select
+                            id="gender"
+                            name="gender"
+                            defaultValue={user?.gender || ""}
+                            disabled={isGenderDisabled}
+                            className="w-full rounded-md border border-input px-3 py-2"
+                          >
+                            <option value="">Select Gender</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                            <option value="unspecified">Unspecified</option>
+                          </select>
+                        </div>
 
-
-  <div className="space-y-2">
-    <Label htmlFor="gender">Gender</Label>
-    <select
-      id="gender"
-      name="gender"
-      defaultValue={user?.gender || ""}
-      disabled={isGenderDisabled}
-      className="w-full rounded-md border border-input px-3 py-2"
-    >
-      <option value="">Select Gender</option>
-      <option value="male">Male</option>
-      <option value="female">Female</option>
-      <option value="other">Other</option>
-      <option value="unspecified">Unspecified</option>
-    </select>
-  </div>
-
-  <Button type="submit">Save Changes</Button>
-</form>
-
+                        <Button type="submit">Save Changes</Button>
+                      </form>
                     </CardContent>
                   </Card>
 
@@ -796,9 +805,9 @@ export default function AccountPage() {
                               Last updated: Never
                             </p>
                           </div>
-                          <Button onClick={handlePasswordUpdateClick}>
-                            Update Password
-                          </Button>
+                         <Button  onClick={handleOpen}>
+        Update Password
+      </Button>
                         </div>
                         <p className="text-xs text-muted-foreground">
                           For security reasons, password updates are handled on
@@ -873,6 +882,23 @@ export default function AccountPage() {
               )}
             </div>
           </div>
+          <Dialog open={open} onOpenChange={setOpen}>
+      
+        <DialogContent className="sm:max-w-[475px]">
+          <DialogHeader>
+            <DialogTitle>Update Your Password</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to update your password? You will be redirected to a secure page.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="secondary">Cancel</Button>
+            </DialogClose>
+            <Button onClick={handleConfirm}>Confirm</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
         </div>
       </main>
     </div>

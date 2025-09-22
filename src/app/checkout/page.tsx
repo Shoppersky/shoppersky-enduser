@@ -399,10 +399,10 @@ function CheckoutContent() {
       const response = await axiosInstance.post("/orders/place-order", payload);
       const { data } = response.data;
 
-      if (!isBuyNow) {
-        clearCart();
-    // fallback
-        };   
+    //   if (!isBuyNow) {
+    //     clearCart();
+    // // fallback
+    //     };   
 
       // localStorage.setItem("checkoutEmail", shippingAddress.email);
       window.location.href = data.checkout_url;
