@@ -251,7 +251,11 @@ console.log(cartCount)
     );
   };
 
-  const clearCart = () => setCartItems([]);
+  const clearCart = () => {
+  setCartItems([]);
+  localStorage.removeItem('cart'); // remove saved cart
+};
+
 
   const toggleCart = () => setIsCartOpen((prev) => !prev);
   const closeCart = () => setIsCartOpen(false);

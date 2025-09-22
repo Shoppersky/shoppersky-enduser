@@ -46,9 +46,10 @@ function SuccessContent() {
           `/orders/checkout-session/${sessionId}`
         );
         const { data } = response.data;
-        if (data.status === "paid") {
-          clearCart(); // <-- clear cart here
-        }
+        clearCart(); // Clear cart immediately after successful payment verification
+        // if (data.status === "paid") {
+        //   clearCart(); // <-- clear cart here
+        // }
         setOrderId(data.order.order_id);
         setEmail(localStorage.getItem("checkoutEmail") || "your email");
       } catch (error: any) {
