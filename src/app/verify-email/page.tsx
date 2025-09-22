@@ -18,7 +18,7 @@ import axiosInstance from '../../lib/axiosInstance';
 import { ErrorBoundary } from '../../components/ErrorBoundary';
 
 export default function VerifyEmailInstructionsPage() {
-  const [email, setEmail] = useState<string>('your-email@example.com');
+  const [email, setEmail] = useState<string>('');
   const [status, setStatus] = useState<
     'idle' | 'loading' | 'success' | 'error'
   >('idle');
@@ -55,9 +55,9 @@ export default function VerifyEmailInstructionsPage() {
       setStatus('loading');
       setMessage('');
 
-      await axiosInstance.put(
-        `/resend-email-token/?emailaddress=${encodeURIComponent(email)}`,
-        {},
+    await axiosInstance.post(
+        '/users/resend-verification',
+        { email },
         { headers: { Accept: 'application/json' } }
       );
 

@@ -7,8 +7,9 @@ import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from './ui/button';
 import { useCart } from './cart-provider';
 import { useWishlist } from './wishlist-provider';
-import { useAuth } from './auth-provider';
+
 import axiosInstance from '../lib/axiosInstance';
+import useStore from '@/lib/Zustand';
  
 interface ApiSubcategory {
   subcategory_id: string;
@@ -58,7 +59,12 @@ export function Header() {
   const pathname = usePathname();
   const { cartCount, toggleCart } = useCart();
   const { wishlistCount } = useWishlist();
-  const { isLoggedIn, userId, token, checkAuth } = useAuth();
+  const { 
+  isAuthenticated, // replaces isLoggedIn
+  userId,
+  token,
+  checkAuth
+} = useStore();
  
   const [industries, setIndustries] = useState<Industry[]>([]);
 

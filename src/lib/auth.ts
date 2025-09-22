@@ -1,0 +1,108 @@
+// lib/auth.ts
+import axiosInstance from './axiosInstance';
+import useStore from './Zustand';
+import jwt from 'jsonwebtoken';
+ 
+interface JWTPayload {
+  uid?: string | number;
+  rid?: string | number;
+  exp?: number;
+  [key: string]: unknown;
+}
+ 
+export const logoutUser = async () => {
+  try {
+    const token = sessionStorage.getItem('token');
+    const refreshToken = sessionStorage.getItem('refreshToken');
+   
+    // First try the new logout endpoint with access token
+    if (token) {
+      try {
+        await axiosInstance.post('/admin/logout');
+        console.log('Logout successful via /admin/logout');
+      } catch (logoutError) {
+        console.error('Error with /admin/logout, trying token revoke:', logoutError);
+       
+        // Fallback to token revoke if logout fails
+        if (refreshToken) {
+          await axiosInstance.post('/admin/token/revoke', {
+            refresh_token: refreshToken
+          });
+          console.log('Token revoked successfully');
+        }
+      }
+    } else if (refreshToken) {
+      // If no access token but have refresh token, revoke it
+      await axiosInstance.post('/admin/token/revoke', {
+        refresh_token: refreshToken
+      });
+      console.log('Token revoked successfully');
+    }
+  } catch (error) {
+    console.error('Error during logout process:', error);
+    // Continue with logout even if server calls fail
+  } finally {
+    // Clear session storage and update store
+    const { logout } = useStore.getState();
+    logout();
+    localStorage.removeItem('id'); // Keep this in localStorage as it's user data
+   
+    // Redirect to login page
+    window.location.href = '/';
+  }
+};
+ 
+export const isTokenExpired = (token: string): boolean => {
+  try {
+    const decoded = jwt.decode(token) as JWTPayload | null;
+    if (!decoded || !decoded.exp) return true;
+   
+    const currentTime = Date.now() / 1000;
+    return decoded.exp < currentTime;
+  } catch {
+    return true;
+  }
+};
+ 
+export const refreshTokenIfNeeded = async (): Promise<boolean> => {
+  try {
+    const token = sessionStorage.getItem('token');
+    const refreshToken = sessionStorage.getItem('refreshToken');
+
+    if (!token || !refreshToken) return false;
+
+    const decoded = jwt.decode(token) as JWTPayload | null;
+    if (!decoded || !decoded.exp) return false;
+
+    const currentTime = Date.now() / 1000;
+    const timeUntilExpiry = decoded.exp - currentTime;
+
+    // Only refresh if token expires soon
+    if (timeUntilExpiry < 300) {
+      const response = await axiosInstance.post('/admin/token/refresh', { refresh_token: refreshToken });
+      const { access_token, refresh_token: newRefreshToken, session_id } = response.data.data;
+
+      sessionStorage.setItem('token', access_token);
+      sessionStorage.setItem('refreshToken', newRefreshToken);
+      sessionStorage.setItem('sessionId', session_id.toString());
+
+      // Update Zustand store
+      const newDecoded = jwt.decode(access_token) as JWTPayload | null;
+      if (newDecoded?.uid && newDecoded?.rid) {
+        const { login } = useStore.getState();
+        login(access_token, newRefreshToken, session_id.toString());
+      }
+
+      console.log('Token refreshed successfully');
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    // Only logout if on protected route, else ignore
+    const { logout } = useStore.getState();
+    logout();
+    return false;
+  }
+};

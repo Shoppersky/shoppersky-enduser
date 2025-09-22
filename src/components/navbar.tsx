@@ -13,13 +13,14 @@ import { useCart } from './cart-provider'
 import { useWishlist } from './wishlist-provider'
 import { CartSidebar } from './cart-sidebar'
 import axiosInstance from '../lib/axiosInstance'
-import useAuthStore from '@/lib/Zustand'
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu"
+import useStore from '@/lib/Zustand'
 
 interface SearchResult {
   product_id: string
@@ -53,7 +54,8 @@ interface Industry {
 const Navbar = () => {
   const { cartCount, toggleCart } = useCart()
   const { wishlistCount } = useWishlist()
-  const { userId, token, isAuthenticated, logout } = useAuthStore()
+  const {userId, token, isAuthenticated, login, logout } = useStore();
+ 
   const router = useRouter()
 
   const [searchQuery, setSearchQuery] = useState('')

@@ -135,16 +135,17 @@ export default function VerifyEmailPage() {
                 </div>
               )}
 
-              {(status === 'error' || status === 'expired') && (
-                <div className="space-y-4">
-                  <p className="text-center text-gray-600">{errorMessage}</p>
-                  <Button variant="outline" className="w-full">
-                    <Link href="/verify-email/resend">
-                      Resend Verification Email
-                    </Link>
-                  </Button>
-                </div>
-              )}
+             {(status === 'error' || status === 'expired') && (
+  <div className="space-y-4">
+    <p className="text-center text-gray-600">{errorMessage}</p>
+    <Button variant="outline" className="w-full">
+      <Link href={`/verify-email-resend${email ? `?email=${encodeURIComponent(email)}` : ''}`}>
+        Resend Verification Email
+      </Link>
+    </Button>
+  </div>
+)}
+
             </CardContent>
 
             <CardFooter className="flex justify-center">
