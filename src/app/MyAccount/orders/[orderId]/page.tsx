@@ -6,9 +6,18 @@ import axiosInstance from "@/lib/axiosInstance";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, CheckCircle, Clock, Package, Truck, Star } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle,
+  Clock,
+  Package,
+  Truck,
+  Star,
+} from "lucide-react";
 import Link from "next/link";
+import useStore from "@/lib/Zustand";
 
+// ✅ Status Icon
 const getStatusIcon = (status: string) => {
   switch (status?.toLowerCase()) {
     case "confirmed":
@@ -24,6 +33,7 @@ const getStatusIcon = (status: string) => {
   }
 };
 
+// ✅ Status Colors
 const getStatusColor = (status: string) => {
   switch (status?.toLowerCase()) {
     case "confirmed":
@@ -43,9 +53,11 @@ const getStatusColor = (status: string) => {
 const RatingStars = ({
   rating,
   onRate,
+  readOnly = false,
 }: {
   rating: number;
-  onRate: (val: number) => void;
+  onRate?: (val: number) => void;
+  readOnly?: boolean;
 }) => {
   return (
     <div className="flex items-center gap-1 cursor-pointer">
@@ -55,13 +67,22 @@ const RatingStars = ({
           className={`w-6 h-6 transition ${
             star <= rating
               ? "text-yellow-500 fill-yellow-500"
+              : readOnly
+              ? "text-gray-300"
               : "text-gray-300 hover:text-yellow-400"
           }`}
-          onClick={() => onRate(star)}
+          onClick={() => !readOnly && onRate?.(star)}
         />
       ))}
     </div>
   );
+};
+
+// ⭐ Feedback type
+type Feedback = {
+  rating: number;
+  comment: string;
+  submitted: boolean;
 };
 
 export default function OrderDetailPage() {
@@ -69,29 +90,71 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { userId } = useStore();
 
-  // Store ratings for each item
-  const [ratings, setRatings] = useState<Record<number, number>>({});
+  // Combined feedback state
+  const [feedbacks, setFeedbacks] = useState<Record<number, Feedback>>({});
 
-  useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const res = await axiosInstance.get(`/orders/orders/${orderId}`);
-        setOrder(res.data.data);
-      } catch (err) {
-        setError("Failed to load order details");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (orderId) fetchOrder();
-  }, [orderId]);
+ useEffect(() => {
+  const fetchOrder = async () => {
+    try {
+      const res = await axiosInstance.get(`/orders/orders/${orderId}`);
+      setOrder(res.data.data);
 
-  const handleRate = (idx: number, value: number) => {
-    setRatings((prev) => ({ ...prev, [idx]: value }));
-    // TODO: send rating to API if needed
-    console.log(`Rated item ${idx} with ${value} stars`);
+      // Initialize feedbacks with existing user reviews
+      const initialFeedbacks: Record<number, Feedback> = {};
+      Object.entries(res.data.data.item_details || {}).forEach(
+        ([productId, item]: [string, any], idx) => {
+          // Assuming each item has a "user_rating" object if the user has already rated
+          const userRating = item.user_rating; // { rating: 4, comment: "..." }
+          initialFeedbacks[idx] = {
+            rating: userRating?.rating || 0,
+            comment: userRating?.comment || "",
+            submitted: !!userRating,
+          };
+        }
+      );
+
+      setFeedbacks(initialFeedbacks);
+
+    } catch (err) {
+      setError("Failed to load order details");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  if (orderId) fetchOrder();
+}, [orderId]);
+
+
+  const handleSubmitFeedback = async (idx: number, item: any, productId: string) => {
+    const feedback = feedbacks[idx];
+    if (!feedback) return;
+
+    try {
+      const payload = {
+        user_id: userId,
+        vendor_id: productId, // adjust if vendor_id is separate
+        rating: feedback.rating,
+        comment: feedback.comment,
+      };
+
+      const res = await axiosInstance.post(
+        `/product_ratings/products/${productId}/ratings`,
+        payload
+      );
+
+      console.log("✅ Feedback submitted:", res.data);
+
+      // Mark as submitted
+      setFeedbacks((prev) => ({
+        ...prev,
+        [idx]: { ...prev[idx], submitted: true },
+      }));
+    } catch (err) {
+      console.error("❌ Failed to submit feedback:", err);
+    }
   };
 
   if (loading) return <div className="p-8 text-center">Loading order...</div>;
@@ -101,6 +164,7 @@ export default function OrderDetailPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-8 max-w-3xl">
+        {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <Link href="/MyAccount?tab=orders">
             <ArrowLeft className="h-6 w-6 mr-2 cursor-pointer hover:text-primary transition" />
@@ -121,34 +185,71 @@ export default function OrderDetailPage() {
           <CardContent className="space-y-6">
             {/* Items */}
             <div className="space-y-6">
-              {Object.values(order.item_details || {}).map((item: any, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-6 p-3 rounded-lg hover:bg-accent transition"
-                >
-                  <img
-                    src={item.images?.[0] || "/placeholder.svg"}
-                    alt={item.name}
-                    className="w-24 h-24 object-cover rounded-md border"
-                  />
-                  <div className="flex-1 space-y-2">
-                    <p className="font-medium">{item.name}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Quantity: {item.quantity}
-                    </p>
-                    {/* Ask user to rate product */}
-                    <div className="flex flex-col gap-1">
-                      <span className="text-xs text-muted-foreground">
-                        Rate this product:
-                      </span>
-                      <RatingStars
-                        rating={ratings[idx] || 0}
-                        onRate={(val) => handleRate(idx, val)}
+              {Object.entries(order.item_details || {}).map(
+                ([productId, item]: [string, any], idx) => (
+                  <div
+                    key={idx}
+                    className="flex flex-col gap-4 p-3 rounded-lg hover:bg-accent transition"
+                  >
+                    <div className="flex items-center gap-6">
+                      <img
+                        src={item.images?.[0] || "/placeholder.svg"}
+                        alt={item.name}
+                        className="w-24 h-24 object-cover rounded-md border"
                       />
+                      <div className="flex-1 space-y-2">
+                        <p className="font-medium">{item.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          Quantity: {item.quantity}
+                        </p>
+
+                        {/* Rating & Comment */}
+                        <div className="flex flex-col gap-2">
+                          <span className="text-xs text-muted-foreground">
+                            Rate this product:
+                          </span>
+                          <RatingStars
+                            rating={feedbacks[idx]?.rating || 0}
+                            onRate={(val) =>
+                              setFeedbacks((prev) => ({
+                                ...prev,
+                                [idx]: { ...prev[idx], rating: val, submitted: false },
+                              }))
+                            }
+                          />
+                          <textarea
+                            value={feedbacks[idx]?.comment || ""}
+                            onChange={(e) =>
+                              setFeedbacks((prev) => ({
+                                ...prev,
+                                [idx]: {
+                                  ...prev[idx],
+                                  comment: e.target.value,
+                                  submitted: false,
+                                },
+                              }))
+                            }
+                            placeholder="Write your feedback..."
+                            className="w-full border rounded-md p-2 text-sm"
+                            disabled={feedbacks[idx]?.submitted}
+                          />
+                          {!feedbacks[idx]?.submitted &&
+                            (feedbacks[idx]?.rating || feedbacks[idx]?.comment) && (
+                              <button
+                                onClick={() =>
+                                  handleSubmitFeedback(idx, item, productId)
+                                }
+                                className="self-start px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition"
+                              >
+                                Submit Feedback
+                              </button>
+                            )}
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                )
+              )}
             </div>
 
             <Separator />

@@ -61,6 +61,7 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="featured">Featured</SelectItem>
+          <SelectItem value="rating_above_4">Rating above 4.0</SelectItem>
           <SelectItem value="price_low_to_high">Price: Low to High</SelectItem>
           <SelectItem value="price_high_to_low">Price: High to Low</SelectItem>
           <SelectItem value="latest">Latest</SelectItem>

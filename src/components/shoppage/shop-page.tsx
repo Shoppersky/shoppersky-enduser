@@ -30,8 +30,9 @@ interface ApiProduct {
   in_stock?: boolean;
   badge?: string;
   badge_color?: string;
-  rating?: number;
+  ratings?: number;
   reviews?: number;
+  average_rating?: number;
 }
 
 export default function ShopPage() {
@@ -82,12 +83,13 @@ export default function ShopPage() {
             productSlug: item.slug,
             timestamp: item.timestamp,
             unit: "unit",
-            rating: item.rating || 0,
-            reviews: item.reviews || 0,
+            rating: item.average_rating || 0,
+reviews: item.ratings?.length || 0,
             inStock: item.in_stock !== undefined ? item.in_stock : true,
             badge: item.badge,
             badgeColor: item.badge_color,
             category_slug:item.category_slug,
+           
           })
         );
         setProducts(mappedProducts);
@@ -154,6 +156,10 @@ export default function ShopPage() {
         filtered.sort((a, b) => a.name.localeCompare(b.name));
 
         break;
+
+       case "rating_above_4":
+        filtered = filtered.filter((p) => (p.rating || 0) > 4);
+        break;  
 
       case "featured":
 
