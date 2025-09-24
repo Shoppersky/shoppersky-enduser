@@ -51,7 +51,7 @@ import Link from "next/link";
 import { Button } from "../components/ui/button";
  
 export function CookieConsent() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
     // Check if the user has already accepted or managed the cookie consent
     const hasConsented = localStorage.getItem("cookieConsent")

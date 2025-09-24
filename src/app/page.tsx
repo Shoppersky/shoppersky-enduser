@@ -51,6 +51,7 @@ import App from "@/components/homepage/AdsSection";
 import IndustryProducts from "@/components/homepage/IndustryProducts";
 import axiosInstance from "@/lib/axiosInstance";
 import type { Product } from "@/types/product";
+import { CookieConsent } from "@/components/cookie-consent";
 
 type IndustryResponse = {
   id: string;
@@ -274,7 +275,11 @@ console.log(industries);
         )}
 
         <Partners />
+
+
       </div>
+
+      <CookieConsent />
     </main>
   );
 }

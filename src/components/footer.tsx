@@ -174,7 +174,7 @@
 
 import { Button } from "../components/ui/button"
 import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from "lucide-react"
-import { CookieConsent } from "./cookie-consent"
+// import { CookieConsent } from "./cookie-consent"
 import { useState, useEffect } from "react"
 import axiosInstance from "@/lib/axiosInstance"
 
@@ -301,10 +301,10 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-300">
-          © {new Date().getFullYear()} ShoppersSky. All rights reserved.
+          © {new Date().getFullYear()} Shoppersky. All rights reserved.
         </div>
       </div>
-      <CookieConsent />
+      {/* <CookieConsent /> */}
     </footer>
   )
 }

@@ -36,7 +36,6 @@ type Address = {
   zipCode: string;
   country: string;
   phone: string;
-
 };
 
 type CheckoutItem = {
@@ -69,6 +68,7 @@ function CheckoutContent() {
   const { cartItems, cartTotal, clearCart } = useCart();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const existingOrderId = searchParams.get("order_id");
 
   // Check if this is a "Buy Now" checkout
   const isBuyNow = searchParams.get("buyNow") === "true";
@@ -81,14 +81,14 @@ function CheckoutContent() {
   const [shippingAddress, setShippingAddress] = useState({
     firstName: "",
     lastName: "",
-    address: "",
+    street: "",
     apartment: "",
     city: "",
     state: "",
     postcode: "",
     country: "AU",
     phone: "",
- 
+
     label: "",
   });
   const [orderNotes, setOrderNotes] = useState("");
@@ -105,74 +105,77 @@ function CheckoutContent() {
     let error = "";
 
     switch (name) {
-  case "firstName":
-  case "lastName":
-    if (!value.trim()) {
-      error = "This field is required.";
-    } else if (value.trim().length < 2) {
-      error = "Name must be at least 2 characters long.";
-    } else if (value.trim().length > 50) {
-      error = "Name cannot exceed 50 characters.";
-    } else if (!/^[a-zA-Z\s-]+$/.test(value)) {
-      error = "Name can only contain letters, spaces, or hyphens.";
+      case "firstName":
+      case "lastName":
+        if (!value.trim()) {
+          error = "This field is required.";
+        } else if (value.trim().length < 2) {
+          error = "Name must be at least 2 characters long.";
+        } else if (value.trim().length > 50) {
+          error = "Name cannot exceed 50 characters.";
+        } else if (!/^[a-zA-Z\s-]+$/.test(value)) {
+          error = "Name can only contain letters, spaces, or hyphens.";
+        }
+        break;
+      case "street":
+        if (!value.trim()) {
+          error = "Street address is required.";
+        } else if (value.trim().length < 5) {
+          error = "Street address must be at least 5 characters long.";
+        } else if (value.trim().length > 100) {
+          error = "Street address cannot exceed 100 characters.";
+        } else if (!/^[0-9a-zA-Z\s,/-]+$/.test(value)) {
+          error =
+            "Invalid street address. Use letters, numbers, spaces, commas, or hyphens.";
+        }
+        break;
+      case "apartment":
+        if (value && value.trim().length > 50) {
+          error = "Apartment details cannot exceed 50 characters.";
+        } else if (value && !/^[0-9a-zA-Z\s,/-]+$/.test(value)) {
+          error =
+            "Invalid apartment details. Use letters, numbers, spaces, commas, or hyphens.";
+        }
+        break;
+      case "city":
+        if (!value.trim()) {
+          error = "City is required.";
+        } else if (value.trim().length < 2) {
+          error = "City must be at least 2 characters long.";
+        } else if (value.trim().length > 50) {
+          error = "City cannot exceed 50 characters.";
+        } else if (!/^[a-zA-Z\s-]+$/.test(value)) {
+          error = "City can only contain letters, spaces, or hyphens.";
+        }
+        break;
+      case "state":
+        if (!value) {
+          error = "State is required.";
+        } else if (!states.some((s) => s.value === value)) {
+          error = "Please select a valid Australian state or territory.";
+        }
+        break;
+      case "postcode":
+        if (!/^\d{4}$/.test(value)) {
+          error = "Postcode must be exactly 4 digits.";
+        }
+        break;
+      case "phone":
+        if (!/^(0[23478]\d{8})$/.test(value)) {
+          error =
+            "Enter a valid Australian phone number (e.g., 04xxxxxxxx or 02xxxxxxxx).";
+        }
+        break;
+      case "label":
+        if (!value.trim()) {
+          error = "Address label is required.";
+        } else if (value.trim().length < 2) {
+          error = "Address label must be at least 2 characters long.";
+        } else if (value.trim().length > 50) {
+          error = "Address label cannot exceed 50 characters.";
+        }
+        break;
     }
-    break;
-  case "address":
-    if (!value.trim()) {
-      error = "Street address is required.";
-    } else if (value.trim().length < 5) {
-      error = "Street address must be at least 5 characters long.";
-    } else if (value.trim().length > 100) {
-      error = "Street address cannot exceed 100 characters.";
-    } else if (!/^[0-9a-zA-Z\s,/-]+$/.test(value)) {
-      error = "Invalid street address. Use letters, numbers, spaces, commas, or hyphens.";
-    }
-    break;
-  case "apartment":
-    if (value && value.trim().length > 50) {
-      error = "Apartment details cannot exceed 50 characters.";
-    } else if (value && !/^[0-9a-zA-Z\s,/-]+$/.test(value)) {
-      error = "Invalid apartment details. Use letters, numbers, spaces, commas, or hyphens.";
-    }
-    break;
-  case "city":
-    if (!value.trim()) {
-      error = "City is required.";
-    } else if (value.trim().length < 2) {
-      error = "City must be at least 2 characters long.";
-    } else if (value.trim().length > 50) {
-      error = "City cannot exceed 50 characters.";
-    } else if (!/^[a-zA-Z\s-]+$/.test(value)) {
-      error = "City can only contain letters, spaces, or hyphens.";
-    }
-    break;
-  case "state":
-    if (!value) {
-      error = "State is required.";
-    } else if (!states.some((s) => s.value === value)) {
-      error = "Please select a valid Australian state or territory.";
-    }
-    break;
-  case "postcode":
-    if (!/^\d{4}$/.test(value)) {
-      error = "Postcode must be exactly 4 digits.";
-    }
-    break;
-  case "phone":
-    if (!/^(0[23478]\d{8})$/.test(value)) {
-      error = "Enter a valid Australian phone number (e.g., 04xxxxxxxx or 02xxxxxxxx).";
-    }
-    break;
-  case "label":
-    if (!value.trim()) {
-      error = "Address label is required.";
-    } else if (value.trim().length < 2) {
-      error = "Address label must be at least 2 characters long.";
-    } else if (value.trim().length > 50) {
-      error = "Address label cannot exceed 50 characters.";
-    }
-    break;
-}
     setErrors((prev) => ({ ...prev, [name]: error }));
     return error === "";
   };
@@ -187,8 +190,6 @@ function CheckoutContent() {
       "state",
       "postcode",
       "phone",
-   
-      
       "label",
     ];
     const results = fieldsToValidate.map((field) =>
@@ -288,7 +289,6 @@ function CheckoutContent() {
                 zipCode: details.postcode || "",
                 country: details.country || "",
                 phone: details.phone || "",
-   
               };
             }
           );
@@ -336,19 +336,21 @@ function CheckoutContent() {
 
       const itemsWithVendors = await Promise.all(vendorPromises);
 
-    const itemDetails = itemsWithVendors.reduce(
+      const itemDetails = itemsWithVendors.reduce(
         (acc, item) => ({
           ...acc,
           [item.product_id]: {
             name: item.name,
             quantity: item.quantity,
-            unit_price: checkoutItems.find((ci) => ci.id === item.product_id)?.price || 0,
-            subtotal: (checkoutItems.find((ci) => ci.id === item.product_id)?.price || 0) * item.quantity,
+            unit_price:
+              checkoutItems.find((ci) => ci.id === item.product_id)?.price || 0,
+            subtotal:
+              (checkoutItems.find((ci) => ci.id === item.product_id)?.price ||
+                0) * item.quantity,
           },
         }),
         {}
       );
- 
 
       let finalAddress;
       let addressId: string | null = null;
@@ -375,7 +377,7 @@ function CheckoutContent() {
           phone: shippingAddress.phone,
           apartment: shippingAddress.apartment,
           label: shippingAddress.label,
-          street: `${shippingAddress.address}`,
+          street: `${shippingAddress.street}`,
           city: shippingAddress.city,
           state: shippingAddress.state,
           postcode: shippingAddress.postcode,
@@ -394,15 +396,16 @@ function CheckoutContent() {
         address: finalAddress,
         address_id: addressId,
         order_notes: orderNotes || null,
+        order_id: existingOrderId || undefined,
       };
 
       const response = await axiosInstance.post("/orders/place-order", payload);
       const { data } = response.data;
 
-    //   if (!isBuyNow) {
-    //     clearCart();
-    // // fallback
-    //     };   
+      //   if (!isBuyNow) {
+      //     clearCart();
+      // // fallback
+      //     };
 
       // localStorage.setItem("checkoutEmail", shippingAddress.email);
       window.location.href = data.checkout_url;
@@ -602,17 +605,17 @@ function CheckoutContent() {
                           )}
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="address">Street Address</Label>
+                          <Label htmlFor="street">Street Address</Label>
                           <Input
-                            id="address"
-                            name="address"
-                            value={shippingAddress.address}
+                            id="street"
+                            name="street"
+                            value={shippingAddress.street}
                             onChange={handleShippingChange}
                             required
                           />
-                          {errors.address && (
+                          {errors.street && (
                             <p className="text-sm text-red-600">
-                              {errors.address}
+                              {errors.street}
                             </p>
                           )}
                         </div>
@@ -739,31 +742,31 @@ function CheckoutContent() {
                             </p>
                           )}
                         </div>
-              
+
                         {addresses.length > 0 && (
-  <Button
-    type="button"
-    variant="outline"
-    onClick={() => {
-      setShowNewAddressForm(false);
-      setShippingAddress({
-        firstName: "",
-        lastName: "",
-        address: "",
-        apartment: "",
-        city: "",
-        state: "",
-        postcode: "",
-        country: "AU",
-        phone: "",
-        label: "",
-      });
-      setErrors({});
-    }}
-  >
-    Back to Saved Addresses
-  </Button>
-)}
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setShowNewAddressForm(false);
+                              setShippingAddress({
+                                firstName: "",
+                                lastName: "",
+                                street: "",
+                                apartment: "",
+                                city: "",
+                                state: "",
+                                postcode: "",
+                                country: "AU",
+                                phone: "",
+                                label: "",
+                              });
+                              setErrors({});
+                            }}
+                          >
+                            Back to Saved Addresses
+                          </Button>
+                        )}
                       </>
                     )}
                   </div>
@@ -846,6 +849,15 @@ function CheckoutContent() {
                 <div className="rounded-lg border bg-card">
                   <div className="p-6">
                     <h2 className="text-xl font-bold">Review Your Order</h2>
+                     {existingOrderId && (
+
+                      <p className="text-sm text-muted-foreground mt-1">
+
+                        Retrying payment for Order ID: {existingOrderId}
+
+                      </p>
+
+                    )}
                   </div>
                   <Separator />
                   <div className="p-6">
@@ -906,7 +918,7 @@ function CheckoutContent() {
                             {shippingAddress.firstName}{" "}
                             {shippingAddress.lastName}
                             <br />
-                            {shippingAddress.address}
+                            {shippingAddress.street}
                             {shippingAddress.apartment &&
                               `, ${shippingAddress.apartment}`}
                             <br />
@@ -937,8 +949,18 @@ function CheckoutContent() {
                   <Button type="button" variant="outline" onClick={prevStep}>
                     Back to Shipping
                   </Button>
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? "Processing..." : "Place Order"}
+                   <Button type="submit" disabled={isLoading}>
+
+                    {isLoading
+
+                      ? "Processing..."
+
+                      : existingOrderId
+
+                      ? "Retry Payment"
+
+                      : "Place Order"}
+
                   </Button>
                 </div>
                 {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
@@ -955,6 +977,15 @@ function CheckoutContent() {
                   <p className="text-sm text-muted-foreground mt-1">
                     Quick Checkout
                   </p>
+                )}
+                  {existingOrderId && (
+
+                  <p className="text-sm text-muted-foreground mt-1">
+
+                    Order ID: {existingOrderId}
+
+                  </p>
+
                 )}
               </div>
               <Separator />
