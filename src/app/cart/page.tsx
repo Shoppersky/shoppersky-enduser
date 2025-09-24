@@ -21,7 +21,7 @@ import { Alert, AlertDescription } from '../../components/ui/alert';
 import useStore from '../../lib/Zustand';
 import { RemoveFromCartButton } from '@/components/remove-cart';
 function CartPageContent() {
-  const { cartItems, cartTotal, removeFromCart, updateQuantity } = useCart();
+  const { cartItems, cartTotal, removeFromCart, updateQuantity, clearCart  } = useCart();
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
   const { isAuthenticated } = useStore();
@@ -62,7 +62,7 @@ console.log(cartItems);
         </div>
         <h2 className="mb-2 text-2xl font-bold">Your cart is empty</h2>
         <p className="mb-8 text-center text-muted-foreground">
-          Looks like you haven`&apos;`t added anything to your cart yet.
+          Looks like you haven&apos;t added anything to your cart yet.
         </p>
         <Button asChild>
           <Link href="/products">Continue Shopping</Link>
@@ -72,15 +72,25 @@ console.log(cartItems);
   }
 
   return (
-    <div className="grid gap-8 lg:grid-cols-3">
+   <div className="grid gap-8 lg:grid-cols-3">
       <div className="lg:col-span-2">
         <div className="rounded-lg border bg-card">
-          <div className="p-6">
-            <h2 className="text-2xl font-bold">Shopping Cart</h2>
-            <p className="text-muted-foreground">
-              {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in
-              your cart
-            </p>
+          <div className="p-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold">Shopping Cart</h2>
+              <p className="text-muted-foreground">
+                {cartItems.length} {cartItems.length === 1 ? 'item' : 'items'} in your cart
+              </p>
+            </div>
+            {/* Clear All Button */}
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => clearCart()}
+              disabled={cartItems.length === 0}
+            >
+              Clear All
+            </Button>
           </div>
           <Separator />
 
@@ -243,24 +253,23 @@ console.log(cartItems);
   );
 }
 
+
 export default function CartPage() {
   return (
-    <CartProvider>
-      <div className="flex min-h-screen flex-col">
-        <main className="flex-1">
-          <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12">
-            <div className="mb-6 flex items-center text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-foreground">
-                Home
-              </Link>
-              <ChevronRight className="mx-1 h-4 w-4" />
-              <span className="text-foreground">Cart</span>
-            </div>
-
-            <CartPageContent />
+    <div className="flex min-h-screen flex-col">
+      <main className="flex-1">
+        <div className="container mx-auto max-w-7xl px-4 py-8 md:py-12">
+          <div className="mb-6 flex items-center text-sm text-muted-foreground">
+            <Link href="/" className="hover:text-foreground">
+              Home
+            </Link>
+            <ChevronRight className="mx-1 h-4 w-4" />
+            <span className="text-foreground">Cart</span>
           </div>
-        </main>
-      </div>
-    </CartProvider>
+
+          <CartPageContent />
+        </div>
+      </main>
+    </div>
   );
 }

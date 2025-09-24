@@ -211,7 +211,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return null; // or a loader/spinner
   }
 
-  const cartCount = cartItems.length
+  const cartCount = cartItems.reduce((total, item) => total + item.quantity, 0);
   const cartTotal = cartItems.reduce(
     (total, item) => total + item.price * item.quantity,
     0
@@ -232,16 +232,19 @@ console.log(cartCount)
 
   };
 
-  const removeFromCart = (productId: string) =>{
+  // const removeFromCart = (productId: string) =>{
 
 
-    setCartItems((prevItems) =>
-      prevItems.filter((item) => item.id !== productId)
+  //   setCartItems((prevItems) =>
+  //     prevItems.filter((item) => item.id !== productId)
 
-    );
-     window.location.reload();
-  }
+  //   );
+  //    window.location.reload();
+  // }
 
+ const removeFromCart = (productId: string) => {
+  setCartItems(prevItems => prevItems.filter(item => item.id !== productId));
+};
   const updateQuantity = (productId: string, quantity: number) => {
     if (quantity < 1) return;
     setCartItems((prevItems) =>
@@ -253,7 +256,7 @@ console.log(cartCount)
 
   const clearCart = () => {
   setCartItems([]);
-  localStorage.removeItem('cart'); // remove saved cart
+  localStorage.removeItem('cart');
 };
 
 

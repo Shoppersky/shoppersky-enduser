@@ -131,7 +131,7 @@ console.log(categories)
         <div className="relative mb-4">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
           <Input
-            placeholder="Search vendors..."
+            placeholder="Search vendors"
             value={searchQuery}
             onChange={(e) => handleSearchChange(e.target.value)}
             className="pl-10 h-12"
@@ -150,18 +150,19 @@ console.log(categories)
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+                <SelectItem value='All Categories'>
+                  All Categories
+                </SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category.id} value={category.name}>
                   {category.name}
                 </SelectItem>
               ))}
-               <SelectItem value='All Categories'>
-                  All Categories
-                </SelectItem>
+             
             </SelectContent>
           </Select>
 
-          <Select value={selectedFilters.location} onValueChange={onLocationFilter}>
+          {/* <Select value={selectedFilters.location} onValueChange={onLocationFilter}>
             <SelectTrigger className="w-40">
               <MapPin className="w-4 h-4 mr-2" />
               <SelectValue />
@@ -173,7 +174,7 @@ console.log(categories)
                 </SelectItem>
               ))}
             </SelectContent>
-          </Select>
+          </Select> */}
 
           {/* <Select value={selectedFilters.rating} onValueChange={onRatingFilter}>
             <SelectTrigger className="w-40">

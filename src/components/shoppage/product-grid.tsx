@@ -1,23 +1,27 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
-import Link from 'next/link';
-import { Product } from '../../types/product';
-import { Button } from '../ui/button';
-import { Badge } from '../ui/badge';
-import { Star, ShoppingCart, Heart, Plus, Minus } from 'lucide-react';
-import { useCart } from '../cart-provider';
-import { useWishlist } from '../wishlist-provider';
-import { ProductCard } from '../product-card';
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Product } from "../../types/product";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
+import { Star, ShoppingCart, Heart, Plus, Minus } from "lucide-react";
+import { useCart } from "../cart-provider";
+import { useWishlist } from "../wishlist-provider";
+import { ProductCard } from "../product-card";
 
 interface ProductGridProps {
   products: Product[];
-  viewMode: 'grid' | 'list';
+  viewMode: "grid" | "list";
   clearFilters?: () => void;
 }
 
-export function ProductGrid({ products, viewMode, clearFilters }: ProductGridProps) {
+export function ProductGrid({
+  products,
+  viewMode,
+  clearFilters,
+}: ProductGridProps) {
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
 
@@ -38,7 +42,7 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
     );
   }
 
-  if (viewMode === 'list') {
+  if (viewMode === "list") {
     return (
       <div className="space-y-3 sm:space-y-4">
         {products.map((product) => {
@@ -46,16 +50,25 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
             const [quantity, setQuantity] = useState(1);
             const [added, setAdded] = useState(false);
             const discountPercentage = product.originalPrice
-              ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+              ? Math.round(
+                  ((product.originalPrice - product.price) /
+                    product.originalPrice) *
+                    100
+                )
               : 0;
 
             // Initialize from localStorage to reflect existing cart items
             useEffect(() => {
               try {
-                const raw = typeof window !== 'undefined' ? localStorage.getItem('cart') : null;
+                const raw =
+                  typeof window !== "undefined"
+                    ? localStorage.getItem("cart")
+                    : null;
                 if (raw) {
                   const items = JSON.parse(raw);
-                  const exists = Array.isArray(items) && items.some((i: any) => String(i.id) === String(product.id));
+                  const exists =
+                    Array.isArray(items) &&
+                    items.some((i: any) => String(i.id) === String(product.id));
                   if (exists) setAdded(true);
                 }
               } catch (_) {
@@ -66,22 +79,24 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
             return (
               <div className="flex gap-3 sm:gap-4 p-3 sm:p-4 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow">
                 <div className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                  <Link href={`/${product.category_slug}/${product.productSlug}`}>
-                    <Image 
-                      src={product.image} 
-                      alt={product.name} 
-                      fill 
-                      className="object-contain p-1" 
+                  <Link
+                    href={`/${product.category_slug}/${product.productSlug}`}
+                  >
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      fill
+                      className="object-contain p-1"
                     />
                   </Link>
                   {product.badge && (
                     <Badge
                       className={`absolute top-1 left-1 text-xs px-1 py-0.5 ${
-                        product.badgeColor === 'red'
-                          ? 'bg-red-100 hover:bg-red-100 text-red-700'
-                          : product.badgeColor === 'green'
-                            ? 'bg-green-100 hover:bg-green-100 text-green-700'
-                            : 'bg-blue-100 hover:bg-blue-100 text-blue-700'
+                        product.badgeColor === "red"
+                          ? "bg-red-100 hover:bg-red-100 text-red-700"
+                          : product.badgeColor === "green"
+                            ? "bg-green-100 hover:bg-green-100 text-green-700"
+                            : "bg-blue-100 hover:bg-blue-100 text-blue-700"
                       }`}
                     >
                       {product.badge}
@@ -94,7 +109,9 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
                       <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">
                         {product.category}
                       </div>
-                      <Link href={`/${product.category_slug}/${product.productSlug}`}>
+                      <Link
+                        href={`/${product.category_slug}/${product.productSlug}`}
+                      >
                         <h3 className="font-semibold text-sm sm:text-base text-gray-900 cursor-pointer hover:text-green-600 transition-colors line-clamp-2">
                           {product.name}
                         </h3>
@@ -117,7 +134,7 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
                       />
                     </Button> */}
                   </div>
-                  
+
                   {/* Rating */}
                   {product.rating > 0 && (
                     <div className="flex items-center gap-1 mb-2">
@@ -128,25 +145,33 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
                             key={i}
                             className={`w-3 h-3 ${
                               i < Math.floor(product.rating)
-                                ? 'fill-yellow-400 text-yellow-400'
-                                : 'text-gray-300'
+                                ? "fill-yellow-400 text-yellow-400"
+                                : "text-gray-300"
                             }`}
                           />
                         ))}
-                      <span className="text-xs text-gray-600 ml-1">({product.reviews || 0})</span>
+                      <span className="text-xs text-gray-600 ml-1">
+                        ({product.reviews || 0})
+                      </span>
                     </div>
                   )}
-                  
+
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="font-bold text-base sm:text-lg">AU${product.price.toFixed(2)}</span>
+                        <span className="font-bold text-base sm:text-lg">
+                          AU${product.price.toFixed(2)}
+                        </span>
                         {product.originalPrice && (
                           <span className="text-xs sm:text-sm text-gray-500 line-through">
                             AU${product.originalPrice.toFixed(2)}
                           </span>
                         )}
-                        {product.unit && <span className="text-xs text-gray-500">{product.unit}</span>}
+                        {product.unit && (
+                          <span className="text-xs text-gray-500">
+                            {product.unit}
+                          </span>
+                        )}
                       </div>
                       {discountPercentage > 0 && (
                         <div className="text-xs text-green-600 font-medium">
@@ -162,11 +187,15 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
                               variant="ghost"
                               size="sm"
                               className="w-6 h-6 sm:w-8 sm:h-8 p-0"
-                              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                              onClick={() =>
+                                setQuantity(Math.max(1, quantity - 1))
+                              }
                             >
                               <Minus className="w-2 h-2 sm:w-3 sm:h-3" />
                             </Button>
-                            <span className="w-6 sm:w-8 text-center text-xs sm:text-sm">{quantity}</span>
+                            <span className="w-6 sm:w-8 text-center text-xs sm:text-sm">
+                              {quantity}
+                            </span>
                             <Button
                               variant="ghost"
                               size="sm"
@@ -180,12 +209,21 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
                             onClick={() => {
                               addToCart({ ...product, quantity });
                               try {
-                                const raw = localStorage.getItem('cart');
+                                const raw = localStorage.getItem("cart");
                                 const items = raw ? JSON.parse(raw) : [];
-                                const idx = items.findIndex((i: any) => String(i.id) === String(product.id));
-                                if (idx === -1) items.push({ ...product, quantity });
-                                else items[idx].quantity = (items[idx].quantity || 0) + quantity;
-                                localStorage.setItem('cart', JSON.stringify(items));
+                                const idx = items.findIndex(
+                                  (i: any) =>
+                                    String(i.id) === String(product.id)
+                                );
+                                if (idx === -1)
+                                  items.push({ ...product, quantity });
+                                else
+                                  items[idx].quantity =
+                                    (items[idx].quantity || 0) + quantity;
+                                localStorage.setItem(
+                                  "cart",
+                                  JSON.stringify(items)
+                                );
                               } catch (_) {
                                 // ignore storage errors
                               }
@@ -194,16 +232,16 @@ export function ProductGrid({ products, viewMode, clearFilters }: ProductGridPro
                             disabled={!product.inStock}
                             className={`text-xs sm:text-sm px-2 sm:px-3 ${
                               !product.inStock
-                                ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-green-600 hover:bg-green-700'
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-green-600 hover:bg-green-700"
                             }`}
                           >
                             <ShoppingCart className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                             <span className="hidden sm:inline">
-                              {!product.inStock ? 'Out of Stock' : 'Add'}
+                              {!product.inStock ? "Out of Stock" : "Add"}
                             </span>
                             <span className="sm:hidden">
-                              {!product.inStock ? 'Out' : '+'}
+                              {!product.inStock ? "Out" : "+"}
                             </span>
                           </Button>
                         </>

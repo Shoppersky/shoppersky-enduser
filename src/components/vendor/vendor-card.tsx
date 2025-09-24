@@ -99,7 +99,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
           </div>
 
           {/* Categories */}
-          <div className="flex flex-wrap gap-1 mb-4 h-10">
+          {/* <div className="flex flex-wrap gap-1 mb-4 h-10">
             {vendor.categories.slice(0, 4).map((category) => (
               <Badge key={category} variant="secondary" className="text-xs">
                 {category}
@@ -110,7 +110,7 @@ export function VendorCard({ vendor }: VendorCardProps) {
                 +{vendor.categories.length - 4}
               </Badge>
             )}
-          </div>
+          </div> */}
 
           {/* Action Button */}
           <Link href={`/vendors/${vendor.slug}`} className="block">

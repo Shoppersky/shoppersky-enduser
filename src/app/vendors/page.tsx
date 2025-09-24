@@ -115,10 +115,9 @@ console.log(filteredVendors);
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
         <div className="container mx-auto px-4 py-12 text-center">
-          <h1 className="text-4xl font-bold mb-4">Discover Amazing Vendors</h1>
+          <h1 className="text-4xl font-bold mb-4">Discover Top Vendors</h1>
           <p className="text-xl opacity-90">
-            Explore {totalVendors} trusted vendors offering quality products and
-            services
+            Explore {totalVendors} trusted partners delivering quality products & exceptional services!
           </p>
         </div>
       </div>

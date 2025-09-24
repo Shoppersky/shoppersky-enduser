@@ -41,7 +41,7 @@ export default function ShopPage() {
   const [categories, setCategories] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
-  const [sortOption, setSortOption] = useState<string>("featured");
+  const [sortOption, setSortOption] = useState<string>("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -84,12 +84,11 @@ export default function ShopPage() {
             timestamp: item.timestamp,
             unit: "unit",
             rating: item.average_rating || 0,
-reviews: item.ratings?.length || 0,
+            reviews: item.ratings?.length || 0,
             inStock: item.in_stock !== undefined ? item.in_stock : true,
             badge: item.badge,
             badgeColor: item.badge_color,
-            category_slug:item.category_slug,
-           
+            category_slug: item.category_slug,
           })
         );
         setProducts(mappedProducts);
@@ -152,16 +151,16 @@ reviews: item.ratings?.length || 0,
 
         break;
 
-      case "name_a_to_z":
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      // case "name_a_to_z":
+      //   filtered.sort((a, b) => a.name.localeCompare(b.name));
 
+      //   break;
+
+      case "rating_above_4":
+        filtered = filtered.filter((p) => (p.rating || 0) > 4);
         break;
 
-       case "rating_above_4":
-        filtered = filtered.filter((p) => (p.rating || 0) > 4);
-        break;  
-
-      case "featured":
+      case "all":
 
       default:
         // Maintain original order or apply featured logic if defined

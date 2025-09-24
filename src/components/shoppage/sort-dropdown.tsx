@@ -60,12 +60,13 @@ export function SortDropdown({ value, onChange }: SortDropdownProps) {
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="featured">Featured</SelectItem>
+          {/* <SelectItem value="featured">Featured</SelectItem> */}
+          <SelectItem value="all">All Products</SelectItem>
           <SelectItem value="rating_above_4">Rating above 4.0</SelectItem>
           <SelectItem value="price_low_to_high">Price: Low to High</SelectItem>
           <SelectItem value="price_high_to_low">Price: High to Low</SelectItem>
           <SelectItem value="latest">Latest</SelectItem>
-          <SelectItem value="name_a_to_z">Name: A to Z</SelectItem>
+          {/* <SelectItem value="name_a_to_z">Name: A to Z</SelectItem> */}
         </SelectContent>
       </Select>
     </div>
