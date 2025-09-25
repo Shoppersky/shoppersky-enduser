@@ -1026,7 +1026,7 @@ export default function Addresses({ addresses, setAddresses, userId, token }: Ad
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
           <CardContent className="p-12 text-center">
             <div className="relative mb-6">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-full blur-xl"></div>
+              <div className="absolute inset-0  rounded-full blur-xl"></div>
               <div className="relative h-24 w-24 mx-auto bg-muted/20 rounded-full flex items-center justify-center">
                 <MapPin className="h-12 w-12 text-muted-foreground" />
               </div>

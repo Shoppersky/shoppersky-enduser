@@ -565,7 +565,7 @@ function ProductDetails() {
                             <span className="font-medium">Weight</span>
                             <span>{physical_attributes?.weight || "N/A"}</span>
                           </div>
-                          <div className="flex justify-between py-2 border-b border-gray-200">
+                          <div className="flex justify-between py-2  border-gray-200">
                             <span className="font-medium">Dimensions</span>
                             <span>
                               {physical_attributes?.dimensions?.length

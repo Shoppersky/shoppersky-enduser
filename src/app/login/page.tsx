@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import type React from "react";
 import { useState, FormEvent } from "react";
@@ -7,19 +7,24 @@ import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Checkbox } from "../../components/ui/checkbox";
 import { Separator } from "../../components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { ArrowLeft, Eye, EyeOff, Mail, Lock, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
-import Link from 'next/link';
-import useStore from '../../lib/Zustand';
-import { useRouter, useSearchParams } from 'next/navigation';
-import axiosInstance from '../../lib/axiosInstance';
+import Link from "next/link";
+import useStore from "../../lib/Zustand";
+import { useRouter, useSearchParams } from "next/navigation";
+import axiosInstance from "../../lib/axiosInstance";
 
 export default function LoginPage() {
   const { login, validateEmail, validatePassword } = useStore();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get('redirect') || '/';
+  const redirectPath = searchParams.get("redirect") || "/";
 
   const [formData, setFormData] = useState({
     email: "",
@@ -34,7 +39,7 @@ export default function LoginPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear field-specific errors when user starts typing
     if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
@@ -62,57 +67,60 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await axiosInstance.post('/users/login', {
+      const response = await axiosInstance.post("/users/login", {
         email: formData.email,
         password: formData.password,
       });
 
-      console.log('Login response:', response.data.data.access_token);
+      console.log("Login response:", response.data.data.access_token);
 
       if (response.status === 200) {
-        const  token  = response.data.data.access_token;
+        const token = response.data.data.access_token;
         login(token);
-        
+
         // Wait for state to persist
         await new Promise((resolve) => setTimeout(resolve, 100));
-        console.log('Post-login localStorage:', localStorage.getItem('auth-storage'));
-        
+        console.log(
+          "Post-login localStorage:",
+          localStorage.getItem("auth-storage")
+        );
+
         toast.success("Welcome back! You've been logged in successfully.");
         router.push(redirectPath);
       }
-    }  catch (error: any) {
-  console.log('Login error:', error);
+    } catch (error: any) {
+      console.log("Login error:", error);
 
-  const status = error.response?.status;
-  let errorMessage = 'Invalid credentials. Please try again.';
+      const status = error.response?.status;
+      let errorMessage = "Invalid credentials. Please try again.";
 
-  if (status === 404) {
-    errorMessage = 'Account not found. Please sign up.';
-  } else if (status === 401) {
-    errorMessage = 'Incorrect email or password.';
-  }
+      if (status === 404) {
+        errorMessage = "Account not found. Please sign up.";
+      } else if (status === 401) {
+        errorMessage = "Incorrect email or password.";
+      }
 
-  setErrors({ general: errorMessage });
-  toast.error(errorMessage);
-} finally {
-  setIsLoading(false);
-}
-  }
+      setErrors({ general: errorMessage });
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSocialLogin = (provider: string) => {
     toast.info(`${provider} login will be available soon!`);
   };
 
   const handleBack = () => {
-    router.push('/');
+    router.push("/");
   };
 
   const handleSignup = () => {
-    router.push('/signup');
+    router.push("/signup");
   };
 
   const handleForgotPassword = () => {
-    router.push('/forgot-password');
+    router.push("/forgot-password");
   };
 
   return (
@@ -120,13 +128,19 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <Button variant="ghost" onClick={handleBack} className="absolute top-4 left-4 text-green-600">
+          <Button
+            variant="ghost"
+            onClick={handleBack}
+            className="absolute top-4 left-4 text-green-600"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Store
           </Button>
-        
+
           <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
-          <p className="text-gray-600 mt-2">Sign in to your account to continue shopping</p>
+          <p className="text-gray-600 mt-2">
+            Sign in to your account to continue shopping
+          </p>
         </div>
 
         <Card className="shadow-xl border-0">
@@ -150,7 +164,7 @@ export default function LoginPage() {
                     placeholder="Enter your email"
                     value={formData.email}
                     onChange={(e) => handleInputChange("email", e.target.value)}
-                    className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                    className={`pl-10 ${errors.email ? "border-red-500" : ""}`}
                     required
                   />
                 </div>
@@ -168,8 +182,10 @@ export default function LoginPage() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
-                    className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : ''}`}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
+                    className={`pl-10 pr-10 ${errors.password ? "border-red-500" : ""}`}
                     required
                   />
                   <Button
@@ -179,7 +195,11 @@ export default function LoginPage() {
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
                 {errors.password && (
@@ -188,15 +208,18 @@ export default function LoginPage() {
               </div>
 
               <div className="flex items-center justify-between">
-          
-                <Button variant="link" className="px-0 text-green-600" onClick={handleForgotPassword}>
+                <Button
+                  variant="link"
+                  className="px-0 text-green-600"
+                  onClick={handleForgotPassword}
+                >
                   Forgot password?
                 </Button>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full bg-green-600 hover:bg-green-700" 
+              <Button
+                type="submit"
+                className="w-full bg-green-600 hover:bg-green-700"
                 disabled={isLoading}
               >
                 {isLoading ? "Signing in..." : "Sign In"}
@@ -246,7 +269,9 @@ export default function LoginPage() {
             </div> */}
 
             <div className="text-center">
-              <span className="text-sm text-gray-600">Don't have an account? </span>
+              <span className="text-sm text-gray-600">
+                Don't have an account?{" "}
+              </span>
               <Button variant="link" className="px-0 text-green-600">
                 <Link href="/signup">Sign Up</Link>
               </Button>
@@ -258,15 +283,21 @@ export default function LoginPage() {
         <div className="mt-8 text-center">
           <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
             <div>
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">🚚</div>
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                🚚
+              </div>
               <span>Fast Delivery</span>
             </div>
             <div>
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">🌱</div>
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                🌱
+              </div>
               <span>Fresh Products</span>
             </div>
             <div>
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">💯</div>
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                💯
+              </div>
               <span>Quality Guarantee</span>
             </div>
           </div>

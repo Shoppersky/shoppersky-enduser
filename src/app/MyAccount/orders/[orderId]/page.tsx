@@ -141,7 +141,7 @@ export default function OrderDetailPage() {
       };
 
       const res = await axiosInstance.post(
-        `/product_ratings/products/${productId}/ratings`,
+        `/product_ratings/products/ratings/${productId}`,
         payload
       );
 

@@ -52,7 +52,7 @@ interface Industry {
 }
 
 const Navbar = () => {
-  const { cartCount, toggleCart } = useCart()
+  const { cartCount, toggleCart, clearCart  } = useCart()
   const { wishlistCount } = useWishlist()
   const {userId, token, isAuthenticated, login, logout } = useStore();
  
@@ -206,6 +206,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout()
+     clearCart();
      setUsername(null);
     router.push('/login')
   }

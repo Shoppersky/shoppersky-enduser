@@ -143,6 +143,7 @@
 
 'use client';
 
+import useStore from '@/lib/Zustand';
 import {
   createContext,
   useContext,
@@ -181,30 +182,38 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const { userId, isAuthenticated } = useStore(); 
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false); // 👈 hydration flag
 
+
+   // Compute storage key per user
+  const storageKey = userId ? `cart_${userId}` : "guest_cart";
+
   // Load cart from localStorage on mount
-  useEffect(() => {
+   useEffect(() => {
     try {
-      const savedCart = localStorage.getItem('cart');
+      const savedCart = localStorage.getItem(storageKey);
       if (savedCart) {
         setCartItems(JSON.parse(savedCart));
+      } else {
+        setCartItems([]); // no cart yet for this user
       }
     } catch (e) {
-      console.error('Failed to load cart:', e);
+      console.error("Failed to load cart:", e);
     } finally {
-      setHydrated(true); // 👈 mark as hydrated
+      setHydrated(true);
     }
-  }, []);
+  }, [storageKey]); // 👈 reload when user changes
+
 
   // Save to localStorage whenever cart changes
-  useEffect(() => {
+    useEffect(() => {
     if (hydrated) {
-      localStorage.setItem('cart', JSON.stringify(cartItems));
+      localStorage.setItem(storageKey, JSON.stringify(cartItems));
     }
-  }, [cartItems, hydrated]);
+  }, [cartItems, hydrated, storageKey]);
 
   // 🚨 Don't render children until we've hydrated localStorage
   if (!hydrated) {
