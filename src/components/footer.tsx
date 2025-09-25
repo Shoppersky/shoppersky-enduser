@@ -262,12 +262,12 @@ export default function Footer() {
             <ul className="flex flex-col space-y-2">
               {industries.map((industry) => (
                 <li key={industry.id}>
-                  <a
-                    href="#"
+                  <p
+             
                     className="text-gray-300 hover:text-green-400 transition-colors"
                   >
                     {industry.industry_name}
-                  </a>
+                  </p>
                 </li>
               ))}
             </ul>

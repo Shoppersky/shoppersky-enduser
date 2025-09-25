@@ -573,12 +573,7 @@ function ProductDetails() {
                                 : "N/A"}
                             </span>
                           </div>
-                          <div className="flex justify-between py-2">
-                            <span className="font-medium">Shipping Class</span>
-                            <span>
-                              {physical_attributes?.shipping_class || "N/A"}
-                            </span>
-                          </div>
+                         
                         </div>
                       </div>
                     </div>
@@ -653,28 +648,26 @@ function ProductDetails() {
                           Delivery Options
                         </h3>
                         <div className="space-y-4">
-                          <div className="flex items-start gap-3">
-                            <Truck className="w-5 h-5 text-green-600 mt-1" />
-                            <div>
-                              <h4 className="font-medium text-gray-900">
-                                Standard Delivery
-                              </h4>
-                              <p className="text-sm text-gray-600">
-                                2-4 hours • Free on orders over AU$50
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-start gap-3">
-                            <Truck className="w-5 h-5 text-green-600 mt-1" />
-                            <div>
-                              <h4 className="font-medium text-gray-900">
-                                Express Delivery
-                              </h4>
-                              <p className="text-sm text-gray-600">
-                                30-60 minutes • AU$9.99
-                              </p>
-                            </div>
-                          </div>
+                         <div className="flex items-start gap-3">
+    <Truck className="w-5 h-5 text-green-600 mt-1" />
+    <div>
+      <h4 className="font-medium text-gray-900">Standard Delivery</h4>
+      <p className="text-sm text-gray-600">
+        3-5 business days • Free on orders over AU$50, else AU$5.99
+      </p>
+    </div>
+  </div>
+
+  {/* Express */}
+  <div className="flex items-start gap-3">
+    <Truck className="w-5 h-5 text-blue-600 mt-1" />
+    <div>
+      <h4 className="font-medium text-gray-900">Express Delivery</h4>
+      <p className="text-sm text-gray-600">
+        1-2 business days • AU$9.99
+      </p>
+    </div>
+  </div>
                         </div>
                       </div>
                       <div>

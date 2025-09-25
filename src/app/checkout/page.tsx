@@ -247,7 +247,7 @@ function CheckoutContent() {
     shippingMethod === "standard"
       ? 5.99
       : shippingMethod === "express"
-        ? 12.99
+        ? 9.99
         : 0;
 
   // Free shipping for orders over A$50
@@ -420,7 +420,7 @@ function CheckoutContent() {
       setIsLoading(false);
     }
   };
-
+console.log(checkoutItems)
   if (checkoutItems.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
@@ -784,7 +784,7 @@ function CheckoutContent() {
                       value={shippingMethod}
                       onValueChange={setShippingMethod}
                     >
-                      <div className="flex items-center justify-between space-x-2 rounded-md border p-4">
+                      {/* <div className="flex items-center justify-between space-x-2 rounded-md border p-4">
                         <div className="flex items-center space-x-2">
                           <RadioGroupItem value="standard" id="standard" />
                           <Label htmlFor="standard" className="font-medium">
@@ -815,7 +815,46 @@ function CheckoutContent() {
                             1-2 business days
                           </div>
                         </div>
-                      </div>
+                      </div> */}
+
+                      <div className="flex items-center justify-between space-x-2 rounded-md border p-4">
+  <div className="flex items-center space-x-2">
+    <RadioGroupItem value="standard" id="standard" />
+    <Label htmlFor="standard" className="font-medium">
+      Standard Shipping
+    </Label>
+  </div>
+  <div className="text-right">
+    <div className="font-medium">
+      {checkoutTotal > 50 ? (
+        <span className="text-green-600">Free Delivery</span>
+      ) : (
+        "A$5.99"
+      )}
+    </div>
+    <div className="text-sm text-muted-foreground">3-5 business days</div>
+    {checkoutTotal <= 50 && (
+      <p className="text-xs text-muted-foreground">(Free over A$50)</p>
+    )}
+  </div>
+</div>
+
+<div className="mt-2 flex items-center justify-between space-x-2 rounded-md border p-4">
+  <div className="flex items-center space-x-2">
+    <RadioGroupItem value="express" id="express" />
+    <Label htmlFor="express" className="font-medium">
+      Express Shipping
+    </Label>
+  </div>
+  <div className="text-right">
+    <div className="font-medium">
+      9.99
+    </div>
+    <div className="text-sm text-muted-foreground">1-2 business days</div>
+   
+  </div>
+</div>
+
                     </RadioGroup>
                     <div className="mt-4 space-y-2">
                       <Label htmlFor="orderNotes">Order Notes (optional)</Label>
@@ -865,15 +904,20 @@ function CheckoutContent() {
                     <ul className="divide-y">
                       {checkoutItems.map((item) => (
                         <li key={item.id} className="py-4 flex items-center">
-                          <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border">
-                            <Image
-                              src={item.image || "/images/placeholder.svg"}
-                              alt={item.name}
-                              width={64}
-                              height={64}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
+                     <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border">
+  <Link
+    href={`/${item.category_slug}/${item.productSlug}`}
+    className="block h-full w-full"
+  >
+    <Image
+      src={item.image || "/images/placeholder.svg"}
+      alt={item.name}
+      width={64}
+      height={64}
+      className="h-full w-full object-cover"
+    />
+  </Link>
+</div>
                           <div className="ml-4 flex-1">
                             <h4 className="font-medium">{item.name}</h4>
                             <p className="text-sm text-muted-foreground">
@@ -1063,7 +1107,7 @@ export default function CheckoutPage() {
             <CheckoutContent />
           </div>
         </main>
-        <footer className="border-t py-6 md:py-0">
+        {/* <footer className="border-t py-6 md:py-0">
           <div className="container mx-auto max-w-7xl px-4 flex flex-col items-center justify-between gap-4 md:h-24 md:flex-row">
             <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
               © 2023 ShopSmart. All rights reserved.
@@ -1089,7 +1133,7 @@ export default function CheckoutPage() {
               </Link>
             </div>
           </div>
-        </footer>
+        </footer> */}
       </div>
     </CartProvider>
   );
