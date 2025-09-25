@@ -280,7 +280,7 @@ export default function PaymentCancelledPage() {
                 </Link>
               </Button> */}
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1">
                 <Button
                   variant="outline"
                   asChild
@@ -292,7 +292,7 @@ export default function PaymentCancelledPage() {
                   </Link>
                 </Button>
 
-                <Button
+                {/* <Button
                   variant="outline"
                   asChild
                   className="font-medium bg-transparent"
@@ -301,13 +301,13 @@ export default function PaymentCancelledPage() {
                     <MessageCircle className="mr-2 h-4 w-4" />
                     Get Help
                   </Link>
-                </Button>
+                </Button> */}
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <div className="text-center text-sm text-muted-foreground space-y-2">
+        {/* <div className="text-center text-sm text-muted-foreground space-y-2">
           <p>
             Need more help? Check out our{" "}
             <Link href="/faq" className="text-primary hover:underline">
@@ -319,7 +319,7 @@ export default function PaymentCancelledPage() {
             </Link>
             .
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

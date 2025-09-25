@@ -433,7 +433,7 @@ export default function OrderDetailsPage() {
                 </>
               )}
 
-              {order.order_status !== "PENDING" && (
+              {order.order_status !== "PENDING" && order.order_status !== "CANCELLED" &&(
                 <>
                   <Separator className="bg-border/50" />
                   <div className="flex justify-end">

@@ -209,6 +209,16 @@ export default function OrderDetailPage() {
                             Rate this product:
                           </span>
                           <RatingStars
+  rating={feedbacks[idx]?.rating || 0}
+  onRate={(val) =>
+    setFeedbacks((prev) => ({
+      ...prev,
+      [idx]: { ...prev[idx], rating: val }, // remove submitted reset
+    }))
+  }
+  readOnly={feedbacks[idx]?.submitted} // disable after submission
+/>
+                          {/* <RatingStars
                             rating={feedbacks[idx]?.rating || 0}
                             onRate={(val) =>
                               setFeedbacks((prev) => ({
@@ -216,7 +226,7 @@ export default function OrderDetailPage() {
                                 [idx]: { ...prev[idx], rating: val, submitted: false },
                               }))
                             }
-                          />
+                          /> */}
                           <textarea
                             value={feedbacks[idx]?.comment || ""}
                             onChange={(e) =>

@@ -80,16 +80,24 @@ export default function LoginPage() {
         toast.success("Welcome back! You've been logged in successfully.");
         router.push(redirectPath);
       }
-    } catch (error: any) {
-      console.log('Login error:', error);
+    }  catch (error: any) {
+  console.log('Login error:', error);
 
-      const errorMessage = error.response?.data?.detail?.message || 'Invalid credentials. Please try again.';
-      setErrors({ general: errorMessage });
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const status = error.response?.status;
+  let errorMessage = 'Invalid credentials. Please try again.';
+
+  if (status === 404) {
+    errorMessage = 'Account not found. Please sign up.';
+  } else if (status === 401) {
+    errorMessage = 'Incorrect email or password.';
+  }
+
+  setErrors({ general: errorMessage });
+  toast.error(errorMessage);
+} finally {
+  setIsLoading(false);
+}
+  }
 
   const handleSocialLogin = (provider: string) => {
     toast.info(`${provider} login will be available soon!`);

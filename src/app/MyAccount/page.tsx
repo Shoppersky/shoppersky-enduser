@@ -1029,6 +1029,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
+import DeleteAccount from "@/components/delete-account"
 
 // ... existing interfaces and data ...
 interface Address {
@@ -1098,20 +1099,6 @@ export default function AccountPage() {
   const [open, setOpen] = useState(false)
   const today = new Date().toISOString().split("T")[0]
 
-const getStatusIcon = (status: string) => {
-  switch (status?.toLowerCase()) {
-    case "confirmed":
-      return <CheckCircle className="h-6 w-6 text-green-500" />;
-    case "pending":
-      return <Clock className="h-6 w-6 text-yellow-500" />;
-    case "shipped":
-      return <Truck className="h-6 w-6 text-blue-500" />;
-    case "delivered":
-      return <Package className="h-6 w-6 text-green-600" />;
-    default:
-      return <Clock className="h-6 w-6 text-gray-500" />;
-  }
-};
 
 // ✅ Status Colors
 const getStatusColor = (status: string) => {
@@ -1515,7 +1502,7 @@ const getStatusColor = (status: string) => {
                                         ${order.amount.toFixed(2)} • {new Date(order.created_at).toLocaleDateString()}
                                       </p>
                                     </div>
-                                    {order.order_status !== "PENDING" && (
+                                    {order.order_status !== "PENDING" && order.order_status !== "CANCELLED" && (
                                       <Button
                                         variant="outline"
                                         size="sm"
@@ -1766,7 +1753,7 @@ const getStatusColor = (status: string) => {
                             </div>
                             <div>
                               <h3 className="font-medium">Password</h3>
-                              <p className="text-sm text-muted-foreground">Last updated: Never</p>
+                              {/* <p className="text-sm text-muted-foreground">Last updated: Never</p> */}
                             </div>
                           </div>
                           <Button onClick={() => setOpen(true)} className="bg-primary hover:bg-primary/90">
@@ -1840,11 +1827,11 @@ const getStatusColor = (status: string) => {
                       <CardDescription>Permanently delete your account and all data</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <p className="mb-4 text-sm text-muted-foreground">
-                        Once you delete your account, there is no going back. Please be certain.
-                      </p>
-                      <Button variant="destructive">Delete Account</Button>
-                    </CardContent>
+  <p className="mb-4 text-sm text-muted-foreground">
+    Once you delete your account, there is no going back. Please be certain.
+  </p>
+  <DeleteAccount userId={userId} />
+</CardContent>
                   </Card>
                 </div>
               )}
