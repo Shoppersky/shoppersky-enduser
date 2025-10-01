@@ -35,6 +35,27 @@ export default function SignupPage() {
   
   const router = useRouter();
 
+// const validateName = (name: string) => {
+//   if (!name) {
+//     return { isValid: false, error: "Name is required" };
+//   }
+
+//   // 🧹 Trim and collapse multiple spaces into one
+//   const cleanedName = name.trim().replace(/\s+/g, " ");
+
+//   // ✅ Only letters and single spaces allowed
+//   const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+
+//   if (!nameRegex.test(cleanedName)) {
+//     return {
+//       isValid: false,
+//       error:
+//         "Name can only contain letters and single spaces (no digits, no special characters).",
+//     };
+//   }
+
+//   return { isValid: true, value: cleanedName };
+// };
 const validateName = (name: string) => {
   if (!name) {
     return { isValid: false, error: "Name is required" };
@@ -43,14 +64,14 @@ const validateName = (name: string) => {
   // 🧹 Trim and collapse multiple spaces into one
   const cleanedName = name.trim().replace(/\s+/g, " ");
 
-  // ✅ Only letters and single spaces allowed
-  const nameRegex = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
+  // ✅ Each word must have at least 2 letters, only letters and spaces allowed
+  const nameRegex = /^[A-Za-z]{2,}(?: [A-Za-z]{2,})*$/;
 
   if (!nameRegex.test(cleanedName)) {
     return {
       isValid: false,
       error:
-        "Name can only contain letters and single spaces (no digits, no special characters).",
+        "Each name part must have at least 2 letters and can only contain letters and single spaces (no digits, no special characters).",
     };
   }
 
