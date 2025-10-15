@@ -19,6 +19,7 @@ import {
   Twitter,
   Copy,
   MessageCircle,
+  Pencil,
 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Badge } from "../../../components/ui/badge";
@@ -42,7 +43,7 @@ import {
 import { Label } from "../../../components/ui/label";
 import axiosInstance from "../../../lib/axiosInstance";
 import Head from "next/head";
-
+import PencilCursorWrapper from "../../../components/PencilCursorWrapper";
 interface ProductResponse {
   product_id: string;
   identification: { product_name: string; product_sku: string };
@@ -227,7 +228,7 @@ function ProductDetails() {
     const title = identification.product_name;
     const description =
       descriptions.short_description ||
-      `Check out ${identification.product_name} at DesiSmart`;
+      `Check out ${identification.product_name} at Shoppersky`;
 
     switch (platform) {
       case "facebook":
@@ -274,12 +275,12 @@ function ProductDetails() {
   return (
     <>
       <Head>
-        <title>{identification.product_name} | DesiSmart</title>
+        <title>{identification.product_name} | Shoppersky</title>
         <meta
           name="description"
           content={
             descriptions?.short_description ||
-            `Buy ${identification.product_name} at DesiSmart.`
+            `Buy ${identification.product_name} at Shoppersky.`
           }
         />
         <meta
@@ -291,7 +292,7 @@ function ProductDetails() {
           property="og:description"
           content={
             descriptions?.short_description ||
-            `Buy ${identification.product_name} at DesiSmart.`
+            `Buy ${identification.product_name} at Shoppersky.`
           }
         />
         <meta
@@ -300,7 +301,7 @@ function ProductDetails() {
         />
         <meta
           property="og:url"
-          content={`https://www.desismart.com/${category}/${productSlugResponse}`}
+          content={`https://www.Shoppersky.com/${category}/${productSlugResponse}`}
         />
       </Head>
 
@@ -359,9 +360,9 @@ function ProductDetails() {
             {/* Product Details */}
             <div className="space-y-6">
               <div>
-                <div className="text-sm text-green-600 uppercase tracking-wide font-medium mb-2">
+                {/* <div className="text-sm text-green-600 uppercase tracking-wide font-medium mb-2">
                   {tags_and_relationships?.product_tags.join(", ")}
-                </div>
+                </div> */}
                 <h1 className="text-3xl font-bold text-gray-900 mb-4">
                   {identification.product_name}
                 </h1>
@@ -448,7 +449,102 @@ function ProductDetails() {
               </div>
 
               {/* Quantity and Add to Cart / Go to Cart / Buy Now */}
-              <div className="space-y-4">
+
+
+ <div className="space-y-4">
+  {!addedToCart && (
+    <div className="flex items-center gap-4">
+      <Label className="font-medium">Quantity:</Label>
+
+      {/* Quantity box container */}
+      <div className="flex items-center border border-gray-200 rounded-lg relative group">
+        {/* Decrement button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-10 h-10 p-0"
+          onClick={() => handleQuantityChange(-1)}
+          disabled={quantity <= 1}
+        >
+          <Minus className="w-4 h-4" />
+        </Button>
+
+        {/* Editable input field */}
+        <div className="relative flex items-center">
+          {/* <PencilCursorWrapper> */}
+          <input
+            type="text"
+            min="1"
+            value={quantity}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10);
+              if (!isNaN(val) && val > 0) {
+                setQuantity(val);
+              } else if (e.target.value === "") {
+                setQuantity("");
+              }
+            }}
+            onBlur={() => {
+              if (!quantity || quantity < 1) setQuantity(1);
+            }}
+            className="
+              w-14 text-center font-medium border-0 
+              focus:ring-0 focus:outline-none 
+              hover:cursor-text hover:bg-gray-50
+              transition-colors duration-150
+            "
+          />
+          {/* </PencilCursorWrapper> */}
+
+        
+        </div>
+
+        {/* Increment button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-10 h-10 p-0"
+          onClick={() => handleQuantityChange(1)}
+        >
+          <Plus className="w-4 h-4" />
+        </Button>
+      </div>
+    </div>
+  )}
+
+  {/* Add to cart + buy now buttons */}
+  <div className="flex flex-col sm:flex-row gap-3">
+    <Button
+      onClick={() =>
+        addedToCart ? router.push("/cart") : handleAddToCart()
+      }
+      disabled={!isInStock || (isAdding && !addedToCart)}
+      className="bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-medium rounded-xl"
+    >
+      <ShoppingCart className="w-5 h-5 mr-2" />
+      {addedToCart
+        ? "Go to Cart"
+        : isAdding
+          ? "Added to Cart"
+          : isInStock
+            ? "Add to Cart"
+            : "Out of Stock"}
+    </Button>
+
+    <Button
+      onClick={handleBuyNow}
+      disabled={!isInStock}
+      variant="outline"
+      className="py-4 text-lg font-medium rounded-xl"
+    >
+      Buy Now
+    </Button>
+  </div>
+</div>
+
+
+
+              {/* <div className="space-y-4">
                 {!addedToCart && (
                   <div className="flex items-center gap-4">
                     <Label className="font-medium">Quantity:</Label>
@@ -504,7 +600,7 @@ function ProductDetails() {
                     Buy Now
                   </Button>
                 </div>
-              </div>
+              </div> */}
 
               {/* Features */}
               <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-200">
