@@ -30,7 +30,7 @@ export default function VendorPage({ params, searchParams }: VendorPageProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
     const [products, setProducts] = useState<Product[]>([]);
     const[vendorId,setVendorid]=useState('')
-    const [vendor,setvendor]=useState({})
+    const [vendor,setVendor]=useState({})
 
 
   const [searchQuery, setSearchQuery] = useState("")
@@ -80,7 +80,13 @@ const fetchCategories=async()=>{
 const fetchvendor=async()=>{
   try{
     const response=await axiosInstance.get(`/vendor/details/by-slug?slug=${slug}`)
-  setvendor(response.data.business_profile)
+  const { business_profile, vendor_login } = response.data;
+
+    // Merge both objects safely
+    setVendor({
+      ...business_profile,
+      ...vendor_login,
+    });
   }
   catch(error){
     toast.error('failed to load event data')

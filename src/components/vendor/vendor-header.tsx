@@ -108,10 +108,10 @@ interface VendorHeaderProps {
   vendor: {
     vendorSlug: string;
     store_name: string;
-    description: string;
-    logo: string;
+    banner_title?: string;
+    profile_pic?: string;
     banner_image: string;
-    aboutUs?: string;
+    about_us?: string;
     years_in_bussiness?: number;
   };
 }
@@ -120,7 +120,7 @@ export const VendorHeader = ({ vendor }: VendorHeaderProps) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <section className="relative w-full h-[28rem] sm:h-[32rem] md:h-[36rem] overflow-hidden">
+    <section className="relative w-full h-[28rem] sm:h-[30rem] md:h-[24rem] overflow-hidden">
       {/* Background Image */}
       <Image
         src={
@@ -141,11 +141,11 @@ export const VendorHeader = ({ vendor }: VendorHeaderProps) => {
   <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start"> {/* <-- items-start fixes the shifting */}
     
     {/* LEFT SIDE — Vendor Info */}
-    <div className="space-y-4">
+    <div className="space-y-4 self-end">
       <div className="flex items-center gap-4 pt-10">
         <div className="w-12 h-12 bg-white rounded-full overflow-hidden shadow-md">
           <Image
-            src={vendor.logo || "/images/placeholder.svg?height=60&width=60"}
+            src={vendor.profile_pic || "/images/placeholder.svg?height=60&width=60"}
             alt={`${vendor.store_name} logo`}
             width={64}
             height={64}
@@ -155,7 +155,7 @@ export const VendorHeader = ({ vendor }: VendorHeaderProps) => {
         <div>
           <h3 className="text-lg font-semibold">{vendor.store_name}</h3>
           <p className="text-sm text-gray-300">
-            {vendor.description || "Welcome to our store"}
+            {vendor.banner_title || "Welcome to our store"}
           </p>
           {vendor.years_in_bussiness && (
             <p className="text-xs mt-1 text-gray-400 italic">
@@ -166,34 +166,37 @@ export const VendorHeader = ({ vendor }: VendorHeaderProps) => {
       </div>
     </div>
 
-    {/* RIGHT SIDE — About Us */}
-    <div className="md:pl-8 md:pr-4">
-      <h3 className="text-amber-400 text-xl font-semibold mb-3">
-        About Us
-      </h3>
+   {/* RIGHT SIDE — About Us */}
+{vendor.about_us && vendor.about_us.trim() !== "" && (
+  <div className="md:pl-8 md:pr-4">
+    <h3 className="text-white text-xl font-semibold mb-3">
+      About Us
+    </h3>
 
-      <div
-        className="text-gray-100 text-sm sm:text-base leading-relaxed transition-all duration-500 ease-in-out overflow-hidden"
-        style={{ maxHeight: expanded ? "600px" : "40px" }} // smoother expansion
-      >
-        {vendor.aboutUs || "At Halwai, we don’t just make sweets — we preserve traditions. Each mithai is crafted with pure ingredients, authentic recipes, and a passion for perfection. From festivals to everyday indulgence, our creations bring families together and make every moment unforgettable. With Halwai, sweetness is not just tasted, it’s experienced."}
-      </div>
-
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="mt-0 flex items-center gap-0 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
-      >
-        {expanded ? (
-          <>
-            View less <ChevronUp className="w-4 h-4" />
-          </>
-        ) : (
-          <>
-            View more <ChevronDown className="w-4 h-4" />
-          </>
-        )}
-      </button>
+    <div
+      className="text-gray-100 text-md sm:text-base leading-relaxed transition-all duration-500 ease-in-out overflow-hidden"
+      style={{ maxHeight: expanded ? "600px" : "58px" }}
+    >
+      {vendor.about_us}
     </div>
+
+    <button
+      onClick={() => setExpanded(!expanded)}
+      className="mt-0 flex items-center gap-0 text-xs font-semibold text-white hover:text-white transition-colors"
+    >
+      {expanded ? (
+        <>
+          View less <ChevronUp className="w-4 h-4" />
+        </>
+      ) : (
+        <>
+          View more <ChevronDown className="w-4 h-4" />
+        </>
+      )}
+    </button>
+  </div>
+)}
+
   </div>
 </div>
 
