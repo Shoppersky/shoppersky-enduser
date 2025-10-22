@@ -513,17 +513,24 @@ export default function OrderDetailsPage() {
   const { userId } = useStore()
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const res = await axiosInstance.get(`/orders/orders?user_id=${userId}`)
-        setOrders(res.data.data || [])
-      } catch (err) {
-        setError("Failed to load orders")
-        console.error(err)
-      } finally {
-        setLoading(false)
-      }
-    }
+   const fetchOrders = async () => {
+  try {
+    const res = await axiosInstance.get(`/orders/orders?user_id=${userId}`)
+
+    const sortedOrders = (res.data.data || []).sort(
+      (a: any, b: any) =>
+        new Date(b.order_at).getTime() - new Date(a.order_at).getTime()
+    )
+
+    setOrders(sortedOrders)
+  } catch (err) {
+    setError("Failed to load orders")
+    console.error(err)
+  } finally {
+    setLoading(false)
+  }
+}
+
     fetchOrders()
   }, [userId])
 
