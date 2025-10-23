@@ -58,6 +58,7 @@ import { CartProvider } from "@/components/cart-provider";
 import { Header } from "@/components/header";
 import { Toaster } from "sonner";
 import ClientLayout from "@/components/ClientLayout";
+import Script from "next/script";
 
 
 const geistSans = Geist({
@@ -82,6 +83,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <Script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-QHL9KP8BLT"
+        />
+        <Script id="ga-init" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-QHL9KP8BLT');
+          `}
+        </Script>
+      </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {/* Delegate client-side logic to a wrapper */}
         <ClientLayout>{children}</ClientLayout>

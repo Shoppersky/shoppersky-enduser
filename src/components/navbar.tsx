@@ -1,186 +1,195 @@
+"use client";
 
-'use client'
-
-import React, { useState, useEffect, useRef } from 'react'
-import { Button } from './ui/button'
-import { Heart, Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react'
-import Link from 'next/link'
-import { Badge } from './ui/badge'
-import { Input } from './ui/input'
-import Image from 'next/image'
-import { useRouter } from 'next/navigation'
-import { useCart } from './cart-provider'
-import { useWishlist } from './wishlist-provider'
-import { CartSidebar } from './cart-sidebar'
-import axiosInstance from '../lib/axiosInstance'
+import React, { useState, useEffect, useRef } from "react";
+import { Button } from "./ui/button";
+import {
+  Search,
+  ShoppingCart,
+  User,
+  Menu,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import { Badge } from "./ui/badge";
+import { Input } from "./ui/input";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useCart } from "./cart-provider";
+import { useWishlist } from "./wishlist-provider";
+import { CartSidebar } from "./cart-sidebar";
+import axiosInstance from "../lib/axiosInstance";
 
 import {
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-} from "@/components/ui/dropdown-menu"
-import useStore from '@/lib/Zustand'
+} from "@/components/ui/dropdown-menu";
+import useStore from "@/lib/Zustand";
+import Notifications from "./notifications";
 
 interface SearchResult {
-  product_id: string
-  product_name: string
-  image_url: string
-  selling_price: string
-  slug: string
-  category_slug: string
+  product_id: string;
+  product_name: string;
+  image_url: string;
+  selling_price: string;
+  slug: string;
+  category_slug: string;
 }
 
 interface IndustrySubcategory {
-  subcategory_id: string
-  subcategory_name: string
-  subcategory_slug: string
+  subcategory_id: string;
+  subcategory_name: string;
+  subcategory_slug: string;
 }
 
 interface IndustryCategory {
-  category_id: string
-  category_name: string
-  category_slug: string
-  subcategories: IndustrySubcategory[]
+  category_id: string;
+  category_name: string;
+  category_slug: string;
+  subcategories: IndustrySubcategory[];
 }
 
 interface Industry {
-  industry_id: string
-  industry_name: string
-  industry_slug: string
-  categories: IndustryCategory[]
+  industry_id: string;
+  industry_name: string;
+  industry_slug: string;
+  categories: IndustryCategory[];
 }
 
 const Navbar = () => {
-  const { cartCount, toggleCart, clearCart  } = useCart()
-  const { wishlistCount } = useWishlist()
-  const {userId, token, isAuthenticated, login, logout } = useStore();
- 
-  const router = useRouter()
+  const { cartCount, toggleCart, clearCart } = useCart();
+  const { wishlistCount } = useWishlist();
+  const { userId, token, isAuthenticated, login, logout } = useStore();
 
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
-  const [isSearchLoading, setIsSearchLoading] = useState(false)
-  const [showSearchDropout, setShowSearchDropout] = useState(false)
-  const [username, setUsername] = useState<string | null>(null)
-  const [showUserMenu, setShowUserMenu] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [showMobileSearch, setShowMobileSearch] = useState(false)
-  const [industries, setIndustries] = useState<Industry[]>([])
-  const [expandedIndustry, setExpandedIndustry] = useState<string | null>(null)
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
+  const router = useRouter();
 
-  const debounceTimeout = useRef<NodeJS.Timeout | null>(null)
-  const searchRef = useRef<HTMLDivElement>(null)
-  const userMenuRef = useRef<HTMLDivElement>(null)
-  const mobileMenuRef = useRef<HTMLDivElement>(null)
-  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearchLoading, setIsSearchLoading] = useState(false);
+  const [showSearchDropout, setShowSearchDropout] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [industries, setIndustries] = useState<Industry[]>([]);
+  const [expandedIndustry, setExpandedIndustry] = useState<string | null>(null);
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
 
-    useEffect(() => {
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement>(null);
 
-  if (!isAuthenticated) {
-
-    setUsername(null); // clear username immediately on logout
-
-  }
-
-}, [isAuthenticated]);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUsername(null); // clear username immediately on logout
+    }
+  }, [isAuthenticated]);
 
   // Fetch username from backend
   useEffect(() => {
     const fetchUser = async () => {
-      if (!userId || !token) return
+      if (!userId || !token) return;
 
       try {
         const res = await axiosInstance.get(`/users/user/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        })
-        setUsername(res.data.data.username)
+        });
+        setUsername(res.data.data.username);
       } catch (err) {
-        console.error('Failed to fetch user info:', err)
+        console.error("Failed to fetch user info:", err);
       }
-    }
+    };
 
-    fetchUser()
-  }, [userId, token])
+    fetchUser();
+  }, [userId, token]);
 
   // Fetch industries with categories and subcategories
   useEffect(() => {
     const fetchIndustries = async () => {
       try {
         const response = await axiosInstance.get<{ data: Industry[] }>(
-          '/industries/industries/full'
-        )
-        setIndustries(response.data.data || [])
+          "/industries/industries/full"
+        );
+        setIndustries(response.data.data || []);
       } catch (error) {
-        console.error('Error fetching industries:', error)
-        setIndustries([])
+        console.error("Error fetching industries:", error);
+        setIndustries([]);
       }
-    }
+    };
 
-    fetchIndustries()
-  }, [])
+    fetchIndustries();
+  }, []);
 
   // Debounced search
   useEffect(() => {
     const handleSearch = async () => {
       if (searchQuery.length < 1) {
-        setSearchResults([])
-        setShowSearchDropout(false)
-        return
+        setSearchResults([]);
+        setShowSearchDropout(false);
+        return;
       }
 
-      setIsSearchLoading(true)
+      setIsSearchLoading(true);
       try {
         const response = await axiosInstance.get<{
           products: {
-            product_id: string
-            product_name: string
-            product_image: string | null
-            product_pricing: string | null
-            slug: string
-            category: string
-          }[]
-          total_count: number
-        }>(`/products/search-by-name?product_name=${encodeURIComponent(searchQuery)}`)
+            product_id: string;
+            product_name: string;
+            product_image: string | null;
+            product_pricing: string | null;
+            slug: string;
+            category: string;
+          }[];
+          total_count: number;
+        }>(
+          `/products/search-by-name?product_name=${encodeURIComponent(searchQuery)}`
+        );
 
-        const mappedResults: SearchResult[] = response.data.products.map((product) => ({
-          product_id: product.product_id,
-          product_name: product.product_name,
-          image_url: product.product_image || '/default-image.png',
-          selling_price: product.product_pricing || 'N/A',
-          slug: product.slug,
-          category_slug: product.category.toLowerCase().replace(/\s+/g, '-'),
-        }))
+        const mappedResults: SearchResult[] = response.data.products.map(
+          (product) => ({
+            product_id: product.product_id,
+            product_name: product.product_name,
+            image_url: product.product_image || "/default-image.png",
+            selling_price: product.product_pricing || "N/A",
+            slug: product.slug,
+            category_slug: product.category.toLowerCase().replace(/\s+/g, "-"),
+          })
+        );
 
-        setSearchResults(mappedResults)
-        setShowSearchDropout(true)
+        setSearchResults(mappedResults);
+        setShowSearchDropout(true);
       } catch (error) {
-        console.error('Search error:', error)
-        setSearchResults([])
+        console.error("Search error:", error);
+        setSearchResults([]);
       } finally {
-        setIsSearchLoading(false)
+        setIsSearchLoading(false);
       }
-    }
+    };
 
-    if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
-    debounceTimeout.current = setTimeout(handleSearch, 300)
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(handleSearch, 300);
 
     return () => {
-      if (debounceTimeout.current) clearTimeout(debounceTimeout.current)
-    }
-  }, [searchQuery])
+      if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    };
+  }, [searchQuery]);
 
   // Hide dropdowns when clicked outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setShowSearchDropout(false)
+        setShowSearchDropout(false);
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
-        setShowUserMenu(false)
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(e.target as Node)
+      ) {
+        setShowUserMenu(false);
       }
       if (
         mobileMenuRef.current &&
@@ -188,34 +197,34 @@ const Navbar = () => {
         mobileMenuButtonRef.current &&
         !mobileMenuButtonRef.current.contains(e.target as Node)
       ) {
-        setIsMobileMenuOpen(false)
+        setIsMobileMenuOpen(false);
       }
-    }
+    };
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleUserClick = () => {
     if (!isAuthenticated) {
-      router.push('/login')
+      router.push("/login");
     } else {
-      setShowUserMenu((prev) => !prev)
+      setShowUserMenu((prev) => !prev);
     }
-  }
+  };
 
   const handleLogout = () => {
-    logout()
-     clearCart();
-     setUsername(null);
-    router.push('/login')
-  }
+    logout();
+    clearCart();
+    setUsername(null);
+    router.push("/login");
+  };
 
   const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false)
-    setExpandedIndustry(null)
-    setExpandedCategory(null)
-  }
+    setIsMobileMenuOpen(false);
+    setExpandedIndustry(null);
+    setExpandedCategory(null);
+  };
 
   return (
     <div>
@@ -227,48 +236,70 @@ const Navbar = () => {
             <div className="flex items-center gap-2 sm:gap-4">
               <Link href="/" className="flex items-center gap-1 sm:gap-2">
                 <div className="h-6 w-6 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center">
-                  <Image src="/logo.png" alt="Logo" width={32} height={32} className="sm:w-[50px] sm:h-[50px]" />
+                  <Image
+                    src="/logo.png"
+                    alt="Logo"
+                    width={32}
+                    height={32}
+                    className="sm:w-[50px] sm:h-[50px]"
+                  />
                 </div>
                 <span className="font-bold text-lg sm:text-xl">Shoppersky</span>
               </Link>
 
               {/* Desktop Navigation */}
               <nav className="hidden lg:flex items-center gap-6 ml-6">
-                <Link href="/products" className="text-sm font-medium hover:text-primary transition-colors">Shop Here</Link>
-                <Link href="/vendors" className="text-sm font-medium hover:text-primary transition-colors">Virtual Shop</Link>
+                <Link
+                  href="/products"
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Shop Here
+                </Link>
+                <Link
+                  href="/vendors"
+                  className="text-sm font-medium hover:text-primary transition-colors"
+                >
+                  Virtual Shop
+                </Link>
                 {/* <Link href="/deals" className="text-sm font-medium hover:text-primary transition-colors">Deals</Link> */}
               </nav>
             </div>
 
             {/* Center Search - Desktop */}
-            <div className="flex-1 max-w-md mx-4 sm:mx-6 hidden md:block relative" ref={searchRef}>
+            <div
+              className="flex-1 max-w-md mx-4 sm:mx-6 hidden md:block relative"
+              ref={searchRef}
+            >
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-  placeholder="Search products"
-  className="pl-10 pr-4 h-9 sm:h-10"
-  value={searchQuery}
-  onChange={(e) => setSearchQuery(e.target.value)}
-  onFocus={() => {
-    if (searchQuery.length >= 2) setShowSearchDropout(true)
-  }}
-  onKeyDown={(e) => {
-    if (e.key === "Enter" && searchResults.length > 0) {
-      window.location.href = `/${searchResults[0].category_slug}/${searchResults[0].slug}`
-      setSearchQuery("")
-      setShowSearchDropout(false)
-    }
-  }}
-/>
-
+                  placeholder="Search products"
+                  className="pl-10 pr-4 h-9 sm:h-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => {
+                    if (searchQuery.length >= 2) setShowSearchDropout(true);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && searchResults.length > 0) {
+                      window.location.href = `/${searchResults[0].category_slug}/${searchResults[0].slug}`;
+                      setSearchQuery("");
+                      setShowSearchDropout(false);
+                    }
+                  }}
+                />
               </div>
 
               {showSearchDropout && (
                 <div className="absolute top-full left-0 right-0 bg-white border shadow-md rounded-md z-50 max-h-96 overflow-y-auto">
                   {isSearchLoading ? (
-                    <div className="p-4 text-center text-muted-foreground">Loading...</div>
+                    <div className="p-4 text-center text-muted-foreground">
+                      Loading...
+                    </div>
                   ) : searchResults.length === 0 ? (
-                    <div className="p-4 text-center text-muted-foreground">No products found</div>
+                    <div className="p-4 text-center text-muted-foreground">
+                      No products found
+                    </div>
                   ) : (
                     searchResults.map((product) => (
                       <Link
@@ -276,8 +307,8 @@ const Navbar = () => {
                         href={`/${product.category_slug}/${product.slug}`}
                         className="flex items-center p-2 hover:bg-muted transition-colors"
                         onClick={() => {
-                          setSearchQuery('')
-                          setShowSearchDropout(false)
+                          setSearchQuery("");
+                          setShowSearchDropout(false);
                         }}
                       >
                         <Image
@@ -288,8 +319,12 @@ const Navbar = () => {
                           className="object-cover rounded mr-2"
                         />
                         <div>
-                          <div className="font-medium text-sm">{product.product_name}</div>
-                          <div className="text-xs text-muted-foreground">AU${product.selling_price}</div>
+                          <div className="font-medium text-sm">
+                            {product.product_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            AU${product.selling_price}
+                          </div>
                         </div>
                       </Link>
                     ))
@@ -323,16 +358,24 @@ const Navbar = () => {
               </Button> */}
 
               {/* Cart */}
-       <Link href="/cart">
-  <Button variant="ghost" size="icon" className="relative h-8 w-8 sm:h-10 sm:w-10">
-    <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-    {cartCount > 0 && (
-      <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 p-0 text-xs flex items-center justify-center">
-        {cartCount}
-      </Badge>
-    )}
-  </Button>
-</Link>
+              <Link href="/cart">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="relative h-8 w-8 sm:h-10 sm:w-10"
+                >
+                  <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+                  {cartCount > 0 && (
+                    <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 h-4 w-4 sm:h-5 sm:w-5 p-0 text-xs flex items-center justify-center">
+                      {cartCount}
+                    </Badge>
+                  )}
+                </Button>
+              </Link>
+
+              <div>
+                <Notifications userId={userId} />
+              </div>
 
               {/* User Profile - Desktop and Mobile */}
               {/* <div className="relative hidden sm:flex items-center" ref={userMenuRef}>
@@ -361,37 +404,46 @@ const Navbar = () => {
                   </div>
                 )}
               </div> */}
-{isAuthenticated ? (
-  <DropdownMenu>
-    <DropdownMenuTrigger asChild>
-      <div className="flex items-center cursor-pointer" ref={userMenuRef}>
-        <Button variant="ghost" size="icon" className="h-8 sm:h-10">
-          <User className="h-4 w-4 sm:h-5 sm:w-5" />
-        </Button>
-        {username && (
-          <span className=" text-sm hidden lg:inline">{username}</span>
-        )}
-      </div>
-    </DropdownMenuTrigger>
-    <DropdownMenuContent align="end" className="w-40">
-      <DropdownMenuItem onClick={() => router.push("/MyAccount")}>
-        My Account
-      </DropdownMenuItem>
-      <DropdownMenuItem onClick={handleLogout}>
-        Logout
-      </DropdownMenuItem>
-    </DropdownMenuContent>
-  </DropdownMenu>
-) : (
-  <Button
-    variant="ghost"
-    size="icon"
-    className="h-8 sm:h-10"
-    onClick={() => router.push("/login")}
-  >
-    <User className="h-4 w-4 sm:h-5 sm:w-5" />
-  </Button>
-)}
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <div
+                      className="flex items-center cursor-pointer"
+                      ref={userMenuRef}
+                    >
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 sm:h-10"
+                      >
+                        <User className="h-4 w-4 sm:h-5 sm:w-5" />
+                      </Button>
+                      {username && (
+                        <span className=" text-sm hidden lg:inline">
+                          {username}
+                        </span>
+                      )}
+                    </div>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem onClick={() => router.push("/MyAccount")}>
+                      My Account
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 sm:h-10"
+                  onClick={() => router.push("/login")}
+                >
+                  <User className="h-4 w-4 sm:h-5 sm:w-5" />
+                </Button>
+              )}
 
               {/* Mobile Menu Button */}
               <Button
@@ -401,7 +453,11 @@ const Navbar = () => {
                 className="lg:hidden h-8 w-8 sm:h-10 sm:w-10"
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               >
-                {isMobileMenuOpen ? <X className="h-4 w-4 sm:h-5 sm:w-5" /> : <Menu className="h-4 w-4 sm:h-5 sm:w-5" />}
+                {isMobileMenuOpen ? (
+                  <X className="h-4 w-4 sm:h-5 sm:w-5" />
+                ) : (
+                  <Menu className="h-4 w-4 sm:h-5 sm:w-5" />
+                )}
               </Button>
             </div>
           </div>
@@ -417,7 +473,7 @@ const Navbar = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => {
-                    if (searchQuery.length >= 2) setShowSearchDropout(true)
+                    if (searchQuery.length >= 2) setShowSearchDropout(true);
                   }}
                 />
               </div>
@@ -425,9 +481,13 @@ const Navbar = () => {
               {showSearchDropout && (
                 <div className="absolute left-3 right-3 top-full bg-white border shadow-md rounded-md z-50 max-h-96 overflow-y-auto mt-1">
                   {isSearchLoading ? (
-                    <div className="p-4 text-center text-muted-foreground">Loading...</div>
+                    <div className="p-4 text-center text-muted-foreground">
+                      Loading...
+                    </div>
                   ) : searchResults.length === 0 ? (
-                    <div className="p-4 text-center text-muted-foreground">No products found</div>
+                    <div className="p-4 text-center text-muted-foreground">
+                      No products found
+                    </div>
                   ) : (
                     searchResults.map((product) => (
                       <Link
@@ -435,9 +495,9 @@ const Navbar = () => {
                         href={`/${product.category_slug}/${product.slug}`}
                         className="flex items-center p-3 hover:bg-muted transition-colors border-b last:border-b-0"
                         onClick={() => {
-                          setSearchQuery('')
-                          setShowSearchDropout(false)
-                          setShowMobileSearch(false)
+                          setSearchQuery("");
+                          setShowSearchDropout(false);
+                          setShowMobileSearch(false);
                         }}
                       >
                         <Image
@@ -448,8 +508,12 @@ const Navbar = () => {
                           className="object-cover rounded mr-3"
                         />
                         <div>
-                          <div className="font-medium text-sm">{product.product_name}</div>
-                          <div className="text-xs text-muted-foreground">AU${product.selling_price}</div>
+                          <div className="font-medium text-sm">
+                            {product.product_name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            AU${product.selling_price}
+                          </div>
                         </div>
                       </Link>
                     ))
@@ -464,7 +528,7 @@ const Navbar = () => {
       {/* Mobile Menu - Sliding Sidebar from Right */}
       <div
         className={`fixed top-0 right-0 h-full w-64 bg-background shadow-lg z-50 transform transition-transform duration-300 ease-in-out lg:hidden ${
-          isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
         }`}
         ref={mobileMenuRef}
       >
@@ -599,8 +663,8 @@ const Navbar = () => {
                 <button
                   className="block w-full text-left px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
                   onClick={() => {
-                    router.push('/MyAccount')
-                    closeMobileMenu()
+                    router.push("/MyAccount");
+                    closeMobileMenu();
                   }}
                 >
                   My Account
@@ -608,8 +672,8 @@ const Navbar = () => {
                 <button
                   className="block w-full text-left px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
                   onClick={() => {
-                    handleLogout()
-                    closeMobileMenu()
+                    handleLogout();
+                    closeMobileMenu();
                   }}
                 >
                   Logout
@@ -619,8 +683,8 @@ const Navbar = () => {
               <button
                 className="block w-full text-left px-3 py-2 text-base font-medium hover:text-primary hover:bg-muted rounded-md transition-colors"
                 onClick={() => {
-                  router.push('/login')
-                  closeMobileMenu()
+                  router.push("/login");
+                  closeMobileMenu();
                 }}
               >
                 Login
@@ -641,7 +705,7 @@ const Navbar = () => {
       {/* Cart Sidebar */}
       <CartSidebar />
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;

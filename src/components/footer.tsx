@@ -177,6 +177,7 @@ import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from "lucide-react"
 // import { CookieConsent } from "./cookie-consent"
 import { useState, useEffect } from "react"
 import axiosInstance from "@/lib/axiosInstance"
+import Link from "next/link"
 
 type Industry = {
   id: string | number
@@ -202,8 +203,8 @@ export default function Footer() {
   return (
     <footer className="bg-gray-900 text-white py-12">
       <div className="container mx-auto px-4">
-        {/* Single row, 4 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
+        {/* Single row, 5 columns */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-8 mb-12">
           
           {/* Column 1: Company Info */}
           <div className="space-y-4">
@@ -297,7 +298,20 @@ export default function Footer() {
               </div>
             </div>
           </div>
+
+          {/* Column 5: call to action */}
+          <div className="flex justify-center items-center">
+            <Link href="https://vendor.shoppersky.com.au">
+            <Button className="bg-green-400 hover:bg-green-500 text-white">
+              Partner with us
+            </Button>
+            </Link>
+            
+            
+          </div>
         </div>
+
+         
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-300">
