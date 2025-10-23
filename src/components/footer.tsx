@@ -303,7 +303,7 @@ export default function Footer() {
           <div className="flex justify-center items-center">
             <Link href="https://vendor.shoppersky.com.au">
             <Button className="bg-green-400 hover:bg-green-500 text-white">
-              Partner with us
+              Open your Storefront
             </Button>
             </Link>
             

@@ -8,6 +8,7 @@ import {
   User,
   Menu,
   X,
+  Store 
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
@@ -356,6 +357,13 @@ const Navbar = () => {
                   )}
                 </Link>
               </Button> */}
+
+              <Link href="https://vendor.shoppersky.com.au" className="flex gap-2 items-center">
+             
+                  <Store className="h-4 w-4 sm:h-5 sm:w-5" />
+                  <p className="hidden lg:block hover:text-blue-500">Become a vendor</p>
+               
+              </Link>
 
               {/* Cart */}
               <Link href="/cart">
