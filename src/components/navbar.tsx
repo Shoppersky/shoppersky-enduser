@@ -373,9 +373,9 @@ const Navbar = () => {
                 </Button>
               </Link>
 
-              <div>
+              {/* <div>
                 <Notifications userId={userId} />
-              </div>
+              </div> */}
 
               {/* User Profile - Desktop and Mobile */}
               {/* <div className="relative hidden sm:flex items-center" ref={userMenuRef}>
