@@ -358,10 +358,10 @@ const Navbar = () => {
                 </Link>
               </Button> */}
 
-              <Link href="https://vendor.shoppersky.com.au" className="flex gap-2 items-center">
+              <Link href="https://vendor.shoppersky.com.au" className="flex gap-2 items-center  p-2">
              
                   <Store className="h-4 w-4 sm:h-5 sm:w-5" />
-                  <p className="hidden lg:block hover:text-blue-500">Become a vendor</p>
+                  <p className="hidden lg:block hover:text-blue-500 text-sm">Open virtual store</p>
                
               </Link>
 
